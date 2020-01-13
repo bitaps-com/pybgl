@@ -2,7 +2,7 @@ from struct import unpack, pack
 from io import BytesIO
 from pybgl.functions.block import bits_to_target, target_to_difficulty
 from pybgl.functions.block import merkle_root, merkle_branches, merkle_root_from_branches
-from pybgl.functions.hash import double_sha256
+from pybgl.functions.hash import sha3_256
 from pybgl.functions.tools import var_int_to_int, read_var_int, var_int_len, rh2s, reverse_hash, s2rh, s2rh_step4
 from pybgl.functions.tools import bytes_from_hex, int_to_var_int
 from pybgl.transaction import Transaction
@@ -50,7 +50,7 @@ class Block(dict):
         self["nonce"] = unpack("<L", s.read(4))[0]
         s.seek(-80, 1)
         self["header"] = s.read(80)
-        self["hash"] = double_sha256(self["header"])
+        self["hash"] = sha3_256(self["header"])
         block_target = int.from_bytes(self["hash"], byteorder="little")
         self["difficulty"] = target_to_difficulty(block_target)
         tx_count = var_int_to_int(read_var_int(s))
@@ -150,7 +150,7 @@ class BlockTemplate():
         if self.transactions:
             for tx in self.transactions:
                 wtxid_list.append(s2rh(tx["hash"]))
-        return double_sha256(merkle_root(wtxid_list) + witness)
+        return sha3_256(merkle_root(wtxid_list, return_hex=0) + witness)
 
     def split_coinbase(self):
         tx = self.coinbase_tx.serialize(segwit=0)
@@ -207,7 +207,7 @@ class BlockTemplate():
         time = s2rh(time)
         bits = s2rh(self.bits)
         nonce = s2rh(nonce)
-        cbh = double_sha256(bytes_from_hex(cb))
+        cbh = sha3_256(bytes_from_hex(cb))
         merkle_root = merkle_root_from_branches(self.merkle_branches, cbh)
         print("merkle_root ", merkle_root.hex())
         print("branches ", self.merkle_branches)
@@ -217,7 +217,7 @@ class BlockTemplate():
         block += cb
         for t in self.transactions:
             block += t["data"]
-        return double_sha256(header,1), block
+        return sha3_256(header,1), block
 
     # def build_orphan(self, hash, ntime):
     #     self.previous_block_hash =  reverse_hash(s2rh(hash)).decode()
