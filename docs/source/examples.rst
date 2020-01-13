@@ -16,6 +16,196 @@ will be created P2WPKH address for mainnet.
 
 .. code-block:: bash
 
+      >>> import pybgl
+      >>> a = pybtc.Address()
+      >>> a.address
+      'bc1q6cxx5t8xkruz3s5khx7923xvsx5ry4c6p74m5s'
+      >>> a.private_key.wif
+      'L5XKGA2xEHcinWEpmyiABS1bqQux8Av5dGVqcpRtVJC3ZCR5sXUe'
+      >>>
+      >>> # create P2PKH legacy format
+      >>> pybtc.Address(address_type="P2PKH").address
+      '1ChpKurzFhdCULKaNHCc3Ra9KfxM2LRguw'
+      >>>
+      >>> # create testnet address
+      >>> pybtc.Address(address_type="P2PKH", testnet=True).address
+      'mpR4hDfu269yxgZtPVYSD21gtpvdxpTmH6'
+      >>>
+      >>> # create P2SH_P2WPKH SEGWIT adoption address
+      >>> pybtc.Address(address_type="P2SH_P2WPKH").address
+      '3Bqeq3XqL6azMK3BxNyr8vXgXUtoG63J4T'
+      >>>
+      >>> import pybgl
+      >>> a = pybtc.Address()
+      >>> a.address
+      'bc1q6cxx5t8xkruz3s5khx7923xvsx5ry4c6p74m5s'
+      >>> a.private_key.wif
+      'L5XKGA2xEHcinWEpmyiABS1bqQux8Av5dGVqcpRtVJC3ZCR5sXUe'
+      >>>
+      >>> # create P2PKH legacy format
+      >>> pybtc.Address(address_type="P2PKH").address
+      '1ChpKurzFhdCULKaNHCc3Ra9KfxM2LRguw'
+      >>>
+      >>> # create testnet address
+      >>> pybtc.Address(address_type="P2PKH", testnet=True).address
+      'mpR4hDfu269yxgZtPVYSD21gtpvdxpTmH6'
+      >>>
+      >>> # create P2SH_P2WPKH SEGWIT adoption address
+      >>> pybtc.Address(address_type="P2SH_P2WPKH").address
+      '3Bqeq3XqL6azMK3BxNyr8vXgXUtoG63J4T'
+      >>>
+      >>> import pybgl
+      >>> a = pybgl.Address()
+      >>> a.address
+      'bc1q6cxx5t8xkruz3s5khx7923xvsx5ry4c6p74m5s'
+      >>> a.private_key.wif
+      'L5XKGA2xEHcinWEpmyiABS1bqQux8Av5dGVqcpRtVJC3ZCR5sXUe'
+      >>>
+      >>> # create P2PKH legacy format
+      >>> pybtc.Address(address_type="P2PKH").address
+      '1ChpKurzFhdCULKaNHCc3Ra9KfxM2LRguw'
+      >>>
+      >>> # create testnet address
+      >>> pybtc.Address(address_type="P2PKH", testnet=True).address
+      'mpR4hDfu269yxgZtPVYSD21gtpvdxpTmH6'
+      >>>
+      >>> # create P2SH_P2WPKH SEGWIT adoption address
+      >>> pybtc.Address(address_type="P2SH_P2WPKH").address
+      '3Bqeq3XqL6azMK3BxNyr8vXgXUtoG63J4T'
+      >>>
+      >>> import pybgl
+      >>> a = pybgl.Address()
+      >>> a.address
+      'bc1q6cxx5t8xkruz3s5khx7923xvsx5ry4c6p74m5s'
+      >>> a.private_key.wif
+      'L5XKGA2xEHcinWEpmyiABS1bqQux8Av5dGVqcpRtVJC3ZCR5sXUe'
+      >>>
+      >>> # create P2PKH legacy format
+      >>> pybtc.Address(address_type="P2PKH").address
+      '1ChpKurzFhdCULKaNHCc3Ra9KfxM2LRguw'
+      >>>
+      >>> # create testnet address
+      >>> pybtc.Address(address_type="P2PKH", testnet=True).address
+      'mpR4hDfu269yxgZtPVYSD21gtpvdxpTmH6'
+      >>>
+      >>> # create P2SH_P2WPKH SEGWIT adoption address
+      >>> pybtc.Address(address_type="P2SH_P2WPKH").address
+      '3Bqeq3XqL6azMK3BxNyr8vXgXUtoG63J4T'
+      >>>
+      >>> import pybtc
+      >>> a = pybtc.Address()
+      >>> a.address
+      'bc1q6cxx5t8xkruz3s5khx7923xvsx5ry4c6p74m5s'
+      >>> a.private_key.wif
+      'L5XKGA2xEHcinWEpmyiABS1bqQux8Av5dGVqcpRtVJC3ZCR5sXUe'
+      >>>
+      >>> # create P2PKH legacy format
+      >>> pybgl.Address(address_type="P2PKH").address
+      '1ChpKurzFhdCULKaNHCc3Ra9KfxM2LRguw'
+      >>>
+      >>> # create testnet address
+      >>> pybtc.Address(address_type="P2PKH", testnet=True).address
+      'mpR4hDfu269yxgZtPVYSD21gtpvdxpTmH6'
+      >>>
+      >>> # create P2SH_P2WPKH SEGWIT adoption address
+      >>> pybtc.Address(address_type="P2SH_P2WPKH").address
+      '3Bqeq3XqL6azMK3BxNyr8vXgXUtoG63J4T'
+      >>>
+      >>> import pybtc
+      >>> a = pybtc.Address()
+      >>> a.address
+      'bc1q6cxx5t8xkruz3s5khx7923xvsx5ry4c6p74m5s'
+      >>> a.private_key.wif
+      'L5XKGA2xEHcinWEpmyiABS1bqQux8Av5dGVqcpRtVJC3ZCR5sXUe'
+      >>>
+      >>> # create P2PKH legacy format
+      >>> pybgl.Address(address_type="P2PKH").address
+      '1ChpKurzFhdCULKaNHCc3Ra9KfxM2LRguw'
+      >>>
+      >>> # create testnet address
+      >>> pybtc.Address(address_type="P2PKH", testnet=True).address
+      'mpR4hDfu269yxgZtPVYSD21gtpvdxpTmH6'
+      >>>
+      >>> # create P2SH_P2WPKH SEGWIT adoption address
+      >>> pybtc.Address(address_type="P2SH_P2WPKH").address
+      '3Bqeq3XqL6azMK3BxNyr8vXgXUtoG63J4T'
+      >>>
+      >>> import pybtc
+      >>> a = pybtc.Address()
+      >>> a.address
+      'bc1q6cxx5t8xkruz3s5khx7923xvsx5ry4c6p74m5s'
+      >>> a.private_key.wif
+      'L5XKGA2xEHcinWEpmyiABS1bqQux8Av5dGVqcpRtVJC3ZCR5sXUe'
+      >>>
+      >>> # create P2PKH legacy format
+      >>> pybtc.Address(address_type="P2PKH").address
+      '1ChpKurzFhdCULKaNHCc3Ra9KfxM2LRguw'
+      >>>
+      >>> # create testnet address
+      >>> pybgl.Address(address_type="P2PKH", testnet=True).address
+      'mpR4hDfu269yxgZtPVYSD21gtpvdxpTmH6'
+      >>>
+      >>> # create P2SH_P2WPKH SEGWIT adoption address
+      >>> pybtc.Address(address_type="P2SH_P2WPKH").address
+      '3Bqeq3XqL6azMK3BxNyr8vXgXUtoG63J4T'
+      >>>
+      >>> import pybtc
+      >>> a = pybtc.Address()
+      >>> a.address
+      'bc1q6cxx5t8xkruz3s5khx7923xvsx5ry4c6p74m5s'
+      >>> a.private_key.wif
+      'L5XKGA2xEHcinWEpmyiABS1bqQux8Av5dGVqcpRtVJC3ZCR5sXUe'
+      >>>
+      >>> # create P2PKH legacy format
+      >>> pybtc.Address(address_type="P2PKH").address
+      '1ChpKurzFhdCULKaNHCc3Ra9KfxM2LRguw'
+      >>>
+      >>> # create testnet address
+      >>> pybgl.Address(address_type="P2PKH", testnet=True).address
+      'mpR4hDfu269yxgZtPVYSD21gtpvdxpTmH6'
+      >>>
+      >>> # create P2SH_P2WPKH SEGWIT adoption address
+      >>> pybtc.Address(address_type="P2SH_P2WPKH").address
+      '3Bqeq3XqL6azMK3BxNyr8vXgXUtoG63J4T'
+      >>>
+      >>> import pybtc
+      >>> a = pybtc.Address()
+      >>> a.address
+      'bc1q6cxx5t8xkruz3s5khx7923xvsx5ry4c6p74m5s'
+      >>> a.private_key.wif
+      'L5XKGA2xEHcinWEpmyiABS1bqQux8Av5dGVqcpRtVJC3ZCR5sXUe'
+      >>>
+      >>> # create P2PKH legacy format
+      >>> pybtc.Address(address_type="P2PKH").address
+      '1ChpKurzFhdCULKaNHCc3Ra9KfxM2LRguw'
+      >>>
+      >>> # create testnet address
+      >>> pybtc.Address(address_type="P2PKH", testnet=True).address
+      'mpR4hDfu269yxgZtPVYSD21gtpvdxpTmH6'
+      >>>
+      >>> # create P2SH_P2WPKH SEGWIT adoption address
+      >>> pybgl.Address(address_type="P2SH_P2WPKH").address
+      '3Bqeq3XqL6azMK3BxNyr8vXgXUtoG63J4T'
+      >>>
+      >>> import pybtc
+      >>> a = pybtc.Address()
+      >>> a.address
+      'bc1q6cxx5t8xkruz3s5khx7923xvsx5ry4c6p74m5s'
+      >>> a.private_key.wif
+      'L5XKGA2xEHcinWEpmyiABS1bqQux8Av5dGVqcpRtVJC3ZCR5sXUe'
+      >>>
+      >>> # create P2PKH legacy format
+      >>> pybtc.Address(address_type="P2PKH").address
+      '1ChpKurzFhdCULKaNHCc3Ra9KfxM2LRguw'
+      >>>
+      >>> # create testnet address
+      >>> pybtc.Address(address_type="P2PKH", testnet=True).address
+      'mpR4hDfu269yxgZtPVYSD21gtpvdxpTmH6'
+      >>>
+      >>> # create P2SH_P2WPKH SEGWIT adoption address
+      >>> pybgl.Address(address_type="P2SH_P2WPKH").address
+      '3Bqeq3XqL6azMK3BxNyr8vXgXUtoG63J4T'
+      >>>
       >>> import pybtc
       >>> a = pybtc.Address()
       >>> a.address
@@ -64,6 +254,146 @@ Create private key
 
 .. code-block:: bash
 
+      >>> import pybgl
+      >>> pybtc.create_private_key()
+      'KyvZYvdzWD4JSPFt4wXwjG53as227zT2qiWbMTicZEUSjiwvbEqi'
+      >>>
+      >>> pybtc.create_private_key(compressed=False)
+      '5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr'
+      >>>
+      >>> pybtc.is_wif_valid('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr')
+      True
+      >>> pybtc.is_wif_valid('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381**********Jto9ZTnr')
+      False
+      >>>
+
+Get public key from private key
+      >>> import pybgl
+      >>> pybtc.create_private_key()
+      'KyvZYvdzWD4JSPFt4wXwjG53as227zT2qiWbMTicZEUSjiwvbEqi'
+      >>>
+      >>> pybtc.create_private_key(compressed=False)
+      '5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr'
+      >>>
+      >>> pybtc.is_wif_valid('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr')
+      True
+      >>> pybtc.is_wif_valid('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381**********Jto9ZTnr')
+      False
+      >>>
+
+Get public key from private key
+      >>> import pybgl
+      >>> pybgl.create_private_key()
+      'KyvZYvdzWD4JSPFt4wXwjG53as227zT2qiWbMTicZEUSjiwvbEqi'
+      >>>
+      >>> pybtc.create_private_key(compressed=False)
+      '5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr'
+      >>>
+      >>> pybtc.is_wif_valid('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr')
+      True
+      >>> pybtc.is_wif_valid('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381**********Jto9ZTnr')
+      False
+      >>>
+
+Get public key from private key
+      >>> import pybgl
+      >>> pybgl.create_private_key()
+      'KyvZYvdzWD4JSPFt4wXwjG53as227zT2qiWbMTicZEUSjiwvbEqi'
+      >>>
+      >>> pybtc.create_private_key(compressed=False)
+      '5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr'
+      >>>
+      >>> pybtc.is_wif_valid('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr')
+      True
+      >>> pybtc.is_wif_valid('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381**********Jto9ZTnr')
+      False
+      >>>
+
+Get public key from private key
+      >>> import pybtc
+      >>> pybtc.create_private_key()
+      'KyvZYvdzWD4JSPFt4wXwjG53as227zT2qiWbMTicZEUSjiwvbEqi'
+      >>>
+      >>> pybgl.create_private_key(compressed=False)
+      '5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr'
+      >>>
+      >>> pybtc.is_wif_valid('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr')
+      True
+      >>> pybtc.is_wif_valid('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381**********Jto9ZTnr')
+      False
+      >>>
+
+Get public key from private key
+      >>> import pybtc
+      >>> pybtc.create_private_key()
+      'KyvZYvdzWD4JSPFt4wXwjG53as227zT2qiWbMTicZEUSjiwvbEqi'
+      >>>
+      >>> pybgl.create_private_key(compressed=False)
+      '5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr'
+      >>>
+      >>> pybtc.is_wif_valid('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr')
+      True
+      >>> pybtc.is_wif_valid('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381**********Jto9ZTnr')
+      False
+      >>>
+
+Get public key from private key
+      >>> import pybtc
+      >>> pybtc.create_private_key()
+      'KyvZYvdzWD4JSPFt4wXwjG53as227zT2qiWbMTicZEUSjiwvbEqi'
+      >>>
+      >>> pybtc.create_private_key(compressed=False)
+      '5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr'
+      >>>
+      >>> pybgl.is_wif_valid('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr')
+      True
+      >>> pybtc.is_wif_valid('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381**********Jto9ZTnr')
+      False
+      >>>
+
+Get public key from private key
+      >>> import pybtc
+      >>> pybtc.create_private_key()
+      'KyvZYvdzWD4JSPFt4wXwjG53as227zT2qiWbMTicZEUSjiwvbEqi'
+      >>>
+      >>> pybtc.create_private_key(compressed=False)
+      '5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr'
+      >>>
+      >>> pybgl.is_wif_valid('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr')
+      True
+      >>> pybtc.is_wif_valid('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381**********Jto9ZTnr')
+      False
+      >>>
+
+Get public key from private key
+      >>> import pybtc
+      >>> pybtc.create_private_key()
+      'KyvZYvdzWD4JSPFt4wXwjG53as227zT2qiWbMTicZEUSjiwvbEqi'
+      >>>
+      >>> pybtc.create_private_key(compressed=False)
+      '5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr'
+      >>>
+      >>> pybtc.is_wif_valid('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr')
+      True
+      >>> pybgl.is_wif_valid('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381**********Jto9ZTnr')
+      False
+      >>>
+
+Get public key from private key
+      >>> import pybtc
+      >>> pybtc.create_private_key()
+      'KyvZYvdzWD4JSPFt4wXwjG53as227zT2qiWbMTicZEUSjiwvbEqi'
+      >>>
+      >>> pybtc.create_private_key(compressed=False)
+      '5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr'
+      >>>
+      >>> pybtc.is_wif_valid('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr')
+      True
+      >>> pybgl.is_wif_valid('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381**********Jto9ZTnr')
+      False
+      >>>
+
+Get public key from private key
       >>> import pybtc
       >>> pybtc.create_private_key()
       'KyvZYvdzWD4JSPFt4wXwjG53as227zT2qiWbMTicZEUSjiwvbEqi'
@@ -81,6 +411,146 @@ Get public key from private key
 
 .. code-block:: bash
 
+      >>> import pybgl
+      >>> pybtc.private_to_public_key('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr')
+      '0479f17a94410afd4f27588a192bacada53add0741765092dc0f8e2a29ea1bcd276dbc1ef74c3e0172d9db8047f2a0a5dc2e8e51a13f7f0cc072de906b765e0f7f'
+      >>>
+      >>> pybtc.public_key_to_address('0479f17a94410afd4f27588a192bacada53add0741765092dc0f8e2a29ea1bcd276dbc1ef74c3e0172d9db8047f2a0a5dc2e8e51a13f7f0cc072de906b765e0f7f')
+      >>>
+      >>> # this is uncompressed public key, so we can't create witness address
+      >>> # we have to set witness_version to None to get non segwit address
+      >>> pub = pybtc.private_to_public_key('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr')
+      >>> pybtc.public_key_to_address(pub, witness_version=None)
+      '17mXwxxZRmj1nJJzDszZbW9URSAradEuAt'
+      >>>
+
+Tools
+      >>> import pybgl
+      >>> pybtc.private_to_public_key('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr')
+      '0479f17a94410afd4f27588a192bacada53add0741765092dc0f8e2a29ea1bcd276dbc1ef74c3e0172d9db8047f2a0a5dc2e8e51a13f7f0cc072de906b765e0f7f'
+      >>>
+      >>> pybtc.public_key_to_address('0479f17a94410afd4f27588a192bacada53add0741765092dc0f8e2a29ea1bcd276dbc1ef74c3e0172d9db8047f2a0a5dc2e8e51a13f7f0cc072de906b765e0f7f')
+      >>>
+      >>> # this is uncompressed public key, so we can't create witness address
+      >>> # we have to set witness_version to None to get non segwit address
+      >>> pub = pybtc.private_to_public_key('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr')
+      >>> pybtc.public_key_to_address(pub, witness_version=None)
+      '17mXwxxZRmj1nJJzDszZbW9URSAradEuAt'
+      >>>
+
+Tools
+      >>> import pybgl
+      >>> pybgl.private_to_public_key('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr')
+      '0479f17a94410afd4f27588a192bacada53add0741765092dc0f8e2a29ea1bcd276dbc1ef74c3e0172d9db8047f2a0a5dc2e8e51a13f7f0cc072de906b765e0f7f'
+      >>>
+      >>> pybtc.public_key_to_address('0479f17a94410afd4f27588a192bacada53add0741765092dc0f8e2a29ea1bcd276dbc1ef74c3e0172d9db8047f2a0a5dc2e8e51a13f7f0cc072de906b765e0f7f')
+      >>>
+      >>> # this is uncompressed public key, so we can't create witness address
+      >>> # we have to set witness_version to None to get non segwit address
+      >>> pub = pybtc.private_to_public_key('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr')
+      >>> pybtc.public_key_to_address(pub, witness_version=None)
+      '17mXwxxZRmj1nJJzDszZbW9URSAradEuAt'
+      >>>
+
+Tools
+      >>> import pybgl
+      >>> pybgl.private_to_public_key('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr')
+      '0479f17a94410afd4f27588a192bacada53add0741765092dc0f8e2a29ea1bcd276dbc1ef74c3e0172d9db8047f2a0a5dc2e8e51a13f7f0cc072de906b765e0f7f'
+      >>>
+      >>> pybtc.public_key_to_address('0479f17a94410afd4f27588a192bacada53add0741765092dc0f8e2a29ea1bcd276dbc1ef74c3e0172d9db8047f2a0a5dc2e8e51a13f7f0cc072de906b765e0f7f')
+      >>>
+      >>> # this is uncompressed public key, so we can't create witness address
+      >>> # we have to set witness_version to None to get non segwit address
+      >>> pub = pybtc.private_to_public_key('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr')
+      >>> pybtc.public_key_to_address(pub, witness_version=None)
+      '17mXwxxZRmj1nJJzDszZbW9URSAradEuAt'
+      >>>
+
+Tools
+      >>> import pybtc
+      >>> pybtc.private_to_public_key('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr')
+      '0479f17a94410afd4f27588a192bacada53add0741765092dc0f8e2a29ea1bcd276dbc1ef74c3e0172d9db8047f2a0a5dc2e8e51a13f7f0cc072de906b765e0f7f'
+      >>>
+      >>> pybgl.public_key_to_address('0479f17a94410afd4f27588a192bacada53add0741765092dc0f8e2a29ea1bcd276dbc1ef74c3e0172d9db8047f2a0a5dc2e8e51a13f7f0cc072de906b765e0f7f')
+      >>>
+      >>> # this is uncompressed public key, so we can't create witness address
+      >>> # we have to set witness_version to None to get non segwit address
+      >>> pub = pybtc.private_to_public_key('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr')
+      >>> pybtc.public_key_to_address(pub, witness_version=None)
+      '17mXwxxZRmj1nJJzDszZbW9URSAradEuAt'
+      >>>
+
+Tools
+      >>> import pybtc
+      >>> pybtc.private_to_public_key('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr')
+      '0479f17a94410afd4f27588a192bacada53add0741765092dc0f8e2a29ea1bcd276dbc1ef74c3e0172d9db8047f2a0a5dc2e8e51a13f7f0cc072de906b765e0f7f'
+      >>>
+      >>> pybgl.public_key_to_address('0479f17a94410afd4f27588a192bacada53add0741765092dc0f8e2a29ea1bcd276dbc1ef74c3e0172d9db8047f2a0a5dc2e8e51a13f7f0cc072de906b765e0f7f')
+      >>>
+      >>> # this is uncompressed public key, so we can't create witness address
+      >>> # we have to set witness_version to None to get non segwit address
+      >>> pub = pybtc.private_to_public_key('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr')
+      >>> pybtc.public_key_to_address(pub, witness_version=None)
+      '17mXwxxZRmj1nJJzDszZbW9URSAradEuAt'
+      >>>
+
+Tools
+      >>> import pybtc
+      >>> pybtc.private_to_public_key('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr')
+      '0479f17a94410afd4f27588a192bacada53add0741765092dc0f8e2a29ea1bcd276dbc1ef74c3e0172d9db8047f2a0a5dc2e8e51a13f7f0cc072de906b765e0f7f'
+      >>>
+      >>> pybgl.public_key_to_address('0479f17a94410afd4f27588a192bacada53add0741765092dc0f8e2a29ea1bcd276dbc1ef74c3e0172d9db8047f2a0a5dc2e8e51a13f7f0cc072de906b765e0f7f')
+      >>>
+      >>> # this is uncompressed public key, so we can't create witness address
+      >>> # we have to set witness_version to None to get non segwit address
+      >>> pub = pybgl.private_to_public_key('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr')
+      >>> pybtc.public_key_to_address(pub, witness_version=None)
+      '17mXwxxZRmj1nJJzDszZbW9URSAradEuAt'
+      >>>
+
+Tools
+      >>> import pybtc
+      >>> pybtc.private_to_public_key('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr')
+      '0479f17a94410afd4f27588a192bacada53add0741765092dc0f8e2a29ea1bcd276dbc1ef74c3e0172d9db8047f2a0a5dc2e8e51a13f7f0cc072de906b765e0f7f'
+      >>>
+      >>> pybgl.public_key_to_address('0479f17a94410afd4f27588a192bacada53add0741765092dc0f8e2a29ea1bcd276dbc1ef74c3e0172d9db8047f2a0a5dc2e8e51a13f7f0cc072de906b765e0f7f')
+      >>>
+      >>> # this is uncompressed public key, so we can't create witness address
+      >>> # we have to set witness_version to None to get non segwit address
+      >>> pub = pybgl.private_to_public_key('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr')
+      >>> pybtc.public_key_to_address(pub, witness_version=None)
+      '17mXwxxZRmj1nJJzDszZbW9URSAradEuAt'
+      >>>
+
+Tools
+      >>> import pybtc
+      >>> pybtc.private_to_public_key('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr')
+      '0479f17a94410afd4f27588a192bacada53add0741765092dc0f8e2a29ea1bcd276dbc1ef74c3e0172d9db8047f2a0a5dc2e8e51a13f7f0cc072de906b765e0f7f'
+      >>>
+      >>> pybgl.public_key_to_address('0479f17a94410afd4f27588a192bacada53add0741765092dc0f8e2a29ea1bcd276dbc1ef74c3e0172d9db8047f2a0a5dc2e8e51a13f7f0cc072de906b765e0f7f')
+      >>>
+      >>> # this is uncompressed public key, so we can't create witness address
+      >>> # we have to set witness_version to None to get non segwit address
+      >>> pub = pybgl.private_to_public_key('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr')
+      >>> pybgl.public_key_to_address(pub, witness_version=None)
+      '17mXwxxZRmj1nJJzDszZbW9URSAradEuAt'
+      >>>
+
+Tools
+      >>> import pybtc
+      >>> pybtc.private_to_public_key('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr')
+      '0479f17a94410afd4f27588a192bacada53add0741765092dc0f8e2a29ea1bcd276dbc1ef74c3e0172d9db8047f2a0a5dc2e8e51a13f7f0cc072de906b765e0f7f'
+      >>>
+      >>> pybgl.public_key_to_address('0479f17a94410afd4f27588a192bacada53add0741765092dc0f8e2a29ea1bcd276dbc1ef74c3e0172d9db8047f2a0a5dc2e8e51a13f7f0cc072de906b765e0f7f')
+      >>>
+      >>> # this is uncompressed public key, so we can't create witness address
+      >>> # we have to set witness_version to None to get non segwit address
+      >>> pub = pybgl.private_to_public_key('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr')
+      >>> pybgl.public_key_to_address(pub, witness_version=None)
+      '17mXwxxZRmj1nJJzDszZbW9URSAradEuAt'
+      >>>
+
+Tools
       >>> import pybtc
       >>> pybtc.private_to_public_key('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr')
       '0479f17a94410afd4f27588a192bacada53add0741765092dc0f8e2a29ea1bcd276dbc1ef74c3e0172d9db8047f2a0a5dc2e8e51a13f7f0cc072de906b765e0f7f'

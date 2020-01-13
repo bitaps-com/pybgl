@@ -1,11 +1,11 @@
 import unittest
-import pybtc
+import pybgl
 
 # from pybtc.test.filters  import filters
 # from pybtc.test.filters  import filters
 # from pybtc.test.wallet_class import *
 # from pybtc.test.shamir import *
-from pybtc.test.hash_functions import *
+from pybgl.test.hash_functions import *
 # testLoad = unittest.TestLoader()
 # suites = testLoad.loadTestsFromModule(pybtc.test)
 #
