@@ -5,8 +5,7 @@ parentPath = os.path.abspath("..")
 if parentPath not in sys.path:
     sys.path.insert(0, parentPath)
 
-from secp256k1 import ffi
-import secp256k1
+
 from pybgl.functions import *
 from pybgl.opcodes import *
 from pybgl.transaction import *
