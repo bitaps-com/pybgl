@@ -119,8 +119,8 @@ class BlockTemplate():
         self.weightlimit = data["weightlimit"]
         self.sigop= 0
         self.weight = 0
-        if type(coinbase_message) == bytes:
-            coinbase_message = coinbase_message.hex()
+        # if type(coinbase_message) == bytes:
+        #     coinbase_message = coinbase_message.hex()
         self.coinbase_message = coinbase_message
 
         self.transactions = list(data["transactions"])
