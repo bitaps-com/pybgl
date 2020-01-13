@@ -193,12 +193,13 @@ def address_to_script(address, hex=False):
              OP_EQUALVERIFY,
              OP_CHECKSIG]
     elif (address[:3] == MAINNET_SEGWIT_ADDRESS_PREFIX) \
-         or (address[:3] == TESTNET_SEGWIT_ADDRESS_PREFIX):
+         or (address[:4] == TESTNET_SEGWIT_ADDRESS_PREFIX):
         h = address_to_hash(address, hex=False)
         s = [OP_0,
              bytes([len(h)]),
              h]
     else:
+        print(address[:3])
         raise ValueError("address invalid")
     s = b''.join(s)
     return s.hex() if hex else s
