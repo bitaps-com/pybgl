@@ -154,7 +154,7 @@ class BlockTemplate():
 
     def split_coinbase(self):
         tx = self.coinbase_tx.serialize(segwit=0)
-        len_coinbase = len(self.coinbase_tx.tx_in[0].sig_script.raw)
+        len_coinbase = int(len(self.coinbase_tx["vIn"][0]["scriptSig"])/2)
         extranonce_len = self.extranonce1_size + self.extranonce2_size
         return tx[:42 + len_coinbase - extranonce_len].hex(),\
                tx[42 + len_coinbase:].hex()
