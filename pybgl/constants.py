@@ -48,9 +48,7 @@ MAINNET_SEGWIT_ADDRESS_PREFIX = 'bgl'
 TESTNET_SEGWIT_ADDRESS_PREFIX = 'tbgl'
 
 
-SCRIPT_TYPES = {"P2PKH":        0,
-                "P2SH":         1,
-                "PUBKEY":       2,
+SCRIPT_TYPES = {
                 "NULL_DATA":    3,
                 "MULTISIG":     4,
                 "P2WPKH":       5,
@@ -59,9 +57,7 @@ SCRIPT_TYPES = {"P2PKH":        0,
                 "NULL_DATA_NON_STANDARD": 8
                 }
 
-SCRIPT_N_TYPES = {0: "P2PKH",
-                  1: "P2SH",
-                  2: "PUBKEY",
+SCRIPT_N_TYPES = {
                   3: "NULL_DATA",
                   4: "MULTISIG",
                   5: "P2WPKH",
