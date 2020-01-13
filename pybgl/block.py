@@ -153,7 +153,7 @@ class BlockTemplate():
         return sha3_256(merkle_root(wtxid_list, return_hex=0) + witness)
 
     def split_coinbase(self):
-        tx = self.coinbase_tx.serialize(segwit=0)
+        tx = self.coinbase_tx.serialize(segwit=0, hex= 0)
         len_coinbase = int(len(self.coinbase_tx["vIn"][0]["scriptSig"])/2)
         extranonce_len = self.extranonce1_size + self.extranonce2_size
         return tx[:42 + len_coinbase - extranonce_len].hex(),\
