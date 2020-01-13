@@ -168,7 +168,7 @@ def merkle_root_from_branches(merkle_branches, coinbase_hash, hex=True):
         if type(h) == str:
             h = bytes_from_hex(h)
         merkle_root = double_sha256(merkle_root + h)
-    return merkle_root if not hex else merkle_root.hex()
+    return bytes_from_hex(merkle_root) if not hex else merkle_root
 
 
 
