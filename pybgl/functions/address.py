@@ -192,8 +192,8 @@ def address_to_script(address, hex=False):
              address_to_hash(address, hex=False),
              OP_EQUALVERIFY,
              OP_CHECKSIG]
-    elif address[:2] in (TESTNET_SEGWIT_ADDRESS_PREFIX,
-                         MAINNET_SEGWIT_ADDRESS_PREFIX):
+    elif (address[:3] == MAINNET_SEGWIT_ADDRESS_PREFIX) \
+         or (address[:3] == TESTNET_SEGWIT_ADDRESS_PREFIX):
         h = address_to_hash(address, hex=False)
         s = [OP_0,
              bytes([len(h)]),
