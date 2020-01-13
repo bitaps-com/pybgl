@@ -167,8 +167,8 @@ class BlockTemplate():
         assert len(coinbase) <= 100
         tx.add_input(script_sig=coinbase)
         commitment = self.calculate_commitment(b'\x00'*32)
-        tx.add_output(self.coinbasevalue, self.coinbase_output_address)
-        tx.add_output(0, b'j$\xaa!\xa9\xed' + commitment)
+        tx.add_output(self.coinbasevalue, address = self.coinbase_output_address)
+        tx.add_output(0, script_pub_key = b'j$\xaa!\xa9\xed' + commitment)
         tx.coinbase = True
         tx.commit()
         return tx

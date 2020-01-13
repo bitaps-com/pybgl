@@ -199,7 +199,6 @@ def address_to_script(address, hex=False):
              bytes([len(h)]),
              h]
     else:
-        print(address[:3])
         raise ValueError("address invalid")
     s = b''.join(s)
     return s.hex() if hex else s
