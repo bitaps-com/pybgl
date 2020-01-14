@@ -214,6 +214,7 @@ class BlockTemplate():
         merkle_root = merkle_root_from_branches(self.merkle_branches, cbh)
         print("cbh ", cbh.hex())
         print("cbh2 ", c["txId"])
+
         print("merkle_root ", merkle_root.hex())
         print("branches ", self.merkle_branches)
         header = version + prev_hash + merkle_root + time + bits + nonce
