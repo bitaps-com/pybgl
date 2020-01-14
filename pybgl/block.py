@@ -210,8 +210,8 @@ class BlockTemplate():
         nonce = s2rh(nonce)
         cbh = sha3_256(bytes_from_hex(cb))
         merkle_root = merkle_root_from_branches(self.merkle_branches, cbh)
-        # print("merkle_root ", merkle_root.hex())
-        # print("branches ", self.merkle_branches)
+        print("merkle_root ", merkle_root.hex())
+        print("branches ", self.merkle_branches)
         header = version + prev_hash + merkle_root + time + bits + nonce
         block = header.hex()
         block +=int_to_var_int(len (self.transactions) + 1).hex()
