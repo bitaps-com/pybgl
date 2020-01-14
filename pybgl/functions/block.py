@@ -1,5 +1,5 @@
 from pybgl.functions.tools import s2rh, bytes_from_hex, int_from_bytes, rh2s
-from pybgl.functions.hash import double_sha256
+from pybgl.functions.hash import sha3_256
 from collections import deque
 from math import ceil, log
 
@@ -27,7 +27,7 @@ def merkle_root(tx_hash_list, return_hex=True, receive_hex=True):
                 h2 = tx_hash_list.popleft()
             except:
                 h2 = h1
-            append(double_sha256(b"".join((h1, h2))))
+            append(sha3_256(b"".join((h1, h2))))
         if len(new_hash_list) > 1:
             tx_hash_list = new_hash_list
         else:
@@ -58,7 +58,7 @@ def merkle_tree(tx_hash_list, return_hex=False, receive_hex=False):
             h1 = tx_hash_deque.popleft()
             try: h2 = tx_hash_deque.popleft()
             except: h2 = h1
-            hs = double_sha256(b"".join((h1, h2)))
+            hs = sha3_256(b"".join((h1, h2)))
             new_deque_append(hs)
         tx_hash_deque = new_deque
         c -= 1
@@ -113,7 +113,7 @@ def merkle_root_from_proof(merkle_proof, tx_id, index, return_hex=True, receive_
 
     root = tx_id
     for h in merkle_proof:
-        root = double_sha256(b"".join((h, root) if index % 2 else (root, h)))
+        root = sha3_256(b"".join((h, root) if index % 2 else (root, h)))
         index = index // 2
 
     if return_hex:
@@ -146,7 +146,7 @@ def merkle_branches(tx_hash_list, hex=True):
                 h2 = tx_hash_list.pop(0)
             except:
                 h2 = h1
-            new_hash_list.append(double_sha256(h1 + h2))
+            new_hash_list.append(sha3_256(h1 + h2))
         if len(new_hash_list) > 1:
             tx_hash_list = new_hash_list
         else:
@@ -167,7 +167,7 @@ def merkle_root_from_branches(merkle_branches, coinbase_hash, hex=True):
     for h in merkle_branches:
         if type(h) == str:
             h = bytes_from_hex(h)
-        merkle_root = double_sha256(merkle_root + h)
+        merkle_root = sha3_256(merkle_root + h)
     return bytes_from_hex(merkle_root) if not hex else merkle_root
 
 
