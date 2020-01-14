@@ -171,6 +171,7 @@ class BlockTemplate():
         tx.add_output(0, script_pub_key = b'j$\xaa!\xa9\xed' + commitment)
         tx.coinbase = True
         tx.commit()
+        print("coinbase tx", tx["txId"])
         return tx
 
     def get_job(self, job_id, clean_jobs = True):
