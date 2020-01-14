@@ -209,8 +209,11 @@ class BlockTemplate():
         bits = s2rh(self.bits)
         nonce = s2rh(nonce)
         cbh = sha3_256(bytes_from_hex(cb))
+        c = Transaction(cb)
+
         merkle_root = merkle_root_from_branches(self.merkle_branches, cbh)
         print("cbh ", cbh.hex())
+        print("cbh2 ", c["txId"])
         print("merkle_root ", merkle_root.hex())
         print("branches ", self.merkle_branches)
         header = version + prev_hash + merkle_root + time + bits + nonce
