@@ -172,6 +172,7 @@ class BlockTemplate():
         tx.coinbase = True
         tx.commit()
         print("coinbase tx", tx["txId"])
+        print("coinbase tx >>>>", tx)
         return tx
 
     def get_job(self, job_id, clean_jobs = True):
@@ -208,12 +209,11 @@ class BlockTemplate():
         time = s2rh(time)
         bits = s2rh(self.bits)
         nonce = s2rh(nonce)
-        cbh = sha3_256(bytes_from_hex(cb))
         c = Transaction(cb)
-
+        cbh = sha3_256(c["txId"])
         merkle_root = merkle_root_from_branches(self.merkle_branches, cbh)
         print("cbh ", cbh.hex())
-        print("cbh2 ", c["txId"])
+        print("cbh2 ", s2rh(c["txId"]))
 
         print("merkle_root ", merkle_root.hex())
         print("branches ", self.merkle_branches)
@@ -225,6 +225,31 @@ class BlockTemplate():
             block += t["data"]
         return sha3_256(header,1), block
 
+
+    def mn(self,  nonce):
+
+        header = self.h1 +  s2rh(nonce) + self.h1
+        return sha3_256(header, 1)
+        cb = self.coinb1 + extra_nonce_1 + extra_nonce_2 + self.coinb2
+        time = s2rh(time)
+        bits = s2rh(self.bits)
+        nonce = s2rh(nonce)
+        cbh = sha3_256(bytes_from_hex(cb))
+        c = Transaction(cb)
+        cbh = sha3_256(c["txId"])
+        merkle_root = merkle_root_from_branches(self.merkle_branches, cbh)
+        print("cbh ", cbh.hex())
+        print("cbh2 ", s2rh(c["txId"]))
+
+        print("merkle_root ", merkle_root.hex())
+        print("branches ", self.merkle_branches)
+        header = version + prev_hash + merkle_root + time + bits + nonce
+        block = header.hex()
+        block +=int_to_var_int(len (self.transactions) + 1).hex()
+        block += cb
+        for t in self.transactions:
+            block += t["data"]
+        return sha3_256(header,1), block
     # def build_orphan(self, hash, ntime):
     #     self.previous_block_hash =  reverse_hash(s2rh(hash)).decode()
     #     self.time = hexlify(ntime.to_bytes(4, "big")).decode()
