@@ -213,6 +213,8 @@ class BlockTemplate():
         c = Transaction(cb)
         cbh = sha3_256(c["txId"])
         merkle_root = merkle_root_from_branches(self.merkle_branches, cbh)
+        print("version ", version.hex())
+        print("prev_hash ", cbh.hex())
         print("cbh ", cbh.hex())
         print("cbh2 ", s2rh(c["txId"]))
         merkle_root = bytes_from_hex("6a24aa21a9ede2f61c3f71d1defd3fa999dfa36953755c690689799962b48bebd836974e8cf9")
