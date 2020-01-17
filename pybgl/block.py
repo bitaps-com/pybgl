@@ -211,7 +211,7 @@ class BlockTemplate():
         bits = s2rh(self.bits)
         nonce = s2rh(nonce)
         c = Transaction(cb)
-        cbh =  c["txId"]
+        cbh =  s2rh(c["txId"])
         merkle_root = merkle_root_from_branches(self.merkle_branches, cbh)
         print("version ", version.hex())
         print("prev_hash ", self.previous_block_hash)
