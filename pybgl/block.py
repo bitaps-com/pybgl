@@ -222,8 +222,8 @@ class BlockTemplate():
         print("prev_hash ", self.previous_block_hash)
         print("cbh ", cbh.hex())
         print("cbh2 ", s2rh(c["txId"]))
-        merkle_root = bytes_from_hex("6a24aa21a9ede2f61c3f71d1defd3fa999dfa36953755c690689799962b48bebd836974e8cf9")
-        merkle_root = cbh
+        # merkle_root = bytes_from_hex("6a24aa21a9ede2f61c3f71d1defd3fa999dfa36953755c690689799962b48bebd836974e8cf9")
+        # merkle_root = cbh
         print("merkle_root ", merkle_root.hex())
         print("branches ", self.merkle_branches)
         header = version + prev_hash + merkle_root + time + bits + nonce
