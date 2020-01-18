@@ -130,7 +130,7 @@ class BlockTemplate():
         self.coinb1, self.coinb2 = self.split_coinbase()
         self.target = bits_to_target(self.bits)
         self.difficulty = target_to_difficulty(self.target)
-        self.merkle_branches = [i.hex() for i in merkle_branches([self.coinbase_tx["txId"],] + self.txid_list)]
+        self.merkle_branches = [i for i in merkle_branches([self.coinbase_tx["txId"].hex(),] + self.txid_list)]
 
 
     def scan_tx_list(self):

@@ -155,16 +155,10 @@ def address_net_type(address):
     :param address: address in base58 or bech32 format.
     :return: address network type in string format or None. 
     """
-    if address[0] in (MAINNET_SCRIPT_ADDRESS_PREFIX,
-                      MAINNET_ADDRESS_PREFIX):
+
+    if address[:3] == MAINNET_SEGWIT_ADDRESS_PREFIX:
         return "mainnet"
-    elif address[:2] == MAINNET_SEGWIT_ADDRESS_PREFIX:
-        return "mainnet"
-    elif address[0] in (TESTNET_SCRIPT_ADDRESS_PREFIX,
-                        TESTNET_ADDRESS_PREFIX,
-                        TESTNET_ADDRESS_PREFIX_2):
-        return "testnet"
-    elif address[:2] == TESTNET_SEGWIT_ADDRESS_PREFIX:
+    elif address[:4] == TESTNET_SEGWIT_ADDRESS_PREFIX:
         return "testnet"
     return None
 
