@@ -146,12 +146,16 @@ class BlockTemplate():
             self.sigop += tx["sigops"]
             self.txid_list.append(txid)
 
-    def calculate_commitment(self, witness):
+    def calculate_commitment(self, witness_reserved_value):
+        print("calculate_commitment")
         wtxid_list = [b"\x00" * 32,]
         if self.transactions:
             for tx in self.transactions:
                 wtxid_list.append(s2rh(tx["hash"]))
-        return sha3_256(merkle_root(wtxid_list, return_hex=0) + witness)
+        print("wtxid_list", wtxid_list)
+        print("wtxid_list", wtxid_list)
+        print("commitment ", sha3_256(merkle_root(wtxid_list, return_hex=0) + witness_reserved_value))
+        return sha3_256(merkle_root(wtxid_list, return_hex=0) + witness_reserved_value)
 
     def split_coinbase(self):
         tx = self.coinbase_tx.serialize(segwit=0, hex= 0)
@@ -169,8 +173,8 @@ class BlockTemplate():
         tx.add_input(script_sig=coinbase)
         commitment = self.calculate_commitment(b'\x00'*32)
         tx.add_output(self.coinbasevalue, address = self.coinbase_output_address)
-        # tx.add_output(0, script_pub_key = b'j$\xaa!\xa9\xed' + commitment)
-        tx.add_output(0, script_pub_key = bytes_from_hex("6a24aa21a9ede2f61c3f71d1defd3fa999dfa36953755c690689799962b48bebd836974e8cf9"))
+        tx.add_output(0, script_pub_key = b'j$\xaa!\xa9\xed' + commitment)
+        # tx.add_output(0, script_pub_key = bytes_from_hex("6a24aa21a9ede2f61c3f71d1defd3fa999dfa36953755c690689799962b48bebd836974e8cf9"))
         tx.coinbase = True
         tx.commit()
         print("coinbase tx", tx["txId"])
