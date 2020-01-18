@@ -1,5 +1,5 @@
 from pybgl.functions.tools import s2rh, bytes_from_hex, int_from_bytes, rh2s
-from pybgl.functions.hash import sha3_256
+from pybgl.functions.hash import sha3_256, double_sha256
 from collections import deque
 from math import ceil, log
 
@@ -32,6 +32,37 @@ def merkle_root(tx_hash_list, return_hex=True, receive_hex=True):
             tx_hash_list = new_hash_list
         else:
             return new_hash_list[0] if not return_hex else rh2s(new_hash_list[0])
+
+def merkle_root_double_sha256(tx_hash_list, return_hex=True, receive_hex=True):
+    """
+    Calculate merkle root from transaction hash list
+
+    :param tx_hash_list: list of transaction hashes in bytes or HEX encoded string.
+    :param return_hex:  (optional) If set to True return result in HEX format, by default is True.
+    :param receive_hex:  (optional) If set to False no internal check or decode from hex to bytes, by default is True.
+    :return: merkle root in bytes or HEX encoded string corresponding hex flag.
+    """
+    if receive_hex:
+        tx_hash_list = deque([h if isinstance(h, bytes) else s2rh(h) for h in tx_hash_list])
+    else:
+        tx_hash_list = deque(tx_hash_list)
+    if len(tx_hash_list) == 1:
+        return rh2s(tx_hash_list[0]) if return_hex else tx_hash_list[0]
+    while True:
+        new_hash_list = deque()
+        append = new_hash_list.append
+        while tx_hash_list:
+            h1 = tx_hash_list.popleft()
+            try:
+                h2 = tx_hash_list.popleft()
+            except:
+                h2 = h1
+            append(double_sha256(b"".join((h1, h2))))
+        if len(new_hash_list) > 1:
+            tx_hash_list = new_hash_list
+        else:
+            return new_hash_list[0] if not return_hex else rh2s(new_hash_list[0])
+
 
 def merkle_tree_depth(tx_hash_count):
     if not isinstance(tx_hash_count, int):

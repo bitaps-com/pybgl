@@ -1,8 +1,8 @@
 from struct import unpack, pack
 from io import BytesIO
-from pybgl.functions.block import bits_to_target, target_to_difficulty
+from pybgl.functions.block import bits_to_target, target_to_difficulty, merkle_root_double_sha256
 from pybgl.functions.block import merkle_root, merkle_branches, merkle_root_from_branches
-from pybgl.functions.hash import sha3_256
+from pybgl.functions.hash import sha3_256, double_sha256
 from pybgl.functions.tools import var_int_to_int, read_var_int, var_int_len, rh2s, reverse_hash, s2rh, s2rh_step4
 from pybgl.functions.tools import bytes_from_hex, int_to_var_int
 from pybgl.transaction import Transaction
@@ -154,8 +154,8 @@ class BlockTemplate():
                 wtxid_list.append(s2rh(tx["hash"]))
         print("wtxid_list", wtxid_list)
         print("wtxid_list", wtxid_list)
-        print("commitment ", sha3_256(merkle_root(wtxid_list, return_hex=0) + witness_reserved_value))
-        return sha3_256(merkle_root(wtxid_list, return_hex=0) + witness_reserved_value)
+        print("commitment ", double_sha256(merkle_root_double_sha256(wtxid_list, return_hex=0) + witness_reserved_value))
+        return double_sha256(merkle_root_double_sha256(wtxid_list, return_hex=0) + witness_reserved_value)
 
     def split_coinbase(self):
         tx = self.coinbase_tx.serialize(segwit=0, hex= 0)
