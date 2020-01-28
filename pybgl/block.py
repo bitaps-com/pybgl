@@ -212,6 +212,7 @@ class BlockTemplate():
         version = s2rh(self.version)
         prev_hash = s2rh_step4(self.previous_block_hash)
         cb = self.coinb1 + extra_nonce_1 + extra_nonce_2 + self.coinb2
+        print("ccoinbase", cb)
         time = s2rh(time)
         bits = s2rh(self.bits)
         nonce = s2rh(nonce)
@@ -227,7 +228,7 @@ class BlockTemplate():
         print("merkle_root ", merkle_root.hex())
         print("branches ", self.merkle_branches)
         header = version + prev_hash + merkle_root + time + bits + nonce
-        # print("header", header)
+        print("header", header.hex())
         block = header.hex()
         block +=int_to_var_int(len (self.transactions) + 1).hex()
         block += cb
