@@ -108,7 +108,7 @@ class BlockTemplate():
         self.time = data["curtime"].to_bytes(4, "big").hex()
         self.bits = data["bits"]
         self.height = data["height"]
-        self.block_reward = 50 * 100000000 >> data["height"] // 210000
+        self.block_reward = 200 * 100000000 >> data["height"] // 210000
         self.coinbasevalue = self.block_reward
         self.extranonce1 = extranonce1
         self.extranonce1_size = extranonce1_size
