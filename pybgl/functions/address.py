@@ -137,9 +137,9 @@ def address_type(address, num=False):
         t = 'P2PKH'
     elif address[:2] in (MAINNET_SEGWIT_ADDRESS_PREFIX,
                          TESTNET_SEGWIT_ADDRESS_PREFIX):
-        if len(address) == 42:
+        if len(address) == 43:
             t = 'P2WPKH'
-        elif len(address) == 62:
+        elif len(address) == 63:
             t = 'P2WSH'
         else:
             return SCRIPT_TYPES['NON_STANDARD'] if num else 'UNKNOWN'
