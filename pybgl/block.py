@@ -6,7 +6,7 @@ from pybgl.functions.hash import sha3_256, double_sha256
 from pybgl.functions.tools import var_int_to_int, read_var_int, var_int_len, rh2s, reverse_hash, s2rh, s2rh_step4
 from pybgl.functions.tools import bytes_from_hex, int_to_var_int
 from pybgl.transaction import Transaction
-
+import math
 
 class Block(dict):
     def __init__(self, raw_block=None, format="decoded", version=536870912, testnet=False, keep_raw_tx=False):
@@ -139,12 +139,14 @@ class BlockTemplate():
         self.sigop = 0
         self.weight = 0
         self.txid_list = list()
+        tx_fee = 0
         for tx in self.transactions:
             txid = s2rh(tx["txid"])
-            self.coinbasevalue += tx["fee"]
+            tx_fee += tx["fee"]
             self.weight += tx["weight"]
             self.sigop += tx["sigops"]
             self.txid_list.append(txid)
+        self.coinbasevalue  += math.floor(tx_fee / 10)
 
     def calculate_commitment(self, witness_reserved_value):
         # print("calculate_commitment")
