@@ -2,7 +2,7 @@ from pybgl.opcodes import *
 from pybgl.constants import *
 
 from pybgl.functions.tools import bytes_from_hex
-from pybgl.functions.hash import double_sha256, hash160
+from pybgl.functions.hash import double_sha256, hash160, sha3_256
 from pybgl.functions.encode import (encode_base58,
                                     rebase_8_to_5,
                                     bech32_polymod,
@@ -41,7 +41,7 @@ def hash_to_address(address_hash, testnet=False, script_hash=False, witness_vers
             else:
                 prefix = MAINNET_ADDRESS_BYTE_PREFIX
             address_hash = b"%s%s" % (prefix, address_hash)
-            address_hash += double_sha256(address_hash)[:4]
+            address_hash += sha3_256(address_hash)[:4]
             return encode_base58(address_hash)
         else:
             if len(address_hash) not in (20, 32):
@@ -66,6 +66,7 @@ def hash_to_address(address_hash, testnet=False, script_hash=False, witness_vers
     address_hash = b"%s%s" % (witness_version.to_bytes(1, "big"),
                               rebase_8_to_5(address_hash))
     checksum = bech32_polymod(b"%s%s%s" % (prefix, address_hash, b"\x00" * 6))
+    print(rebase_8_to_5(checksum.to_bytes(5, "big")))
     checksum = rebase_8_to_5(checksum.to_bytes(5, "big"))[2:]
     return "%s1%s" % (hrp, rebase_5_to_32(address_hash + checksum).decode())
 

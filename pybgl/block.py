@@ -225,8 +225,8 @@ class BlockTemplate():
         # print("cbh2 ", s2rh(c["txId"]))
         # merkle_root = bytes_from_hex("6a24aa21a9ede2f61c3f71d1defd3fa999dfa36953755c690689799962b48bebd836974e8cf9")
         # merkle_root = s2rh(c["txId"])
-        # print("merkle_root ", merkle_root.hex())
-        # print("merkle_root ", s2rh(c["txId"]))
+        print("merkle_root ", merkle_root.hex())
+        print("merkle_root ", s2rh(c["txId"]))
         # print("branches ", self.merkle_branches)
         header = version + prev_hash + merkle_root + time + bits + nonce
         # print("header", header.hex())
