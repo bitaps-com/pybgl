@@ -65,8 +65,8 @@ def hash_to_address(address_hash, testnet=False, script_hash=False, witness_vers
 
     address_hash = b"%s%s" % (witness_version.to_bytes(1, "big"),
                               rebase_8_to_5(address_hash))
+
     checksum = bech32_polymod(b"%s%s%s" % (prefix, address_hash, b"\x00" * 6))
-    print(rebase_8_to_5(checksum.to_bytes(5, "big")))
     checksum = rebase_8_to_5(checksum.to_bytes(5, "big"))[2:]
     return "%s1%s" % (hrp, rebase_5_to_32(address_hash + checksum).decode())
 
