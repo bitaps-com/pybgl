@@ -13,4 +13,4 @@ from .hash_functions import *
 # from .filters import *
 
 # from .script_deserialize import *
-# from .create_transaction import *
+from .create_transaction import *

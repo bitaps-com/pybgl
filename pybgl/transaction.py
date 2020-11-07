@@ -14,7 +14,7 @@ from pybgl.functions.tools import (int_to_var_int,
 from pybgl.functions.script import op_push_data, decode_script, parse_script, sign_message
 from pybgl.functions.script import get_multisig_public_keys, read_opcode, is_valid_signature_encoding
 from pybgl.functions.script import public_key_recovery, delete_from_script
-from pybgl.functions.hash import hash160, sha256, sha256
+from pybgl.functions.hash import hash160, sha3_256, sha256
 from pybgl.functions.address import  hash_to_address, address_net_type, address_to_script
 from pybgl.address import  PrivateKey, Address, ScriptAddress, PublicKey
 from collections import deque
@@ -1058,8 +1058,8 @@ class Transaction(dict):
             if i == n:
                 outpoint = b"%s%s" % (tx_id, pack('<L', self["vIn"][i]["vOut"]))
                 n_sequence = pack('<L', self["vIn"][i]["sequence"])
-        hash_prevouts = sha256(hp) if hp else b'\x00' * 32
-        hash_sequence = sha256(hs) if hs else b'\x00' * 32
+        hash_prevouts = sha3_256(hp) if hp else b'\x00' * 32
+        hash_sequence = sha3_256(hs) if hs else b'\x00' * 32
         value = amount.to_bytes(8, 'little')
         # 8. hashOutputs (32-byte hash)
         ho = bytearray()
@@ -1076,13 +1076,13 @@ class Transaction(dict):
                     ho += b"%s%s%s" % (self["vOut"][o]["value"].to_bytes(8, 'little'),
                                        int_to_var_int(len(script_pub_key)),
                                        script_pub_key)
-        hash_outputs = sha256(ho) if ho else b'\x00' * 32
+        hash_outputs = sha3_256(ho) if ho else b'\x00' * 32
         pm += b"%s%s%s%s%s%s%s%s%s" % (hash_prevouts, hash_sequence, outpoint,
                                        script_code, value, n_sequence, hash_outputs,
                                        pack('<L', self["lockTime"]),
                                        pack('<L', sighash_type))
         if not preimage:
-            pm = sha256(pm)
+            pm = sha3_256(pm)
         return pm if self["format"] == "raw" else pm.hex()
 
     def commit(self):

@@ -14,22 +14,18 @@ class CreateTransactionTests(unittest.TestCase):
         print("\nTesting create transaction:\n")
 
     def test_create_tx(self):
-        tx = Transaction()
-        tx.add_input("60965ce5eec9846373c497ff0b45e55d0af5e6ed96ef46455be377935eb563e4",
-                     2)
-        tx.add_output_address(270000000, "3ByyFTy4ESZVr6y3mWqapqC84yn2TAtcr4")
-        tx.add_output_address(171310000, "bc1qwqdg6squsna38e46795at95yu9atm8azzmyvckulcc7kytlcckxswvvzej")
-        self.assertEqual(rh2s(tx.hash), "1afc445bf8aef9904f2e1d7f4c5f9093587ccff8aa01263c7369c917aa86616a")
-        raw_tx = tx.serialize()
-        tx2 = Transaction.deserialize(raw_tx)
-        self.assertEqual(rh2s(tx2.hash), "1afc445bf8aef9904f2e1d7f4c5f9093587ccff8aa01263c7369c917aa86616a")
-        self.assertEqual(tx2.tx_out[-1].pk_script.type, "P2WSH")
+        rtx = "0200000000010151ab0ce41d17c55597011e798f6e634704cfd22d0debf0c4e0ee9c2c9cbb5f8e0000000000ffffffff0118ddf" \
+              "50500000000160014e0a5424502ad701c79ed7cb53f7ceabe9fd3b1e30247304402207b07de070579ec1c481ec858f339ea02b8" \
+              "269f554e70130e6f94f0dfe84dc45402202bfab5d7877ddcf57c7afd5dead1d708940382231007c166f83c31247d71c97d01210" \
+              "384fcc40094f0bdf493483dd5db6c7985d10122ef599e59be7436b59ca50de574c37e0000";
 
-        tx = Transaction()
-        tx.add_input("593cd8119bcd49055df0a3a01c38989b311c1e88985a6315608bb5d59dda9d1f", 1)
-        tx.add_output_address(25000, "39okDra9814p4Dz3SFSuS2D8riqbbMtSiP")
-        tx.add_output_address(689, "bc1qrn7pyh2c79gf7a8ywpx85w9u7lj9dx7tfevlv0")
-        self.assertEqual(rh2s(tx.hash), "7221dfc0fa3ff37d5dcbaf77c2e1b56318a25a793a62d854909cbd7f754881bb")
-        self.assertEqual(tx.tx_out[-1].pk_script.type, "P2WPKH")
-        self.assertEqual(tx.tx_out[0].pk_script.type, "P2SH")
+        tx = Transaction(version=2, lock_time= 32451)
+        tx.add_input("8e5fbb9c2c9ceee0c4f0eb0d2dd2cf0447636e8f791e019755c5171de40cab51",
+                     0, address="bgl1qrujz90dzsd5cle8yy7lm546saregcjmzt4g4kl")
+        tx.add_output(99999000, "bgl1quzj5y3gz44cpc70d0j6n7l82h60a8v0rwf0pjq")
+        tx.sign_input(0, private_key="KyfrGSgiv9rSiXiXBhJnDyZz8DU8VJdKYcbMGPginJUhrx7VSvAY",
+                         sighash_type=SIGHASH_ALL,
+                         amount=100000000)
+        self.assertEqual(tx.serialize(), rtx)
+
 

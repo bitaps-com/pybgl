@@ -6,6 +6,7 @@ import pybgl
 # from pybgl.test.wallet_class import *
 # from pybgl.test.shamir import *
 from pybgl.test.hash_functions import *
+from pybgl.test.create_transaction import *
 # testLoad = unittest.TestLoader()
 # suites = testLoad.loadTestsFromModule(pybgl.test)
 #
