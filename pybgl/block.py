@@ -169,7 +169,10 @@ class BlockTemplate():
 
     def create_coinbase_transaction(self):
         tx = Transaction()
-        coinbase = b'\x02' + self.height.to_bytes(2,'little') + self.coinbase_message
+        k = b'\x02'
+        if self.height > 0x7fff:
+            k = b'\x03'
+        coinbase = k + self.height.to_bytes(3,'little') + self.coinbase_message
         coinbase += b"\x00" * (self.extranonce1_size + self.extranonce2_size)
         assert len(coinbase) <= 100
         tx.add_input(script_sig=coinbase)
