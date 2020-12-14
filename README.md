@@ -1,8 +1,8 @@
 <img src="docs/img/pybtc.png" width="100">
 
-## Python bitcoin library
+## Python bitgesell library
 
-Current version is 2.2
+Based on pybtc library. Current version is 3.0
 
 
 ### Feature Support
@@ -16,10 +16,10 @@ Current version is 2.2
 
 ### Installation
 
-To install pybtc, simply use pip
+To install pybgl
 
-    $ git clone https://github.com/bitaps-com/pybtc
-    $ cd pybtc
+    $ git clone https://github.com/bitaps-com/pybgl
+    $ cd pybgl
     $ python3 setup.py install
     
 ### Dependencies
@@ -42,7 +42,7 @@ Workflow is pretty straightforward:
 2. Make a change
 3. Make sure all tests passed
 4. Add a record into file into change.log.
-5. Commit changes to own pybtc clone
+5. Commit changes to own pybgl clone
 6. Make pull request from github page for your clone against master branch
 
 

@@ -1,5 +1,5 @@
 from struct import unpack
-from .functions import *
+from pybgl.functions import *
 
 
 # Hierarchical Deterministic Wallets (HD Wallets)
@@ -47,7 +47,7 @@ class Wallet():
             e = generate_entropy()
             m = entropy_to_mnemonic(e)
             self.mnemonic = m
-            self.seed = mnemonic_to_seed(m)
+            self.seed = mnemonic_to_seed(m, passphrase=passphrase)
             self._init_vector = create_master_xprivate_key(self.seed, base58=False, testnet=testnet)
             self._init_vector_type = "xprivate_key"
         else:
@@ -74,7 +74,7 @@ class Wallet():
                     if len(init_vector) == 156:
                         self._init_vector = bytes.fromhex(init_vector)
                     else:
-                        self._init_vector = decode_base58_with_checksum(init_vector)
+                        self._init_vector = decode_base58(init_vector)
                     self._init_vector_type = "xpublic_key"
                     if path_type is None:
                         if self._init_vector[:4] in (MAINNET_M49_XPUBLIC_KEY_PREFIX,

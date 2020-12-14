@@ -1,7 +1,7 @@
 from pybgl.opcodes import *
 from pybgl.constants import *
 
-from pybgl.functions.tools import bytes_from_hex
+from pybgl.functions.tools import bytes_from_hex, get_bytes
 from pybgl.functions.hash import double_sha256, hash160, sha3_256
 from pybgl.functions.encode import (encode_base58,
                                     rebase_8_to_5,
@@ -12,6 +12,34 @@ from pybgl.functions.encode import (encode_base58,
                                     rebase_32_to_5,
                                     base32charset,
                                     base32charset_upcase)
+
+
+def public_key_to_address(pubkey, testnet=False, p2sh_p2wpkh=False, witness_version=0):
+    """
+    Get address from public key/script hash. In case PUBKEY, P2PKH, P2PKH public key/script hash is SHA256+RIPEMD160,
+    P2WSH script hash is SHA256.
+
+    :param pubkey: public key HEX or bytes string format.
+    :param testnet: (optional) flag for testnet network, by default is False.
+    :param p2sh_p2wpkh: (optional) flag for P2WPKH inside P2SH address, by default is False.
+    :param witness_version: (optional) witness program version, by default is 0, for legacy
+                            address format use None.
+    :return: address in base58 or bech32 format.
+    """
+    pubkey = get_bytes(pubkey, encoding='hex')
+    if p2sh_p2wpkh:
+        if len(pubkey) != 33:
+            raise ValueError("public key invalid")
+        h = hash160(b'\x00\x14%s' % hash160(pubkey))
+        witness_version = None
+    else:
+        if witness_version is not None:
+            if len(pubkey) != 33:
+                raise ValueError("public key invalid")
+        h = hash160(pubkey)
+    return hash_to_address(h, testnet=testnet,
+                           script_hash=p2sh_p2wpkh,
+                           witness_version=witness_version)
 
 
 def hash_to_address(address_hash, testnet=False, script_hash=False, witness_version=0):
@@ -27,10 +55,7 @@ def hash_to_address(address_hash, testnet=False, script_hash=False, witness_vers
                             address format use None.
     :return: address in base58 or bech32 format.
     """
-    if isinstance(address_hash, str):
-        address_hash = bytes_from_hex(address_hash)
-    if not isinstance(address_hash, bytes):
-        raise TypeError("address hash must be HEX encoded string or bytes")
+    address_hash = get_bytes(address_hash, encoding='hex')
 
     if not script_hash:
         if witness_version is None:
@@ -65,41 +90,9 @@ def hash_to_address(address_hash, testnet=False, script_hash=False, witness_vers
 
     address_hash = b"%s%s" % (witness_version.to_bytes(1, "big"),
                               rebase_8_to_5(address_hash))
-
     checksum = bech32_polymod(b"%s%s%s" % (prefix, address_hash, b"\x00" * 6))
     checksum = rebase_8_to_5(checksum.to_bytes(5, "big"))[2:]
     return "%s1%s" % (hrp, rebase_5_to_32(address_hash + checksum).decode())
-
-
-def public_key_to_address(pubkey, testnet=False, p2sh_p2wpkh=False, witness_version=0):
-    """
-    Get address from public key/script hash. In case PUBKEY, P2PKH, P2PKH public key/script hash is SHA256+RIPEMD160,
-    P2WSH script hash is SHA256.
-
-    :param pubkey: public key HEX or bytes string format.
-    :param testnet: (optional) flag for testnet network, by default is False.
-    :param p2sh_p2wpkh: (optional) flag for P2WPKH inside P2SH address, by default is False.
-    :param witness_version: (optional) witness program version, by default is 0, for legacy
-                            address format use None.
-    :return: address in base58 or bech32 format.
-    """
-    if isinstance(pubkey, str):
-        pubkey = bytes.fromhex(pubkey)
-    if not isinstance(pubkey, bytes):
-        raise TypeError("public key invalid, expected bytes or str")
-    if p2sh_p2wpkh:
-        if len(pubkey) != 33:
-            raise ValueError("public key invalid")
-        h = hash160(b'\x00\x14%s' % hash160(pubkey))
-        witness_version = None
-    else:
-        if witness_version is not None:
-            if len(pubkey) != 33:
-                raise ValueError("public key invalid")
-        h = hash160(pubkey)
-    return hash_to_address(h, testnet=testnet,
-                           script_hash=p2sh_p2wpkh,
-                           witness_version=witness_version)
 
 
 def address_to_hash(address, hex=True):
@@ -136,7 +129,7 @@ def address_type(address, num=False):
                         TESTNET_ADDRESS_PREFIX,
                         TESTNET_ADDRESS_PREFIX_2):
         t = 'P2PKH'
-    elif address[:2] in (MAINNET_SEGWIT_ADDRESS_PREFIX,
+    elif address[:3] in (MAINNET_SEGWIT_ADDRESS_PREFIX,
                          TESTNET_SEGWIT_ADDRESS_PREFIX):
         if len(address) == 43:
             t = 'P2WPKH'
@@ -156,9 +149,15 @@ def address_net_type(address):
     :param address: address in base58 or bech32 format.
     :return: address network type in string format or None. 
     """
-
-    if address[:3] == MAINNET_SEGWIT_ADDRESS_PREFIX:
+    if address[0] in (MAINNET_SCRIPT_ADDRESS_PREFIX,
+                      MAINNET_ADDRESS_PREFIX):
         return "mainnet"
+    elif address[:3] == MAINNET_SEGWIT_ADDRESS_PREFIX:
+        return "mainnet"
+    elif address[0] in (TESTNET_SCRIPT_ADDRESS_PREFIX,
+                        TESTNET_ADDRESS_PREFIX,
+                        TESTNET_ADDRESS_PREFIX_2):
+        return "testnet"
     elif address[:4] == TESTNET_SEGWIT_ADDRESS_PREFIX:
         return "testnet"
     return None
@@ -172,6 +171,9 @@ def address_to_script(address, hex=False):
     :param hex:  (optional) If set to True return key in HEX format, by default is True.
     :return: public key script in HEX or bytes string.
     """
+    if not isinstance(address, str):
+        raise TypeError("address invalid")
+
     if address[0] in (TESTNET_SCRIPT_ADDRESS_PREFIX,
                       MAINNET_SCRIPT_ADDRESS_PREFIX):
         s = [OP_HASH160,
@@ -198,6 +200,7 @@ def address_to_script(address, hex=False):
     s = b''.join(s)
     return s.hex() if hex else s
 
+
 def hash_to_script(address_hash, script_type, hex=False):
     """
     Get public key script from hash.
@@ -206,10 +209,12 @@ def hash_to_script(address_hash, script_type, hex=False):
     :param hex:  (optional) If set to True return key in HEX format, by default is True.
     :return: public key script in HEX or bytes string.
     """
-    if isinstance(address_hash, str):
-        address_hash = bytes_from_hex(address_hash)
-    if not isinstance(address_hash, bytes):
-        raise TypeError("address hash must be HEX encoded string or bytes")
+    address_hash = get_bytes(address_hash)
+    if isinstance(script_type, str):
+        try:
+            script_type = SCRIPT_TYPES[script_type]
+        except:
+            script_type = ""
 
     if script_type == 1:
         s = [OP_HASH160, b'\x14', address_hash, OP_EQUAL]
@@ -225,11 +230,12 @@ def hash_to_script(address_hash, script_type, hex=False):
     return s.hex() if hex else s
 
 
-
-def public_key_to_p2sh_p2wpkh_script(pubkey):
+def public_key_to_p2sh_p2wpkh_script(pubkey, hex=False):
+    pubkey = get_bytes(pubkey)
     if len(pubkey) != 33:
         raise ValueError("public key len invalid")
-    return b'\x00\x14%s' % hash160(pubkey)
+    r = b'\x00\x14%s' % hash160(pubkey)
+    return r.hex() if hex else r
 
 
 def is_address_valid(address, testnet=False):
@@ -263,8 +269,8 @@ def is_address_valid(address, testnet=False):
         if double_sha256(h[:-4])[:4] != checksum:
             return False
         return True
-    elif address[:2].lower() in (TESTNET_SEGWIT_ADDRESS_PREFIX,
-                                 MAINNET_SEGWIT_ADDRESS_PREFIX):
+    elif (address[:3] == MAINNET_SEGWIT_ADDRESS_PREFIX) \
+             or (address[:4] == TESTNET_SEGWIT_ADDRESS_PREFIX):
         if len(address) not in (43, 63):
             return False
         try:
@@ -297,11 +303,10 @@ def is_address_valid(address, testnet=False):
         if checksum != checksum2:
             return False
         return True
+    return False
 
 
 def get_witness_version(address):
     address = address.split("1")[1]
     h = rebase_32_to_5(address)
     return h[0]
-
-

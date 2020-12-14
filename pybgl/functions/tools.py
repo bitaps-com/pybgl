@@ -8,6 +8,34 @@ bytes_from_hex = bytes.fromhex
 int_from_bytes = int.from_bytes
 
 
+def get_bytes(s, encoding = None):
+    if isinstance(s, list):
+        try:
+            s = b"".join(s)
+        except:
+            try:
+                s = "".join(s)
+            except:
+                try:
+                    s = [n if isinstance(n,bytes) else bytes_from_hex(n) for n in s]
+                    s = b"".join(s)
+                except:
+                    raise ValueError("invalid list")
+    if isinstance(s, bytes) or isinstance(s, bytearray):
+        return s
+    if isinstance(s, str):
+        if encoding == 'utf8':
+            return s.encode()
+        elif encoding == 'hex':
+            return bytes_from_hex(s)
+        try:
+            return bytes_from_hex(s)
+        except:
+            return s.encode()
+
+    raise ValueError("utf8 string/hex string/byte string required")
+
+
 def rh2s(raw_hash):
     """
     Encode raw transaction hash to HEX string with bytes order change

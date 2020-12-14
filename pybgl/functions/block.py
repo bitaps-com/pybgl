@@ -33,13 +33,9 @@ def merkle_root(tx_hash_list, return_hex=True, receive_hex=True):
         else:
             return new_hash_list[0] if not return_hex else rh2s(new_hash_list[0])
 
-
-
-
 def merkle_root_double_sha256(tx_hash_list, return_hex=True, receive_hex=True):
     """
     Calculate merkle root from transaction hash list
-
     :param tx_hash_list: list of transaction hashes in bytes or HEX encoded string.
     :param return_hex:  (optional) If set to True return result in HEX format, by default is True.
     :param receive_hex:  (optional) If set to False no internal check or decode from hex to bytes, by default is True.
@@ -69,7 +65,6 @@ def merkle_root_double_sha256(tx_hash_list, return_hex=True, receive_hex=True):
 def merkle_root_sha256(tx_hash_list, return_hex=True, receive_hex=True):
     """
     Calculate merkle root from transaction hash list
-
     :param tx_hash_list: list of transaction hashes in bytes or HEX encoded string.
     :param return_hex:  (optional) If set to True return result in HEX format, by default is True.
     :param receive_hex:  (optional) If set to False no internal check or decode from hex to bytes, by default is True.
@@ -99,7 +94,6 @@ def merkle_root_sha256(tx_hash_list, return_hex=True, receive_hex=True):
 def merkle_root_sha3_256(tx_hash_list, return_hex=True, receive_hex=True):
     """
     Calculate merkle root from transaction hash list
-
     :param tx_hash_list: list of transaction hashes in bytes or HEX encoded string.
     :param return_hex:  (optional) If set to True return result in HEX format, by default is True.
     :param receive_hex:  (optional) If set to False no internal check or decode from hex to bytes, by default is True.
@@ -284,7 +278,6 @@ def bits_to_target(bits):
         target = (bits & 0xffffff) * (1 << (8 * (shift - 3)))
         return target
 
-
 def target_to_difficulty(target):
     """
     Calculate difficulty from target
@@ -294,7 +287,6 @@ def target_to_difficulty(target):
     """
     return 0x00000000FFFF0000000000000000000000000000000000000000000000000000 / target
 
-
 def bits_to_difficulty(bits):
     """
     Calculate difficulty from bits
@@ -303,7 +295,6 @@ def bits_to_difficulty(bits):
     :return: integer.
     """
     return target_to_difficulty(bits_to_target(bits))
-
 
 def difficulty_to_target(difficulty):
     """

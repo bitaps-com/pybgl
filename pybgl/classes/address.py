@@ -265,6 +265,7 @@ class ScriptAddress():
             elif isinstance(a, PublicKey):
                 a = a.key
             elif isinstance(a, PrivateKey):
+
                 a = private_to_public_key(a.key)
             if not isinstance(a, bytes):
                 raise TypeError("invalid public key list element")

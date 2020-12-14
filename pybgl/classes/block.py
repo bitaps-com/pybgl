@@ -5,7 +5,7 @@ from pybgl.functions.block import merkle_root, merkle_branches, merkle_root_from
 from pybgl.functions.hash import sha3_256, double_sha256
 from pybgl.functions.tools import var_int_to_int, read_var_int, var_int_len, rh2s, reverse_hash, s2rh, s2rh_step4
 from pybgl.functions.tools import bytes_from_hex, int_to_var_int
-from pybgl.transaction import Transaction
+from pybgl.classes.transaction import Transaction
 import math
 
 class Block(dict):
@@ -51,6 +51,7 @@ class Block(dict):
         s.seek(-80, 1)
         self["header"] = s.read(80)
         self["hash"] = sha3_256(self["header"])
+
         block_target = int.from_bytes(self["hash"], byteorder="little")
         self["difficulty"] = target_to_difficulty(block_target)
         tx_count = var_int_to_int(read_var_int(s))
@@ -201,7 +202,6 @@ class BlockTemplate():
         clean_jobs - When true, server indicates that submitting shares from previous jobs don't have a
         sense and such shares will be rejected. When this flag is set, miner should also drop all previous
          jobs, so job_ids can be eventually rotated.
-
         """
         return [job_id,
                 self.previous_block_hash,

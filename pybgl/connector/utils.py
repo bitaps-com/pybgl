@@ -2,8 +2,8 @@ from pybgl.functions.tools import rh2s
 from pybgl.functions.tools import var_int_to_int
 from pybgl.functions.tools import var_int_len
 from pybgl.functions.tools import read_var_int
-from pybgl.functions.hash import double_sha256
-from pybgl.transaction import Transaction
+from pybgl.functions.hash import double_sha256, sha3_256
+from pybgl.classes.transaction import Transaction
 from pybgl.functions.block import target_to_difficulty
 from pybgl.functions.block import bits_to_target
 from struct import unpack, pack
@@ -48,7 +48,7 @@ def decode_block_tx(block):
     b["header"] = s.read(80)
     b["bits"] = rh2s(b["bits"])
     b["target"] = rh2s(b["target"])
-    b["hash"] = double_sha256(b["header"], hex=0)
+    b["hash"] = sha3_256(b["header"])
     b["hash"] = rh2s(b["hash"])
     b["rawTx"] = dict()
     b["tx"] = list()
