@@ -129,8 +129,8 @@ class build_ext(_build_ext):
 
 
 setup(name='pybgl',
-      version='2.2.0',
-      description='Python Bitcoin library',
+      version='3.0.0',
+      description='Python Bitgesell library',
       keywords='bitcoin',
       url='https://github.com/bitaps-com/pybgl',
       author='Alexsei Karpov',
