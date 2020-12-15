@@ -1,15 +1,13 @@
 import unittest
 import os
 import sys
-import time
+
 parentPath = os.path.abspath("..")
 if parentPath not in sys.path:
     sys.path.insert(0, parentPath)
 
 from pybgl.functions import *
-from pybgl.transaction import *
-from binascii import unhexlify
-from pybgl import address_to_hash as address2hash160
+from pybgl.classes.transaction import *
 
 
 def decode_block_tx(block):
