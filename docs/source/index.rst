@@ -4,15 +4,15 @@
    contain the root `toctree` directive.
 
 ==================
-Welcome to PYBTC
+Welcome to PYBGL
 ==================
 
-Python library for Bitcoin.
+Python library for Bitgesell.
 
-Current version is 2.0.
+Current version is 3.0.
 
 
-.. _GitHub: https://github.com/bitaps-com/pybtc
+.. _GitHub: https://github.com/bitaps-com/pybgl
 
 
 Key Features
@@ -33,7 +33,7 @@ Quick library Installation
 
 .. code-block:: bash
 
-   $ pip install pybtc
+   $ pip install pybgl
 
 
 Getting Started
@@ -41,8 +41,8 @@ Getting Started
 
 Usage example::
 
-    import pybtc
-    a = pybtc.Address()
+    import pybgl
+    a = pybgl.Address()
     print(a.address)
     print(a.private_key.wif)
 
@@ -51,7 +51,7 @@ Usage example::
 
 
 
-What's new in pybtc 2.0 ?
+What's new in pybgl 3.0 ?
 =========================
 
 - Mnemonic code generation (BIP39)
@@ -68,7 +68,7 @@ Source code
 The project is hosted on GitHub_
 
 Please feel free to file an issue on the `bug tracker
-<https://github.com/bitaps-com/pybtc/issues>`_ if you have found a bug
+<https://github.com/bitaps-com/pybgl/issues>`_ if you have found a bug
 or have some suggestion in order to improve the library.
 
 
@@ -83,7 +83,7 @@ Dependencies
 Authors and License
 ===================
 
-The ``pybtc`` package was initially written by `Aleksey Karpov <https://github.com/4tochka>`_ and development continues with contributors.
+The ``pybgl`` package was initially written by `Aleksey Karpov <https://github.com/4tochka>`_ and development continues with contributors.
 
 Recent contributors:
 

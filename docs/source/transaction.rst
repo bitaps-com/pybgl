@@ -5,7 +5,7 @@ Transactions
 The class for creating transaction.
 
 
-.. autoclass:: pybtc.Transaction
+.. autoclass:: pybgl.Transaction
    :members:
 
 

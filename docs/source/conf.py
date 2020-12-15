@@ -22,16 +22,16 @@ sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('..'))
 sys.path.insert(0, os.path.abspath('../_static/'))
 sys.path.insert(0, os.path.abspath('../../_static/'))
-sys.path.insert(0, os.path.abspath('../../pybtc/'))
-sys.path.insert(0, os.path.abspath('../../pybtc'))
+sys.path.insert(0, os.path.abspath('../../pybgl/'))
+sys.path.insert(0, os.path.abspath('../../pybgl'))
 sys.path.insert(0, os.path.abspath('./_static/'))
 
 sys.path.insert(0, os.path.abspath('..'))
 sys.path.insert(0, os.path.abspath('../..'))
 # -- Project information -----------------------------------------------------
 
-project = 'pybtc'
-copyright = '2015-2018, bitaps.com'
+project = 'pybgl'
+copyright = '2015-2020, bitaps.com'
 author = 'Aleksey Karpov'
 
 
@@ -108,7 +108,7 @@ html_theme_options = {
     'github_banner': True,
     'github_button': True,
     'github_user': 'bitaps-com',
-    'github_repo': 'pybtc',
+    'github_repo': 'pybgl',
     'page_width': '1100px',
     'caption_font_family': "sans-serif",
     'font_family': "sans-serif",
@@ -149,7 +149,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'pybtcdoc'
+htmlhelp_basename = 'pybgldoc'
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -176,7 +176,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'pybtc.tex', 'pybtc Documentation',
+    (master_doc, 'pybgl.tex', 'pybgl Documentation',
      'Aleksey Karpov', 'manual'),
 ]
 
@@ -186,7 +186,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'pybtc', 'pybtc Documentation',
+    (master_doc, 'pybgl', 'pybgl Documentation',
      [author], 1)
 ]
 
@@ -197,8 +197,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'pybtc', 'pybtc Documentation',
-     author, 'pybtc', 'One line description of project.',
+    (master_doc, 'pybgl', 'pybgl Documentation',
+     author, 'pybgl', 'One line description of project.',
      'Miscellaneous'),
 ]
 

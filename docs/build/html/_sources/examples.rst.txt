@@ -16,25 +16,26 @@ will be created P2WPKH address for mainnet.
 
 .. code-block:: bash
 
-      >>> import pybtc
-      >>> a = pybtc.Address()
+      >>> import pybgl
+      >>> a = pybgl.Address()
       >>> a.address
-      'bc1q6cxx5t8xkruz3s5khx7923xvsx5ry4c6p74m5s'
+      'bgl1qdzjn6rd7e84lt2m5d3yf9jcg42ncdje7vhp4rl'
       >>> a.private_key.wif
-      'L5XKGA2xEHcinWEpmyiABS1bqQux8Av5dGVqcpRtVJC3ZCR5sXUe'
+      'L1LAHLFBWcW2E1xRsUooVL9ajxJXtsAUjJJ4GuPTgHKAKNhy6fsD'
       >>>
       >>> # create P2PKH legacy format
-      >>> pybtc.Address(address_type="P2PKH").address
-      '1ChpKurzFhdCULKaNHCc3Ra9KfxM2LRguw'
+      >>> pybgl.Address(address_type="P2PKH").address
+      '1FGruSGTHj5WVDe8G8G2dJgkLyTMizHo8G'
       >>>
       >>> # create testnet address
-      >>> pybtc.Address(address_type="P2PKH", testnet=True).address
-      'mpR4hDfu269yxgZtPVYSD21gtpvdxpTmH6'
+      >>> pybgl.Address(address_type="P2PKH", testnet=True).address
+      'n1giVCK9XA9FfDAVuNtDEeHJhH4aaNbMPq'
       >>>
       >>> # create P2SH_P2WPKH SEGWIT adoption address
-      >>> pybtc.Address(address_type="P2SH_P2WPKH").address
-      '3Bqeq3XqL6azMK3BxNyr8vXgXUtoG63J4T'
+      >>> pybgl.Address(address_type="P2SH_P2WPKH").address
+      '32UHE8g2XFvhC6FTKkERtdkeuQYikZNsWR'
       >>>
+
 
 
 Get address from key
@@ -44,17 +45,17 @@ In case you already have private or public key you can object from your key.
 
 .. code-block:: bash
 
-      >>> a = pybtc.Address('L5XKGA2xEHcinWEpmyiABS1bqQux8Av5dGVqcpRtVJC3ZCR5sXUe')
+      >>> a = pybgl.Address('L1LAHLFBWcW2E1xRsUooVL9ajxJXtsAUjJJ4GuPTgHKAKNhy6fsD')
       >>> a.address
-      'bc1q6cxx5t8xkruz3s5khx7923xvsx5ry4c6p74m5s'
+      'bgl1qdzjn6rd7e84lt2m5d3yf9jcg42ncdje7vhp4rl'
       >>> a.public_key.hex
-      '03b8b44876e1f45be7e42953ea47026c39cc45341344d3ab32701b93de696107af'
+      '028608fe359c6ffa37f2429279145e627feff745b2e35fe1f4fcabc1759005ddc7'
       >>>
       >>> # get address from public key
-      >>> pub = pybtc.PublicKey('03b8b44876e1f45be7e42953ea47026c39cc45341344d3ab32701b93de696107af')
+      >>> pub = pybgl.PublicKey('028608fe359c6ffa37f2429279145e627feff745b2e35fe1f4fcabc1759005ddc7')
       >>>
-      >>> pybtc.Address(pub).address
-      'bc1q6cxx5t8xkruz3s5khx7923xvsx5ry4c6p74m5s'
+      >>> pybgl.Address(pub).address
+      'bgl1qdzjn6rd7e84lt2m5d3yf9jcg42ncdje7vhp4rl'
       >>>
 
 Pure functions for address
@@ -64,16 +65,16 @@ Create private key
 
 .. code-block:: bash
 
-      >>> import pybtc
-      >>> pybtc.create_private_key()
-      'KyvZYvdzWD4JSPFt4wXwjG53as227zT2qiWbMTicZEUSjiwvbEqi'
+      >>> import pybgl
+      >>> pybgl.create_private_key()
+      'L38PPqhzCbyTH3nd7e2ExEY3LSdaYhaF1d7pXYBEz83avPfpBbZ6'
       >>>
-      >>> pybtc.create_private_key(compressed=False)
-      '5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr'
+      >>> pybgl.create_private_key(compressed=False)
+      '5JCnJEggRKX5rscdGiqasmYdsyQ2fCYyLA7xYqSDRLEbWY7mZtq'
       >>>
-      >>> pybtc.is_wif_valid('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr')
+      >>> pybgl.is_wif_valid('5JCnJEggRKX5rscdGiqasmYdsyQ2fCYyLA7xYqSDRLEbWY7mZtq')
       True
-      >>> pybtc.is_wif_valid('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381**********Jto9ZTnr')
+      >>> pybgl.is_wif_valid('5JCnJEggRKX5rscdGiqasmYds*******yLA7xYqSDRLEbWY7mZtq')
       False
       >>>
 
@@ -81,34 +82,31 @@ Get public key from private key
 
 .. code-block:: bash
 
-      >>> import pybtc
-      >>> pybtc.private_to_public_key('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr')
-      '0479f17a94410afd4f27588a192bacada53add0741765092dc0f8e2a29ea1bcd276dbc1ef74c3e0172d9db8047f2a0a5dc2e8e51a13f7f0cc072de906b765e0f7f'
+      >>> import pybgl
+      >>> pybgl.private_to_public_key('5JCnJEggRKX5rscdGiqasmYdsyQ2fCYyLA7xYqSDRLEbWY7mZtq')
+      '04153e10a2c18ffe097d10d431023590d22508765509fc74f6fd504bea9442e0ad0782ec8c446d82e40cec6e04981c016e39fca1d50009f2008cbe9621a05ddb72'
       >>>
-      >>> pybtc.public_key_to_address('0479f17a94410afd4f27588a192bacada53add0741765092dc0f8e2a29ea1bcd276dbc1ef74c3e0172d9db8047f2a0a5dc2e8e51a13f7f0cc072de906b765e0f7f')
+      >>> pybgl.public_key_to_address('04153e10a2c18ffe097d10d431023590d22508765509fc74f6fd504bea9442e0ad0782ec8c446d82e40cec6e04981c016e39fca1d50009f2008cbe9621a05ddb72')
       >>>
       >>> # this is uncompressed public key, so we can't create witness address
       >>> # we have to set witness_version to None to get non segwit address
-      >>> pub = pybtc.private_to_public_key('5Jw8DY1uBrd35xup6eD6KLEFa4AJFbX381HWuHvPGirJto9ZTnr')
-      >>> pybtc.public_key_to_address(pub, witness_version=None)
-      '17mXwxxZRmj1nJJzDszZbW9URSAradEuAt'
+      >>> pub = pybgl.private_to_public_key('5JCnJEggRKX5rscdGiqasmYdsyQ2fCYyLA7xYqSDRLEbWY7mZtq')
+      >>> pybgl.public_key_to_address(pub, witness_version=None)
+      '1Nj5GErZy4Q58XEEJPwh5ZiFVKpp2BRSxZ'
       >>>
 
 Tools
 
 .. code-block:: bash
 
-      >>> pybtc.is_address_valid('17mXwxxZRmj1nJJzDszZbW9URSAradEuAt')
+      >>> pybgl.is_address_valid('1Nj5GErZy4Q58XEEJPwh5ZiFVKpp2BRSxZ')
       True
-      >>> pybtc.address_type('17mXwxxZRmj1nJJzDszZbW9URSAradEuAt')
+      >>> pybgl.address_type('1Nj5GErZy4Q58XEEJPwh5ZiFVKpp2BRSxZ')
       'P2PKH'
-      >>> pybtc.address_net_type('17mXwxxZRmj1nJJzDszZbW9URSAradEuAt')
+      >>> pybgl.address_net_type('1Nj5GErZy4Q58XEEJPwh5ZiFVKpp2BRSxZ')
       'mainnet'
       >>>
 
-
-Create script address
----------------------
 
 
 

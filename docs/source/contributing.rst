@@ -1,4 +1,4 @@
-.. _pybtc-contributing:
+.. _pybgl-contributing:
 
 ============
 Contributing

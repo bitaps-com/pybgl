@@ -10,20 +10,20 @@ Base function primitives implemented in functional programming paradigm.
 Mnemonic(BIP39)
 ===============
 
-.. autofunction:: pybtc.generate_entropy
-.. autofunction:: pybtc.load_word_list
-.. autofunction:: pybtc.entropy_to_mnemonic
-.. autofunction:: pybtc.mnemonic_to_entropy
-.. autofunction:: pybtc.mnemonic_to_seed
+.. autofunction:: pybgl.generate_entropy
+.. autofunction:: pybgl.load_word_list
+.. autofunction:: pybgl.entropy_to_mnemonic
+.. autofunction:: pybgl.mnemonic_to_entropy
+.. autofunction:: pybgl.mnemonic_to_seed
 
 
 Private keys
 ============
 
-.. autofunction:: pybtc.create_private_key
-.. autofunction:: pybtc.private_key_to_wif
-.. autofunction:: pybtc.wif_to_private_key
-.. autofunction:: pybtc.is_wif_valid
+.. autofunction:: pybgl.create_private_key
+.. autofunction:: pybgl.private_key_to_wif
+.. autofunction:: pybgl.wif_to_private_key
+.. autofunction:: pybgl.is_wif_valid
 
 
 Public keys
@@ -38,91 +38,91 @@ Public keys
    compatibilitylegacy in legacy address format (PUBKEY, P2PKH).
 
 
-.. autofunction:: pybtc.private_to_public_key
-.. autofunction:: pybtc.is_public_key_valid
+.. autofunction:: pybgl.private_to_public_key
+.. autofunction:: pybgl.is_public_key_valid
 
 
 
 Extended keys(BIP32)
 ====================
 
-.. autofunction:: pybtc.create_master_xprivate_key
-.. autofunction:: pybtc.xprivate_to_xpublic_key
-.. autofunction:: pybtc.derive_xkey
-.. autofunction:: pybtc.public_from_xpublic_key
-.. autofunction:: pybtc.private_from_xprivate_key
+.. autofunction:: pybgl.create_master_xprivate_key
+.. autofunction:: pybgl.xprivate_to_xpublic_key
+.. autofunction:: pybgl.derive_xkey
+.. autofunction:: pybgl.public_from_xpublic_key
+.. autofunction:: pybgl.private_from_xprivate_key
 
 
 
 Addresses
 =========
 
-.. autofunction:: pybtc.hash_to_address
-.. autofunction:: pybtc.address_to_hash
-.. autofunction:: pybtc.public_key_to_address
-.. autofunction:: pybtc.address_type
-.. autofunction:: pybtc.address_to_script
-.. autofunction:: pybtc.is_address_valid
+.. autofunction:: pybgl.hash_to_address
+.. autofunction:: pybgl.address_to_hash
+.. autofunction:: pybgl.public_key_to_address
+.. autofunction:: pybgl.address_type
+.. autofunction:: pybgl.address_to_script
+.. autofunction:: pybgl.is_address_valid
 
 
 
 Script
 ======
 
-.. autofunction:: pybtc.decode_script
-.. autofunction:: pybtc.parse_script
-.. autofunction:: pybtc.delete_from_script
-.. autofunction:: pybtc.script_to_hash
+.. autofunction:: pybgl.decode_script
+.. autofunction:: pybgl.parse_script
+.. autofunction:: pybgl.delete_from_script
+.. autofunction:: pybgl.script_to_hash
 
 
 Signatures
 ==========
 
-.. autofunction:: pybtc.verify_signature
-.. autofunction:: pybtc.sign_message
-.. autofunction:: pybtc.is_valid_signature_encoding
+.. autofunction:: pybgl.verify_signature
+.. autofunction:: pybgl.sign_message
+.. autofunction:: pybgl.is_valid_signature_encoding
 
 
 Hash encoding
 =============
 
-.. autofunction:: pybtc.rh2s
-.. autofunction:: pybtc.s2rh
-.. autofunction:: pybtc.reverse_hash
+.. autofunction:: pybgl.rh2s
+.. autofunction:: pybgl.s2rh
+.. autofunction:: pybgl.reverse_hash
 
 
 Merkle root
 ===========
 
-.. autofunction:: pybtc.merkle_root
-.. autofunction:: pybtc.merkle_branches
-.. autofunction:: pybtc.merkleroot_from_branches
+.. autofunction:: pybgl.merkle_root
+.. autofunction:: pybgl.merkle_branches
+.. autofunction:: pybgl.merkleroot_from_branches
 
 
 Difficulty
 ==========
 
-.. autofunction:: pybtc.bits_to_target
-.. autofunction:: pybtc.target_to_difficulty
-.. autofunction:: pybtc.bits_to_difficulty
-.. autofunction:: pybtc.difficulty_to_target
+.. autofunction:: pybgl.bits_to_target
+.. autofunction:: pybgl.target_to_difficulty
+.. autofunction:: pybgl.bits_to_difficulty
+.. autofunction:: pybgl.difficulty_to_target
 
 
 Tools
 =====
 
-.. autofunction:: pybtc.bytes_needed
-.. autofunction:: pybtc.int_to_bytes
-.. autofunction:: pybtc.bytes_to_int
-.. autofunction:: pybtc.int_to_var_int
-.. autofunction:: pybtc.var_int_to_int
-.. autofunction:: pybtc.var_int_len
-.. autofunction:: pybtc.get_var_int_len
-.. autofunction:: pybtc.read_var_int
-.. autofunction:: pybtc.read_var_list
-.. autofunction:: pybtc.int_to_c_int
-.. autofunction:: pybtc.c_int_to_int
-.. autofunction:: pybtc.c_int_len
+.. autofunction:: pybgl.bytes_needed
+.. autofunction:: pybgl.int_to_bytes
+.. autofunction:: pybgl.bytes_to_int
+.. autofunction:: pybgl.int_to_var_int
+.. autofunction:: pybgl.var_int_to_int
+.. autofunction:: pybgl.var_int_len
+.. autofunction:: pybgl.get_var_int_len
+.. autofunction:: pybgl.read_var_int
+.. autofunction:: pybgl.read_var_list
+.. autofunction:: pybgl.int_to_c_int
+.. autofunction:: pybgl.c_int_to_int
+.. autofunction:: pybgl.c_int_len
 
 
 
