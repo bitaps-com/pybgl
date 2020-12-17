@@ -93,7 +93,7 @@ def decode_path(path, sub_path=False):
     return r
 
 
-def derive_xkey(xkey, path, base58=None, hex=None):
+def derive_xkey(xkey, *path_level, base58=None, hex=None):
     """
     Child Key derivation for extended private/public keys
     
@@ -104,16 +104,16 @@ def derive_xkey(xkey, path, base58=None, hex=None):
                         In case True base58 flag value will be ignored.
     :return: extended child private/public key  in base58, HEX or bytes string format.
     """
-    if isinstance(path, str):
-        path = decode_path(path)
+    if isinstance(path_level, str):
+        path_level = decode_path(path_level)
     if isinstance(xkey, str):
         xkey = decode_base58(xkey, checksum=True)
     if xkey[:4] in [MAINNET_XPRIVATE_KEY_PREFIX, TESTNET_XPRIVATE_KEY_PREFIX]:
-        for i in path:
+        for i in path_level:
             xkey = derive_child_xprivate_key(xkey, i)
 
     elif xkey[:4] in [MAINNET_XPUBLIC_KEY_PREFIX, TESTNET_XPUBLIC_KEY_PREFIX]:
-        for i in path:
+        for i in path_level:
             xkey = derive_child_xpublic_key(xkey, i)
     else:
         raise ValueError("invalid extended key")
