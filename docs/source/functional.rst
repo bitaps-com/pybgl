@@ -96,7 +96,6 @@ Merkle root
 
 .. autofunction:: pybgl.merkle_root
 .. autofunction:: pybgl.merkle_branches
-.. autofunction:: pybgl.merkleroot_from_branches
 
 
 Difficulty

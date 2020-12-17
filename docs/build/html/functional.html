@@ -38,9 +38,175 @@
 <p>Base function primitives implemented in functional programming paradigm.</p>
 <div class="section" id="mnemonic-bip39">
 <h2>Mnemonic(BIP39)<a class="headerlink" href="#mnemonic-bip39" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="pybgl.generate_entropy">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">generate_entropy</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">strength</span><span class="o">=</span><span class="default_value">256</span></em>, <em class="sig-param"><span class="n">hex</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/bip39_mnemonic.html#generate_entropy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.generate_entropy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate 128-256 bits entropy bytes string</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>strength</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – entropy bits strength, by default is 256 bit.</p></li>
+<li><p><strong>hex</strong> (<em>boolean</em>) – return HEX encoded string result flag, by default True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>HEX encoded or bytes entropy string.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pybgl.load_word_list">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">load_word_list</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">language</span><span class="o">=</span><span class="default_value">'english'</span></em>, <em class="sig-param"><span class="n">word_list_dir</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/bip39_mnemonic.html#load_word_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.load_word_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the word list from local file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>language</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – (optional) uses word list language (chinese_simplified, chinese_traditional, english, french,
+italian, japanese, korean, spanish), by default is english.</p></li>
+<li><p><strong>word_list_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – (optional) path to a directory containing a list of words,
+by default None (use BIP39 standard list)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list of words.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pybgl.entropy_to_mnemonic">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">entropy_to_mnemonic</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">entropy</span></em>, <em class="sig-param"><span class="n">language</span><span class="o">=</span><span class="default_value">'english'</span></em>, <em class="sig-param"><span class="n">word_list_dir</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">word_list</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/bip39_mnemonic.html#entropy_to_mnemonic"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.entropy_to_mnemonic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert entropy to mnemonic words string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>entropy</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>,</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.9)"><em>bytes</em></a>) – random entropy HEX encoded or bytes string.</p></li>
+<li><p><strong>language</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – (optional) uses word list language (chinese_simplified, chinese_traditional, english, french,
+italian, japanese, korean, spanish), by default is english.</p></li>
+<li><p><strong>word_list_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – (optional) path to a directory containing a list of words,
+by default None (use BIP39 standard list)</p></li>
+<li><p><strong>word_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a>) – (optional) already loaded word list, by default None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>mnemonic words string.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pybgl.mnemonic_to_entropy">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">mnemonic_to_entropy</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mnemonic</span></em>, <em class="sig-param"><span class="n">language</span><span class="o">=</span><span class="default_value">'english'</span></em>, <em class="sig-param"><span class="n">word_list_dir</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">word_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">hex</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/bip39_mnemonic.html#mnemonic_to_entropy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.mnemonic_to_entropy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converting mnemonic words to entropy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mnemonic</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – mnemonic words string (space separated)</p></li>
+<li><p><strong>language</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – (optional) uses word list language (chinese_simplified, chinese_traditional, english, french,
+italian, japanese, korean, spanish), by default is english.</p></li>
+<li><p><strong>word_list_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – (optional) path to a directory containing a list of words,
+by default None (use BIP39 standard list)</p></li>
+<li><p><strong>word_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a>) – (optional) already loaded word list, by default None</p></li>
+<li><p><strong>hex</strong> (<em>boolean</em>) – return HEX encoded string result flag, by default True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>bytes string.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pybgl.mnemonic_to_seed">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">mnemonic_to_seed</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mnemonic</span></em>, <em class="sig-param"><span class="n">passphrase</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">hex</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/bip39_mnemonic.html#mnemonic_to_seed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.mnemonic_to_seed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converting mnemonic words string to seed for uses in key derivation (BIP-0032).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mnemonic</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – mnemonic words string (space separated)</p></li>
+<li><p><strong>passphrase</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – (optional) passphrase to get ability use 2FA approach for 
+creating seed, by default empty string.</p></li>
+<li><p><strong>hex</strong> (<em>boolean</em>) – return HEX encoded string result flag, by default True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>HEX encoded or bytes string.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 <div class="section" id="private-keys">
 <h2>Private keys<a class="headerlink" href="#private-keys" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="pybgl.create_private_key">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">create_private_key</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">compressed</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">testnet</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">wif</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">hex</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/key.html#create_private_key"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.create_private_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create private key</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>compressed</strong> – (optional) Type of public key, by default set to compressed. 
+Using uncompressed public keys is deprecated in new SEGWIT addresses, 
+use this option only for backward compatibility.</p></li>
+<li><p><strong>testnet</strong> – (optional) flag for testnet network, by default is False.</p></li>
+<li><p><strong>wif</strong> – (optional) If set to True return key in WIF format, by default is True.</p></li>
+<li><p><strong>hex</strong> – (optional) If set to True return key in HEX format, by default is False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Private key in wif format (default), hex encoded byte string in case of hex flag or
+raw bytes string in case wif and hex flags set to False.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pybgl.private_key_to_wif">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">private_key_to_wif</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">h</span></em>, <em class="sig-param"><span class="n">compressed</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">testnet</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/key.html#private_key_to_wif"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.private_key_to_wif" title="Permalink to this definition">¶</a></dt>
+<dd><p>Encode private key in HEX or RAW bytes format to WIF format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>h</strong> – private key 32 byte string or HEX encoded string.</p></li>
+<li><p><strong>compressed</strong> – (optional) flag of public key compressed format, by default set to True.</p></li>
+<li><p><strong>testnet</strong> – (optional) flag for testnet network, by default is False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Private key in WIF format.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pybgl.wif_to_private_key">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">wif_to_private_key</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">h</span></em>, <em class="sig-param"><span class="n">hex</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/key.html#wif_to_private_key"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.wif_to_private_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decode WIF private key to bytes string or HEX encoded string</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>hex</strong> – (optional) if set to True return key in HEX format, by default is True.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Private key HEX encoded string or raw bytes string.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pybgl.is_wif_valid">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">is_wif_valid</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">wif</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/key.html#is_wif_valid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.is_wif_valid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check is private key in WIF format string is valid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>wif</strong> – private key in WIF format string.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>boolean.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 <div class="section" id="public-keys">
 <h2>Public keys<a class="headerlink" href="#public-keys" title="Permalink to this headline">¶</a></h2>
@@ -53,30 +219,693 @@ To avoid potential future funds loss, users MUST NOT use uncompressed keys
 in version 0 witness programs. Use uncompressed keys only for backward
 compatibilitylegacy in legacy address format (PUBKEY, P2PKH).</p>
 </div>
+<dl class="py function">
+<dt id="pybgl.private_to_public_key">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">private_to_public_key</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">private_key</span></em>, <em class="sig-param"><span class="n">compressed</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">hex</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/key.html#private_to_public_key"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.private_to_public_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get public key from private key using ECDSA secp256k1</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>private_key</strong> – private key in WIF, HEX or bytes.</p></li>
+<li><p><strong>compressed</strong> – (optional) flag of public key compressed format, by default set to True.
+In case private_key in WIF format, this flag is set in accordance with 
+the key format specified in WIF string.</p></li>
+<li><p><strong>hex</strong> – (optional) if set to True return key in HEX format, by default is True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>33/65 bytes public key in HEX or bytes string.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pybgl.is_public_key_valid">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">is_public_key_valid</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/key.html#is_public_key_valid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.is_public_key_valid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check public key is valid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>key</strong> – public key in HEX or bytes string format.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>boolean.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 <div class="section" id="extended-keys-bip32">
 <h2>Extended keys(BIP32)<a class="headerlink" href="#extended-keys-bip32" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="pybgl.create_master_xprivate_key">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">create_master_xprivate_key</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">seed</span></em>, <em class="sig-param"><span class="n">testnet</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">base58</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">hex</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/bip32.html#create_master_xprivate_key"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.create_master_xprivate_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create extended private key from seed</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>,</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.9)"><em>bytes</em></a>) – seed HEX or bytes string.</p></li>
+<li><p><strong>base58</strong> (<em>boolean</em>) – (optional) return result as base58 encoded string, by default True.</p></li>
+<li><p><strong>hex</strong> (<em>boolean</em>) – (optional) return result as HEX encoded string, by default False.
+In case True base58 flag value will be ignored.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>extended private key  in base58, HEX or bytes string format.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pybgl.xprivate_to_xpublic_key">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">xprivate_to_xpublic_key</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xprivate_key</span></em>, <em class="sig-param"><span class="n">base58</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">hex</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/bip32.html#xprivate_to_xpublic_key"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.xprivate_to_xpublic_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get extended public key from extended private key using ECDSA secp256k1</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>,</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.9)"><em>bytes</em></a>) – extended private key in base58, HEX or bytes string.</p></li>
+<li><p><strong>base58</strong> (<em>boolean</em>) – (optional) return result as base58 encoded string, by default True.</p></li>
+<li><p><strong>hex</strong> (<em>boolean</em>) – (optional) return result as HEX encoded string, by default False.
+In case True base58 flag value will be ignored.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>extended public key  in base58, HEX or bytes string format.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pybgl.derive_xkey">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">derive_xkey</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xkey</span></em>, <em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">base58</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">hex</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/bip32.html#derive_xkey"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.derive_xkey" title="Permalink to this definition">¶</a></dt>
+<dd><p>Child Key derivation for extended private/public keys</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xkey</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.9)"><em>bytes</em></a>) – extended private/public in base58, HEX or bytes string format.</p></li>
+<li><p><strong>path_level</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a>) – list of derivation path levels. For hardened derivation use HARDENED_KEY flag.</p></li>
+<li><p><strong>base58</strong> (<em>boolean</em>) – (optional) return result as base58 encoded string, by default True.</p></li>
+<li><p><strong>hex</strong> (<em>boolean</em>) – (optional) return result as HEX encoded string, by default False.
+In case True base58 flag value will be ignored.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>extended child private/public key  in base58, HEX or bytes string format.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pybgl.public_from_xpublic_key">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">public_from_xpublic_key</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xpublic_key</span></em>, <em class="sig-param"><span class="n">hex</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/bip32.html#public_from_xpublic_key"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.public_from_xpublic_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get public key from extended public key</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xpublic_key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.9)"><em>bytes</em></a>) – extended public in base58, HEX or bytes string format.</p></li>
+<li><p><strong>base58</strong> (<em>boolean</em>) – (optional) return result as base58 encoded string, by default True.</p></li>
+<li><p><strong>hex</strong> (<em>boolean</em>) – (optional) return result as HEX encoded string, by default False.
+In case True base58 flag value will be ignored.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>public key  in HEX or bytes string format.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pybgl.private_from_xprivate_key">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">private_from_xprivate_key</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xprivate_key</span></em>, <em class="sig-param"><span class="n">wif</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">hex</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/bip32.html#private_from_xprivate_key"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.private_from_xprivate_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get private key from extended private key</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xprivate_key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.9)"><em>bytes</em></a>) – extended public in base58, HEX or bytes string format.</p></li>
+<li><p><strong>wif</strong> (<em>boolean</em>) – (optional) return result as WIF format, by default True.</p></li>
+<li><p><strong>hex</strong> (<em>boolean</em>) – (optional) return result as HEX encoded string, by default False.
+In case True WIF flag value will be ignored.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>private key  in HEX or bytes string format.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 <div class="section" id="addresses">
 <h2>Addresses<a class="headerlink" href="#addresses" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="pybgl.hash_to_address">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">hash_to_address</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">address_hash</span></em>, <em class="sig-param"><span class="n">testnet</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">script_hash</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">witness_version</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/address.html#hash_to_address"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.hash_to_address" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get address from public key/script hash. In case PUBKEY, P2PKH, P2PKH public key/script hash is SHA256+RIPEMD160,
+P2WSH script hash is SHA256.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>address_hash</strong> – public key hash or script hash in HEX or bytes string format.</p></li>
+<li><p><strong>testnet</strong> – (optional) flag for testnet network, by default is False.</p></li>
+<li><p><strong>script_hash</strong> – (optional) flag for script hash (P2SH address), by default is False.</p></li>
+<li><p><strong>witness_version</strong> – (optional) witness program version, by default is 0, for legacy
+address format use None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>address in base58 or bech32 format.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pybgl.address_to_hash">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">address_to_hash</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">address</span></em>, <em class="sig-param"><span class="n">hex</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/address.html#address_to_hash"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.address_to_hash" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get address hash from base58 or bech32 address format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>address</strong> – address in base58 or bech32 format.</p></li>
+<li><p><strong>hex</strong> – (optional) If set to True return key in HEX format, by default is True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>script in HEX or bytes string.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pybgl.public_key_to_address">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">public_key_to_address</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pubkey</span></em>, <em class="sig-param"><span class="n">testnet</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">p2sh_p2wpkh</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">witness_version</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/address.html#public_key_to_address"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.public_key_to_address" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get address from public key/script hash. In case PUBKEY, P2PKH, P2PKH public key/script hash is SHA256+RIPEMD160,
+P2WSH script hash is SHA256.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pubkey</strong> – public key HEX or bytes string format.</p></li>
+<li><p><strong>testnet</strong> – (optional) flag for testnet network, by default is False.</p></li>
+<li><p><strong>p2sh_p2wpkh</strong> – (optional) flag for P2WPKH inside P2SH address, by default is False.</p></li>
+<li><p><strong>witness_version</strong> – (optional) witness program version, by default is 0, for legacy
+address format use None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>address in base58 or bech32 format.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pybgl.address_type">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">address_type</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">address</span></em>, <em class="sig-param"><span class="n">num</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/address.html#address_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.address_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get address type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>address</strong> – address in base58 or bech32 format.</p></li>
+<li><p><strong>num</strong> – (optional) If set to True return type in numeric format, by default is False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>address type in string or numeric format.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pybgl.address_to_script">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">address_to_script</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">address</span></em>, <em class="sig-param"><span class="n">hex</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/address.html#address_to_script"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.address_to_script" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get public key script from address.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>address</strong> – address in base58 or bech32 format.</p></li>
+<li><p><strong>hex</strong> – (optional) If set to True return key in HEX format, by default is True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>public key script in HEX or bytes string.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pybgl.is_address_valid">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">is_address_valid</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">address</span></em>, <em class="sig-param"><span class="n">testnet</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/address.html#is_address_valid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.is_address_valid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check is address valid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>address</strong> – address in base58 or bech32 format.</p></li>
+<li><p><strong>testnet</strong> – (optional) flag for testnet network, by default is False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>boolean.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 <div class="section" id="script">
 <h2>Script<a class="headerlink" href="#script" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="pybgl.decode_script">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">decode_script</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">script</span></em>, <em class="sig-param"><span class="n">asm</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/script.html#decode_script"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.decode_script" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decode script to ASM format or to human readable OPCODES string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>script</strong> – script in bytes string or HEX encoded string format.</p></li>
+<li><p><strong>asm</strong> – (optional) If set to True decode to ASM format, by default set to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>script in ASM format string or OPCODES string.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pybgl.parse_script">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">parse_script</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">script</span></em>, <em class="sig-param"><span class="n">segwit</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/script.html#parse_script"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.parse_script" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse script and return script type, script address and required signatures count.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>script</strong> – script in bytes string or HEX encoded string format.</p></li>
+<li><p><strong>segwit</strong> – (optional) If set to True recognize P2WPKH and P2WSH sripts, by default set to True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>dictionary:</p>
+<ul class="simple">
+<li><p>nType - numeric script type</p></li>
+<li><p>type  - script type</p></li>
+<li><p>addressHash - address hash in case address recognized</p></li>
+<li><p>script - script if no address recognized</p></li>
+<li><p>reqSigs - required signatures count</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pybgl.delete_from_script">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">delete_from_script</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">script</span></em>, <em class="sig-param"><span class="n">sub_script</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/script.html#delete_from_script"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.delete_from_script" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decode OP_CODE or subscript from script.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>script</strong> – target script in bytes or HEX encoded string.</p></li>
+<li><p><strong>sub_script</strong> – sub_script which is necessary to remove from target script in bytes or HEX encoded string.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>script in bytes or HEX encoded string corresponding to the format of target script.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pybgl.script_to_hash">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">script_to_hash</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">script</span></em>, <em class="sig-param"><span class="n">witness</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">hex</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/script.html#script_to_hash"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.script_to_hash" title="Permalink to this definition">¶</a></dt>
+<dd><p>Encode script to hash HASH160 or SHA256 in dependency of the witness.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>script</strong> – script in bytes or HEX encoded string.</p></li>
+<li><p><strong>witness</strong> – (optional) If set to True return SHA256 hash for P2WSH, by default is False.</p></li>
+<li><p><strong>hex</strong> – (optional) If set to True return key in HEX format, by default is True.</p></li>
+<li><p><strong>sub_script</strong> – sub_script which is necessary to remove from target script in bytes or HEX encoded string.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>script in bytes or HEX encoded string corresponding to the format of target script.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 <div class="section" id="signatures">
 <h2>Signatures<a class="headerlink" href="#signatures" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="pybgl.verify_signature">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">verify_signature</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sig</span></em>, <em class="sig-param"><span class="n">pub_key</span></em>, <em class="sig-param"><span class="n">msg</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">'hex'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/script.html#verify_signature"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.verify_signature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Verify signature for message and given public key</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sig</strong> – signature in bytes or HEX encoded string.</p></li>
+<li><p><strong>pub_key</strong> – public key in bytes or HEX encoded string.</p></li>
+<li><p><strong>msg</strong> – message in bytes or HEX encoded string.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>boolean.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pybgl.sign_message">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">sign_message</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">msg</span></em>, <em class="sig-param"><span class="n">private_key</span></em>, <em class="sig-param"><span class="n">hex</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/script.html#sign_message"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.sign_message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sign message</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>msg</strong> – message to sign  bytes or HEX encoded string.</p></li>
+<li><p><strong>private_key</strong> – private key (bytes, hex encoded string or WIF format)</p></li>
+<li><p><strong>hex</strong> – (optional) If set to True return key in HEX format, by default is True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>DER encoded signature in bytes or HEX encoded string.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pybgl.is_valid_signature_encoding">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">is_valid_signature_encoding</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sig</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/script.html#is_valid_signature_encoding"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.is_valid_signature_encoding" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check is valid signature encoded in DER format</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>sig</strong> – signature in bytes or HEX encoded string.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>boolean.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 <div class="section" id="hash-encoding">
 <h2>Hash encoding<a class="headerlink" href="#hash-encoding" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="pybgl.rh2s">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">rh2s</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">raw_hash</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/tools.html#rh2s"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.rh2s" title="Permalink to this definition">¶</a></dt>
+<dd><p>Encode raw transaction hash to HEX string with bytes order change</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>raw_hash</strong> – transaction hash in bytes string.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>HEX encoded string.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pybgl.s2rh">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">s2rh</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">hash_string</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/tools.html#s2rh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.s2rh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decode HEX  transaction hash to bytes with byte order change</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>raw_hash</strong> – transaction hash in bytes string.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>bytes string.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pybgl.reverse_hash">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">reverse_hash</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">raw_hash</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/tools.html#reverse_hash"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.reverse_hash" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reverse hash order</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>raw_hash</strong> – bytes string.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>bytes string.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 <div class="section" id="merkle-root">
 <h2>Merkle root<a class="headerlink" href="#merkle-root" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="pybgl.merkle_root">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">merkle_root</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tx_hash_list</span></em>, <em class="sig-param"><span class="n">return_hex</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">receive_hex</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/block.html#merkle_root"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.merkle_root" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate merkle root from transaction hash list</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tx_hash_list</strong> – list of transaction hashes in bytes or HEX encoded string.</p></li>
+<li><p><strong>return_hex</strong> – (optional) If set to True return result in HEX format, by default is True.</p></li>
+<li><p><strong>receive_hex</strong> – (optional) If set to False no internal check or decode from hex to bytes, by default is True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>merkle root in bytes or HEX encoded string corresponding hex flag.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pybgl.merkle_branches">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">merkle_branches</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tx_hash_list</span></em>, <em class="sig-param"><span class="n">hex</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/block.html#merkle_branches"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.merkle_branches" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate merkle branches for coinbase transacton
+:param tx_hash_list: list of transaction hashes in bytes or HEX encoded string.
+:param hex:  (optional) If set to True return result in HEX format, by default is True.
+:return: list of merkle branches in bytes or HEX encoded string corresponding hex flag.</p>
+</dd></dl>
+
 </div>
 <div class="section" id="difficulty">
 <h2>Difficulty<a class="headerlink" href="#difficulty" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="pybgl.bits_to_target">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">bits_to_target</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">bits</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/block.html#bits_to_target"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.bits_to_target" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate target from bits</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>bits</strong> – HEX string, bytes string or integer representation of bits.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>integer.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pybgl.target_to_difficulty">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">target_to_difficulty</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">target</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/block.html#target_to_difficulty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.target_to_difficulty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate difficulty from target</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>target</strong> – integer.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>float.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pybgl.bits_to_difficulty">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">bits_to_difficulty</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">bits</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/block.html#bits_to_difficulty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.bits_to_difficulty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate difficulty from bits</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>bits</strong> – HEX string, bytes string or integer representation of bits.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>integer.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pybgl.difficulty_to_target">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">difficulty_to_target</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">difficulty</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/block.html#difficulty_to_target"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.difficulty_to_target" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate target from difficulty</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>target</strong> – integer.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>float.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 <div class="section" id="tools">
 <h2>Tools<a class="headerlink" href="#tools" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="pybgl.bytes_needed">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">bytes_needed</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/tools.html#bytes_needed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.bytes_needed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate bytes needed to convert integer to bytes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>n</strong> – integer.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>integer.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pybgl.int_to_bytes">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">int_to_bytes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">i</span></em>, <em class="sig-param"><span class="n">byteorder</span><span class="o">=</span><span class="default_value">'big'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/tools.html#int_to_bytes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.int_to_bytes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert integer to bytes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> – integer.</p></li>
+<li><p><strong>byteorder</strong> – (optional) byte order ‘big’ or ‘little’, by default ‘big’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>bytes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pybgl.bytes_to_int">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">bytes_to_int</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">i</span></em>, <em class="sig-param"><span class="n">byteorder</span><span class="o">=</span><span class="default_value">'big'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/tools.html#bytes_to_int"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.bytes_to_int" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert bytes to integer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>i</strong> – bytes.</p></li>
+<li><p><strong>byteorder</strong> – (optional) byte order ‘big’ or ‘little’, by default ‘big’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>integer.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pybgl.int_to_var_int">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">int_to_var_int</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">i</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/tools.html#int_to_var_int"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.int_to_var_int" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert integer to variable integer</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>i</strong> – integer.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>bytes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pybgl.var_int_to_int">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">var_int_to_int</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/tools.html#var_int_to_int"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.var_int_to_int" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert variable integer to integer</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> – bytes variable integer.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>integer.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pybgl.var_int_len">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">var_int_len</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/tools.html#var_int_len"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.var_int_len" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get variable integer length in bytes from integer value</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>n</strong> – integer.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>integer.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pybgl.get_var_int_len">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">get_var_int_len</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">bytes</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/tools.html#get_var_int_len"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.get_var_int_len" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get variable integer length in bytes from bytes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>bytes</strong> – bytes.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>integer.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pybgl.read_var_int">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">read_var_int</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">stream</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/tools.html#read_var_int"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.read_var_int" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read variable integer from io.BytesIO stream to bytes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>stream</strong> – io.BytesIO stream.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>bytes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pybgl.read_var_list">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">read_var_list</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">stream</span></em>, <em class="sig-param"><span class="n">data_type</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/tools.html#read_var_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.read_var_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read variable integer list from io.BytesIO stream to bytes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stream</strong> – io.BytesIO stream.</p></li>
+<li><p><strong>data_type</strong> – list data type.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list of data_type.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pybgl.int_to_c_int">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">int_to_c_int</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n</span></em>, <em class="sig-param"><span class="n">base_bytes</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/tools.html#int_to_c_int"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.int_to_c_int" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert integer to compressed integer
+:param n: integer.
+:param base_bytes: len of bytes base from which start compression.
+:return: bytes.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pybgl.c_int_to_int">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">c_int_to_int</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">b</span></em>, <em class="sig-param"><span class="n">base_bytes</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/tools.html#c_int_to_int"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.c_int_to_int" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert compressed integer bytes to integer</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>b</strong> – compressed integer bytes.</p></li>
+<li><p><strong>base_bytes</strong> – len of bytes base from which start compression.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>integer.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pybgl.c_int_len">
+<code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">c_int_len</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n</span></em>, <em class="sig-param"><span class="n">base_bytes</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/functions/tools.html#c_int_len"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.c_int_len" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get length of compressed integer from integer value
+:param n: bytes.
+:param base_bytes: len of bytes base from which start compression.
+:return: integer.</p>
+</dd></dl>
+
 </div>
 </div>
 

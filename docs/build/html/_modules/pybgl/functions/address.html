@@ -1,0 +1,435 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pybgl.functions.address &#8212; pybgl  documentation</title>
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pybgl.functions.address</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">pybgl.opcodes</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pybgl.constants</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="kn">from</span> <span class="nn">pybgl.functions.tools</span> <span class="kn">import</span> <span class="n">bytes_from_hex</span><span class="p">,</span> <span class="n">get_bytes</span>
+<span class="kn">from</span> <span class="nn">pybgl.functions.hash</span> <span class="kn">import</span> <span class="n">double_sha256</span><span class="p">,</span> <span class="n">hash160</span><span class="p">,</span> <span class="n">sha3_256</span>
+<span class="kn">from</span> <span class="nn">pybgl.functions.encode</span> <span class="kn">import</span> <span class="p">(</span><span class="n">encode_base58</span><span class="p">,</span>
+                                    <span class="n">rebase_8_to_5</span><span class="p">,</span>
+                                    <span class="n">bech32_polymod</span><span class="p">,</span>
+                                    <span class="n">rebase_5_to_32</span><span class="p">,</span>
+                                    <span class="n">decode_base58</span><span class="p">,</span>
+                                    <span class="n">rebase_5_to_8</span><span class="p">,</span>
+                                    <span class="n">rebase_32_to_5</span><span class="p">,</span>
+                                    <span class="n">base32charset</span><span class="p">,</span>
+                                    <span class="n">base32charset_upcase</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="public_key_to_address"><a class="viewcode-back" href="../../../functional.html#pybgl.public_key_to_address">[docs]</a><span class="k">def</span> <span class="nf">public_key_to_address</span><span class="p">(</span><span class="n">pubkey</span><span class="p">,</span> <span class="n">testnet</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">p2sh_p2wpkh</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">witness_version</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get address from public key/script hash. In case PUBKEY, P2PKH, P2PKH public key/script hash is SHA256+RIPEMD160,</span>
+<span class="sd">    P2WSH script hash is SHA256.</span>
+
+<span class="sd">    :param pubkey: public key HEX or bytes string format.</span>
+<span class="sd">    :param testnet: (optional) flag for testnet network, by default is False.</span>
+<span class="sd">    :param p2sh_p2wpkh: (optional) flag for P2WPKH inside P2SH address, by default is False.</span>
+<span class="sd">    :param witness_version: (optional) witness program version, by default is 0, for legacy</span>
+<span class="sd">                            address format use None.</span>
+<span class="sd">    :return: address in base58 or bech32 format.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pubkey</span> <span class="o">=</span> <span class="n">get_bytes</span><span class="p">(</span><span class="n">pubkey</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;hex&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">p2sh_p2wpkh</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pubkey</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">33</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;public key invalid&quot;</span><span class="p">)</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">hash160</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x00\x14</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">hash160</span><span class="p">(</span><span class="n">pubkey</span><span class="p">))</span>
+        <span class="n">witness_version</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">witness_version</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pubkey</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">33</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;public key invalid&quot;</span><span class="p">)</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">hash160</span><span class="p">(</span><span class="n">pubkey</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">hash_to_address</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">testnet</span><span class="o">=</span><span class="n">testnet</span><span class="p">,</span>
+                           <span class="n">script_hash</span><span class="o">=</span><span class="n">p2sh_p2wpkh</span><span class="p">,</span>
+                           <span class="n">witness_version</span><span class="o">=</span><span class="n">witness_version</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="hash_to_address"><a class="viewcode-back" href="../../../functional.html#pybgl.hash_to_address">[docs]</a><span class="k">def</span> <span class="nf">hash_to_address</span><span class="p">(</span><span class="n">address_hash</span><span class="p">,</span> <span class="n">testnet</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">script_hash</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">witness_version</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get address from public key/script hash. In case PUBKEY, P2PKH, P2PKH public key/script hash is SHA256+RIPEMD160,</span>
+<span class="sd">    P2WSH script hash is SHA256.</span>
+
+
+<span class="sd">    :param address_hash: public key hash or script hash in HEX or bytes string format.</span>
+<span class="sd">    :param testnet: (optional) flag for testnet network, by default is False.</span>
+<span class="sd">    :param script_hash: (optional) flag for script hash (P2SH address), by default is False.</span>
+<span class="sd">    :param witness_version: (optional) witness program version, by default is 0, for legacy</span>
+<span class="sd">                            address format use None.</span>
+<span class="sd">    :return: address in base58 or bech32 format.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">address_hash</span> <span class="o">=</span> <span class="n">get_bytes</span><span class="p">(</span><span class="n">address_hash</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;hex&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">script_hash</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">witness_version</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">address_hash</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">20</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;address hash length incorrect&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">testnet</span><span class="p">:</span>
+                <span class="n">prefix</span> <span class="o">=</span> <span class="n">TESTNET_ADDRESS_BYTE_PREFIX</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">prefix</span> <span class="o">=</span> <span class="n">MAINNET_ADDRESS_BYTE_PREFIX</span>
+            <span class="n">address_hash</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;</span><span class="si">%s%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">address_hash</span><span class="p">)</span>
+            <span class="n">address_hash</span> <span class="o">+=</span> <span class="n">sha3_256</span><span class="p">(</span><span class="n">address_hash</span><span class="p">)[:</span><span class="mi">4</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">encode_base58</span><span class="p">(</span><span class="n">address_hash</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">address_hash</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">32</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;address hash length incorrect&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">witness_version</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">testnet</span><span class="p">:</span>
+            <span class="n">prefix</span> <span class="o">=</span> <span class="n">TESTNET_SCRIPT_ADDRESS_BYTE_PREFIX</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">prefix</span> <span class="o">=</span> <span class="n">MAINNET_SCRIPT_ADDRESS_BYTE_PREFIX</span>
+        <span class="n">address_hash</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;</span><span class="si">%s%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">address_hash</span><span class="p">)</span>
+        <span class="n">address_hash</span> <span class="o">+=</span> <span class="n">sha3_256</span><span class="p">(</span><span class="n">address_hash</span><span class="p">)[:</span><span class="mi">4</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">encode_base58</span><span class="p">(</span><span class="n">address_hash</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">testnet</span><span class="p">:</span>
+        <span class="n">prefix</span> <span class="o">=</span> <span class="n">TESTNET_SEGWIT_ADDRESS_BYTE_PREFIX</span>
+        <span class="n">hrp</span> <span class="o">=</span> <span class="n">TESTNET_SEGWIT_ADDRESS_PREFIX</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">prefix</span> <span class="o">=</span> <span class="n">MAINNET_SEGWIT_ADDRESS_BYTE_PREFIX</span>
+        <span class="n">hrp</span> <span class="o">=</span> <span class="n">MAINNET_SEGWIT_ADDRESS_PREFIX</span>
+
+    <span class="n">address_hash</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;</span><span class="si">%s%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">witness_version</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;big&quot;</span><span class="p">),</span>
+                              <span class="n">rebase_8_to_5</span><span class="p">(</span><span class="n">address_hash</span><span class="p">))</span>
+    <span class="n">checksum</span> <span class="o">=</span> <span class="n">bech32_polymod</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;</span><span class="si">%s%s%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">address_hash</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;</span><span class="se">\x00</span><span class="s2">&quot;</span> <span class="o">*</span> <span class="mi">6</span><span class="p">))</span>
+    <span class="n">checksum</span> <span class="o">=</span> <span class="n">rebase_8_to_5</span><span class="p">(</span><span class="n">checksum</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s2">&quot;big&quot;</span><span class="p">))[</span><span class="mi">2</span><span class="p">:]</span>
+    <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">1</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">hrp</span><span class="p">,</span> <span class="n">rebase_5_to_32</span><span class="p">(</span><span class="n">address_hash</span> <span class="o">+</span> <span class="n">checksum</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span></div>
+
+
+<div class="viewcode-block" id="address_to_hash"><a class="viewcode-back" href="../../../functional.html#pybgl.address_to_hash">[docs]</a><span class="k">def</span> <span class="nf">address_to_hash</span><span class="p">(</span><span class="n">address</span><span class="p">,</span> <span class="nb">hex</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get address hash from base58 or bech32 address format.</span>
+
+<span class="sd">    :param address: address in base58 or bech32 format.</span>
+<span class="sd">    :param hex:  (optional) If set to True return key in HEX format, by default is True.</span>
+<span class="sd">    :return: script in HEX or bytes string.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">address</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">ADDRESS_PREFIX_LIST</span><span class="p">:</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">decode_base58</span><span class="p">(</span><span class="n">address</span><span class="p">)[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">address</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;1&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="n">MAINNET_SEGWIT_ADDRESS_PREFIX</span><span class="p">,</span>
+                         <span class="n">TESTNET_SEGWIT_ADDRESS_PREFIX</span><span class="p">):</span>
+        <span class="n">address</span> <span class="o">=</span> <span class="n">address</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;1&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">rebase_5_to_8</span><span class="p">(</span><span class="n">rebase_32_to_5</span><span class="p">(</span><span class="n">address</span><span class="p">)[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">6</span><span class="p">],</span> <span class="kc">False</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">h</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hex</span> <span class="k">else</span> <span class="n">h</span></div>
+
+
+<div class="viewcode-block" id="address_type"><a class="viewcode-back" href="../../../functional.html#pybgl.address_type">[docs]</a><span class="k">def</span> <span class="nf">address_type</span><span class="p">(</span><span class="n">address</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get address type.   </span>
+
+<span class="sd">    :param address: address in base58 or bech32 format.</span>
+<span class="sd">    :param num: (optional) If set to True return type in numeric format, by default is False.</span>
+<span class="sd">    :return: address type in string or numeric format. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">address</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="n">TESTNET_SCRIPT_ADDRESS_PREFIX</span><span class="p">,</span>
+                      <span class="n">MAINNET_SCRIPT_ADDRESS_PREFIX</span><span class="p">):</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="s1">&#39;P2SH&#39;</span>
+    <span class="k">elif</span> <span class="n">address</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="n">MAINNET_ADDRESS_PREFIX</span><span class="p">,</span>
+                        <span class="n">TESTNET_ADDRESS_PREFIX</span><span class="p">,</span>
+                        <span class="n">TESTNET_ADDRESS_PREFIX_2</span><span class="p">):</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="s1">&#39;P2PKH&#39;</span>
+    <span class="k">elif</span> <span class="n">address</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="n">MAINNET_SEGWIT_ADDRESS_PREFIX</span><span class="p">,</span>
+                         <span class="n">TESTNET_SEGWIT_ADDRESS_PREFIX</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">address</span><span class="p">)</span> <span class="o">==</span> <span class="mi">43</span><span class="p">:</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="s1">&#39;P2WPKH&#39;</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">address</span><span class="p">)</span> <span class="o">==</span> <span class="mi">63</span><span class="p">:</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="s1">&#39;P2WSH&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">SCRIPT_TYPES</span><span class="p">[</span><span class="s1">&#39;NON_STANDARD&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">num</span> <span class="k">else</span> <span class="s1">&#39;UNKNOWN&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">SCRIPT_TYPES</span><span class="p">[</span><span class="s1">&#39;NON_STANDARD&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">num</span> <span class="k">else</span> <span class="s1">&#39;UNKNOWN&#39;</span>
+    <span class="k">return</span> <span class="n">SCRIPT_TYPES</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="k">if</span> <span class="n">num</span> <span class="k">else</span> <span class="n">t</span></div>
+
+
+<span class="k">def</span> <span class="nf">address_net_type</span><span class="p">(</span><span class="n">address</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get address network type.   </span>
+
+<span class="sd">    :param address: address in base58 or bech32 format.</span>
+<span class="sd">    :return: address network type in string format or None. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">address</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="n">MAINNET_SCRIPT_ADDRESS_PREFIX</span><span class="p">,</span>
+                      <span class="n">MAINNET_ADDRESS_PREFIX</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;mainnet&quot;</span>
+    <span class="k">elif</span> <span class="n">address</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="n">MAINNET_SEGWIT_ADDRESS_PREFIX</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;mainnet&quot;</span>
+    <span class="k">elif</span> <span class="n">address</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="n">TESTNET_SCRIPT_ADDRESS_PREFIX</span><span class="p">,</span>
+                        <span class="n">TESTNET_ADDRESS_PREFIX</span><span class="p">,</span>
+                        <span class="n">TESTNET_ADDRESS_PREFIX_2</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;testnet&quot;</span>
+    <span class="k">elif</span> <span class="n">address</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="n">TESTNET_SEGWIT_ADDRESS_PREFIX</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;testnet&quot;</span>
+    <span class="k">return</span> <span class="kc">None</span>
+
+
+<div class="viewcode-block" id="address_to_script"><a class="viewcode-back" href="../../../functional.html#pybgl.address_to_script">[docs]</a><span class="k">def</span> <span class="nf">address_to_script</span><span class="p">(</span><span class="n">address</span><span class="p">,</span> <span class="nb">hex</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get public key script from address.</span>
+
+<span class="sd">    :param address: address in base58 or bech32 format.</span>
+<span class="sd">    :param hex:  (optional) If set to True return key in HEX format, by default is True.</span>
+<span class="sd">    :return: public key script in HEX or bytes string.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">address</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;address invalid&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">address</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="n">TESTNET_SCRIPT_ADDRESS_PREFIX</span><span class="p">,</span>
+                      <span class="n">MAINNET_SCRIPT_ADDRESS_PREFIX</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="p">[</span><span class="n">OP_HASH160</span><span class="p">,</span>
+             <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x14</span><span class="s1">&#39;</span><span class="p">,</span>
+             <span class="n">address_to_hash</span><span class="p">(</span><span class="n">address</span><span class="p">,</span> <span class="nb">hex</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+             <span class="n">OP_EQUAL</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">address</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="n">MAINNET_ADDRESS_PREFIX</span><span class="p">,</span>
+                        <span class="n">TESTNET_ADDRESS_PREFIX</span><span class="p">,</span>
+                        <span class="n">TESTNET_ADDRESS_PREFIX_2</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="p">[</span><span class="n">OP_DUP</span><span class="p">,</span>
+             <span class="n">OP_HASH160</span><span class="p">,</span>
+             <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x14</span><span class="s1">&#39;</span><span class="p">,</span>
+             <span class="n">address_to_hash</span><span class="p">(</span><span class="n">address</span><span class="p">,</span> <span class="nb">hex</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+             <span class="n">OP_EQUALVERIFY</span><span class="p">,</span>
+             <span class="n">OP_CHECKSIG</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="n">address</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="n">MAINNET_SEGWIT_ADDRESS_PREFIX</span><span class="p">)</span> \
+         <span class="ow">or</span> <span class="p">(</span><span class="n">address</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="n">TESTNET_SEGWIT_ADDRESS_PREFIX</span><span class="p">):</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">address_to_hash</span><span class="p">(</span><span class="n">address</span><span class="p">,</span> <span class="nb">hex</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="p">[</span><span class="n">OP_0</span><span class="p">,</span>
+             <span class="nb">bytes</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">h</span><span class="p">)]),</span>
+             <span class="n">h</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;address invalid&quot;</span><span class="p">)</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">s</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hex</span> <span class="k">else</span> <span class="n">s</span></div>
+
+
+<span class="k">def</span> <span class="nf">hash_to_script</span><span class="p">(</span><span class="n">address_hash</span><span class="p">,</span> <span class="n">script_type</span><span class="p">,</span> <span class="nb">hex</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get public key script from hash.</span>
+
+<span class="sd">    :param address: h in base58 or bech32 format.</span>
+<span class="sd">    :param hex:  (optional) If set to True return key in HEX format, by default is True.</span>
+<span class="sd">    :return: public key script in HEX or bytes string.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">address_hash</span> <span class="o">=</span> <span class="n">get_bytes</span><span class="p">(</span><span class="n">address_hash</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">script_type</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">script_type</span> <span class="o">=</span> <span class="n">SCRIPT_TYPES</span><span class="p">[</span><span class="n">script_type</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">script_type</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">script_type</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="p">[</span><span class="n">OP_HASH160</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x14</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">address_hash</span><span class="p">,</span> <span class="n">OP_EQUAL</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">script_type</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="p">[</span><span class="n">OP_DUP</span><span class="p">,</span> <span class="n">OP_HASH160</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x14</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">address_hash</span><span class="p">,</span> <span class="n">OP_EQUALVERIFY</span><span class="p">,</span> <span class="n">OP_CHECKSIG</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">script_type</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="p">[</span><span class="n">OP_0</span><span class="p">,</span>
+             <span class="nb">bytes</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">address_hash</span><span class="p">)]),</span>
+             <span class="n">address_hash</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;address type invalid&quot;</span><span class="p">)</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">s</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hex</span> <span class="k">else</span> <span class="n">s</span>
+
+
+<span class="k">def</span> <span class="nf">public_key_to_p2sh_p2wpkh_script</span><span class="p">(</span><span class="n">pubkey</span><span class="p">,</span> <span class="nb">hex</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="n">pubkey</span> <span class="o">=</span> <span class="n">get_bytes</span><span class="p">(</span><span class="n">pubkey</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pubkey</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">33</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;public key len invalid&quot;</span><span class="p">)</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x00\x14</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">hash160</span><span class="p">(</span><span class="n">pubkey</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">r</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hex</span> <span class="k">else</span> <span class="n">r</span>
+
+
+<div class="viewcode-block" id="is_address_valid"><a class="viewcode-back" href="../../../functional.html#pybgl.is_address_valid">[docs]</a><span class="k">def</span> <span class="nf">is_address_valid</span><span class="p">(</span><span class="n">address</span><span class="p">,</span> <span class="n">testnet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check is address valid.</span>
+
+<span class="sd">    :param address: address in base58 or bech32 format.</span>
+<span class="sd">    :param testnet: (optional) flag for testnet network, by default is False.</span>
+<span class="sd">    :return: boolean.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">address</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">address</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">address</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="n">MAINNET_ADDRESS_PREFIX</span><span class="p">,</span>
+                      <span class="n">MAINNET_SCRIPT_ADDRESS_PREFIX</span><span class="p">,</span>
+                      <span class="n">TESTNET_ADDRESS_PREFIX</span><span class="p">,</span>
+                      <span class="n">TESTNET_ADDRESS_PREFIX_2</span><span class="p">,</span>
+                      <span class="n">TESTNET_SCRIPT_ADDRESS_PREFIX</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">testnet</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">address</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">TESTNET_ADDRESS_PREFIX</span><span class="p">,</span>
+                                  <span class="n">TESTNET_ADDRESS_PREFIX_2</span><span class="p">,</span>
+                                  <span class="n">TESTNET_SCRIPT_ADDRESS_PREFIX</span><span class="p">):</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">address</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">MAINNET_ADDRESS_PREFIX</span><span class="p">,</span>
+                                  <span class="n">MAINNET_SCRIPT_ADDRESS_PREFIX</span><span class="p">):</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">decode_base58</span><span class="p">(</span><span class="n">address</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">h</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">25</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="n">checksum</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span>
+        <span class="k">if</span> <span class="n">sha3_256</span><span class="p">(</span><span class="n">h</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">])[:</span><span class="mi">4</span><span class="p">]</span> <span class="o">!=</span> <span class="n">checksum</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="n">address</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="n">MAINNET_SEGWIT_ADDRESS_PREFIX</span><span class="p">)</span> \
+             <span class="ow">or</span> <span class="p">(</span><span class="n">address</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="n">TESTNET_SEGWIT_ADDRESS_PREFIX</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">address</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">43</span><span class="p">,</span> <span class="mi">63</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">prefix</span><span class="p">,</span> <span class="n">payload</span> <span class="o">=</span> <span class="n">address</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;1&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="n">upp</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">prefix</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isupper</span><span class="p">()</span> <span class="k">else</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">payload</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="k">if</span> <span class="n">upp</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">i</span><span class="o">.</span><span class="n">isupper</span><span class="p">()</span> <span class="ow">or</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">base32charset_upcase</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">i</span><span class="o">.</span><span class="n">isupper</span><span class="p">()</span> <span class="ow">or</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">base32charset</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="kc">False</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="n">payload</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">prefix</span> <span class="o">=</span> <span class="n">prefix</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">testnet</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">prefix</span> <span class="o">!=</span> <span class="n">TESTNET_SEGWIT_ADDRESS_PREFIX</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="n">stripped_prefix</span> <span class="o">=</span> <span class="n">TESTNET_SEGWIT_ADDRESS_BYTE_PREFIX</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">prefix</span> <span class="o">!=</span> <span class="n">MAINNET_SEGWIT_ADDRESS_PREFIX</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="n">stripped_prefix</span> <span class="o">=</span> <span class="n">MAINNET_SEGWIT_ADDRESS_BYTE_PREFIX</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">rebase_32_to_5</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+        <span class="n">address_hash</span> <span class="o">=</span> <span class="n">d</span><span class="p">[:</span><span class="o">-</span><span class="mi">6</span><span class="p">]</span>
+        <span class="n">checksum</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="o">-</span><span class="mi">6</span><span class="p">:]</span>
+        <span class="n">checksum2</span> <span class="o">=</span> <span class="n">bech32_polymod</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;</span><span class="si">%s%s%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">stripped_prefix</span><span class="p">,</span> <span class="n">address_hash</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;</span><span class="se">\x00</span><span class="s2">&quot;</span> <span class="o">*</span> <span class="mi">6</span><span class="p">))</span>
+        <span class="n">checksum2</span> <span class="o">=</span> <span class="n">rebase_8_to_5</span><span class="p">(</span><span class="n">checksum2</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s2">&quot;big&quot;</span><span class="p">))[</span><span class="mi">2</span><span class="p">:]</span>
+        <span class="k">if</span> <span class="n">checksum</span> <span class="o">!=</span> <span class="n">checksum2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<span class="k">def</span> <span class="nf">get_witness_version</span><span class="p">(</span><span class="n">address</span><span class="p">):</span>
+    <span class="n">address</span> <span class="o">=</span> <span class="n">address</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;1&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">rebase_32_to_5</span><span class="p">(</span><span class="n">address</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">h</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../../../index.html">
+    <img class="logo" src="../../../_static/pybtc.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+<p class="blurb"> </p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=bitaps-com&repo=pybgl&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../classes.html">Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../functional.html">Pure functions reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Contributing</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015-2020, bitaps.com.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+    <a href="https://github.com/bitaps-com/pybgl" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,518 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pybgl.functions.bip32 &#8212; pybgl  documentation</title>
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pybgl.functions.bip32</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">struct</span> <span class="kn">import</span> <span class="n">pack</span>
+<span class="kn">from</span> <span class="nn">pybgl.functions.key</span> <span class="kn">import</span> <span class="n">private_to_public_key</span><span class="p">,</span> <span class="n">private_key_to_wif</span>
+<span class="kn">from</span> <span class="nn">pybgl.functions.hash</span> <span class="kn">import</span> <span class="n">hmac_sha512</span><span class="p">,</span> <span class="n">double_sha256</span><span class="p">,</span> <span class="n">hash160</span>
+<span class="kn">from</span> <span class="nn">pybgl.functions.encode</span> <span class="kn">import</span> <span class="n">encode_base58</span><span class="p">,</span> <span class="n">decode_base58</span>
+<span class="kn">from</span> <span class="nn">pybgl.constants</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pybgl.crypto</span> <span class="kn">import</span> <span class="n">__secp256k1_ec_pubkey_tweak_add__</span>
+<span class="kn">from</span> <span class="nn">pybgl.functions.tools</span> <span class="kn">import</span> <span class="n">get_bytes</span>
+
+<div class="viewcode-block" id="create_master_xprivate_key"><a class="viewcode-back" href="../../../functional.html#pybgl.create_master_xprivate_key">[docs]</a><span class="k">def</span> <span class="nf">create_master_xprivate_key</span><span class="p">(</span><span class="n">seed</span><span class="p">,</span> <span class="n">testnet</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">base58</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">hex</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create extended private key from seed</span>
+
+<span class="sd">    :param str,bytes key: seed HEX or bytes string. </span>
+<span class="sd">    :param boolean base58: (optional) return result as base58 encoded string, by default True.</span>
+<span class="sd">    :param boolean hex: (optional) return result as HEX encoded string, by default False.</span>
+<span class="sd">                        In case True base58 flag value will be ignored.</span>
+<span class="sd">    :return: extended private key  in base58, HEX or bytes string format.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">seed</span> <span class="o">=</span> <span class="n">get_bytes</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="n">hmac_sha512</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;Bitcoin seed&quot;</span><span class="p">,</span> <span class="n">seed</span><span class="p">)</span>
+    <span class="n">m</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">i</span><span class="p">[:</span><span class="mi">32</span><span class="p">],</span> <span class="n">i</span><span class="p">[</span><span class="mi">32</span><span class="p">:]</span>
+    <span class="n">m_int</span> <span class="o">=</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">byteorder</span><span class="o">=</span><span class="s2">&quot;big&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">m_int</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">m_int</span> <span class="o">&gt;</span> <span class="n">ECDSA_SEC256K1_ORDER</span><span class="p">:</span> <span class="c1"># pragma: no cover</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">prefix</span> <span class="o">=</span> <span class="n">TESTNET_XPRIVATE_KEY_PREFIX</span> <span class="k">if</span> <span class="n">testnet</span> <span class="k">else</span> <span class="n">MAINNET_XPRIVATE_KEY_PREFIX</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">prefix</span><span class="p">,</span>
+                    <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x00\x00\x00\x00\x00\x00\x00\x00\x00</span><span class="s1">&#39;</span><span class="p">,</span>
+                    <span class="n">c</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x00</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">m</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">base58</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">hex</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">base58</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">base58</span><span class="p">:</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">key</span><span class="p">,</span> <span class="n">double_sha256</span><span class="p">(</span><span class="n">key</span><span class="p">)[:</span><span class="mi">4</span><span class="p">]])</span>
+        <span class="k">return</span> <span class="n">encode_base58</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">hex</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">hex</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="n">key</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">hex</span> <span class="k">else</span> <span class="n">key</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="xprivate_to_xpublic_key"><a class="viewcode-back" href="../../../functional.html#pybgl.xprivate_to_xpublic_key">[docs]</a><span class="k">def</span> <span class="nf">xprivate_to_xpublic_key</span><span class="p">(</span><span class="n">xprivate_key</span><span class="p">,</span> <span class="n">base58</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="nb">hex</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get extended public key from extended private key using ECDSA secp256k1</span>
+
+<span class="sd">    :param str,bytes key: extended private key in base58, HEX or bytes string. </span>
+<span class="sd">    :param boolean base58: (optional) return result as base58 encoded string, by default True.</span>
+<span class="sd">    :param boolean hex: (optional) return result as HEX encoded string, by default False.</span>
+<span class="sd">                        In case True base58 flag value will be ignored.</span>
+<span class="sd">    :return: extended public key  in base58, HEX or bytes string format.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">xprivate_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">xprivate_key</span><span class="p">)</span> <span class="o">==</span> <span class="mi">156</span><span class="p">:</span>
+                <span class="n">xprivate_key</span> <span class="o">=</span> <span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="n">xprivate_key</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">xprivate_key</span> <span class="o">=</span> <span class="n">decode_base58</span><span class="p">(</span><span class="n">xprivate_key</span><span class="p">,</span> <span class="n">checksum</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid extended private key&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">xprivate_key</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;extended private key should be base58 string or bytes&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">xprivate_key</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="n">TESTNET_XPRIVATE_KEY_PREFIX</span><span class="p">:</span>
+        <span class="n">prefix</span> <span class="o">=</span> <span class="n">TESTNET_XPUBLIC_KEY_PREFIX</span>
+    <span class="k">elif</span> <span class="n">xprivate_key</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="n">MAINNET_XPRIVATE_KEY_PREFIX</span><span class="p">:</span>
+        <span class="n">prefix</span> <span class="o">=</span> <span class="n">MAINNET_XPUBLIC_KEY_PREFIX</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid extended private key&quot;</span><span class="p">)</span>
+
+    <span class="n">key</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">prefix</span><span class="p">,</span>
+                    <span class="n">xprivate_key</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">45</span><span class="p">],</span>
+                    <span class="n">private_to_public_key</span><span class="p">(</span><span class="n">xprivate_key</span><span class="p">[</span><span class="mi">46</span><span class="p">:],</span> <span class="nb">hex</span><span class="o">=</span><span class="kc">False</span><span class="p">)])</span>
+    <span class="k">if</span> <span class="nb">hex</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">key</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">base58</span><span class="p">:</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">key</span><span class="p">,</span> <span class="n">double_sha256</span><span class="p">(</span><span class="n">key</span><span class="p">)[:</span><span class="mi">4</span><span class="p">]])</span>
+        <span class="k">return</span> <span class="n">encode_base58</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">key</span></div>
+
+<span class="k">def</span> <span class="nf">decode_path</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">sub_path</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">sub_path</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">path</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;m&#39;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid path&quot;</span><span class="p">)</span>
+
+    <span class="n">r</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">path</span> <span class="k">if</span> <span class="n">sub_path</span> <span class="k">else</span> <span class="n">path</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+        <span class="k">if</span> <span class="n">k</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;&#39;&quot;</span><span class="p">:</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">k</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="n">HARDENED_KEY</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+        <span class="n">r</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">r</span>
+
+
+
+
+<div class="viewcode-block" id="derive_xkey"><a class="viewcode-back" href="../../../functional.html#pybgl.derive_xkey">[docs]</a><span class="k">def</span> <span class="nf">derive_xkey</span><span class="p">(</span><span class="n">xkey</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">base58</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">hex</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Child Key derivation for extended private/public keys</span>
+<span class="sd">    </span>
+<span class="sd">    :param bytes xkey: extended private/public in base58, HEX or bytes string format.</span>
+<span class="sd">    :param list path_level: list of derivation path levels. For hardened derivation use HARDENED_KEY flag.</span>
+<span class="sd">    :param boolean base58: (optional) return result as base58 encoded string, by default True.</span>
+<span class="sd">    :param boolean hex: (optional) return result as HEX encoded string, by default False.</span>
+<span class="sd">                        In case True base58 flag value will be ignored.</span>
+<span class="sd">    :return: extended child private/public key  in base58, HEX or bytes string format.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">decode_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">xkey</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">xkey</span> <span class="o">=</span> <span class="n">decode_base58</span><span class="p">(</span><span class="n">xkey</span><span class="p">,</span> <span class="n">checksum</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">xkey</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="n">MAINNET_XPRIVATE_KEY_PREFIX</span><span class="p">,</span> <span class="n">TESTNET_XPRIVATE_KEY_PREFIX</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">path</span><span class="p">:</span>
+            <span class="n">xkey</span> <span class="o">=</span> <span class="n">derive_child_xprivate_key</span><span class="p">(</span><span class="n">xkey</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">xkey</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="n">MAINNET_XPUBLIC_KEY_PREFIX</span><span class="p">,</span> <span class="n">TESTNET_XPUBLIC_KEY_PREFIX</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">path</span><span class="p">:</span>
+            <span class="n">xkey</span> <span class="o">=</span> <span class="n">derive_child_xpublic_key</span><span class="p">(</span><span class="n">xkey</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid extended key&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">base58</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">hex</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">base58</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="nb">hex</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="nb">hex</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">xkey</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">base58</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">encode_base58</span><span class="p">(</span><span class="n">xkey</span><span class="p">,</span> <span class="n">checksum</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">xkey</span></div>
+
+
+<span class="k">def</span> <span class="nf">derive_child_xprivate_key</span><span class="p">(</span><span class="n">xprivate_key</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">xprivate_key</span><span class="p">[</span><span class="mi">13</span><span class="p">:</span><span class="mi">45</span><span class="p">]</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="n">xprivate_key</span><span class="p">[</span><span class="mi">45</span><span class="p">:]</span>
+    <span class="n">depth</span> <span class="o">=</span> <span class="n">xprivate_key</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="n">depth</span> <span class="o">&gt;</span> <span class="mi">255</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;path depth should be &lt;= 255&quot;</span><span class="p">)</span>  <span class="c1"># pragma: no cover</span>
+    <span class="n">pub</span> <span class="o">=</span> <span class="n">private_to_public_key</span><span class="p">(</span><span class="n">k</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="nb">hex</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">fingerprint</span> <span class="o">=</span> <span class="n">hash160</span><span class="p">(</span><span class="n">pub</span><span class="p">)[:</span><span class="mi">4</span><span class="p">]</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">hmac_sha512</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;</span><span class="si">%s%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span> <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="n">HARDENED_KEY</span> <span class="k">else</span> <span class="n">pub</span><span class="p">,</span> <span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;L&quot;</span><span class="p">,</span> <span class="n">i</span><span class="p">)))</span>
+    <span class="n">p_int</span> <span class="o">=</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">s</span><span class="p">[:</span><span class="mi">32</span><span class="p">],</span><span class="n">byteorder</span><span class="o">=</span><span class="s1">&#39;big&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">p_int</span> <span class="o">&gt;=</span> <span class="n">ECDSA_SEC256K1_ORDER</span><span class="p">:</span> <span class="c1"># pragma: no cover</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">k_int</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">k</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">byteorder</span><span class="o">=</span><span class="s1">&#39;big&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">p_int</span><span class="p">)</span> <span class="o">%</span> <span class="n">ECDSA_SEC256K1_ORDER</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">k_int</span><span class="p">:</span> <span class="c1"># pragma: no cover</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="nb">int</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="n">k_int</span><span class="p">,</span> <span class="n">byteorder</span> <span class="o">=</span> <span class="s2">&quot;big&quot;</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">32</span><span class="p">)</span>
+    <span class="k">return</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">xprivate_key</span><span class="p">[:</span><span class="mi">4</span><span class="p">],</span>
+                     <span class="nb">bytes</span><span class="p">([</span><span class="n">depth</span><span class="p">]),</span>
+                     <span class="n">fingerprint</span><span class="p">,</span>
+                     <span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;L&quot;</span><span class="p">,</span> <span class="n">i</span><span class="p">),</span>
+                     <span class="n">s</span><span class="p">[</span><span class="mi">32</span><span class="p">:],</span>
+                     <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x00</span><span class="s1">&#39;</span><span class="p">,</span>
+                     <span class="n">key</span><span class="p">])</span>
+
+
+<span class="k">def</span> <span class="nf">derive_child_xpublic_key</span><span class="p">(</span><span class="n">xpublic_key</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">xpublic_key</span><span class="p">[</span><span class="mi">13</span><span class="p">:</span><span class="mi">45</span><span class="p">]</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="n">xpublic_key</span><span class="p">[</span><span class="mi">45</span><span class="p">:]</span>
+    <span class="n">fingerprint</span> <span class="o">=</span> <span class="n">hash160</span><span class="p">(</span><span class="n">k</span><span class="p">)[:</span><span class="mi">4</span><span class="p">]</span>
+    <span class="n">depth</span> <span class="o">=</span> <span class="n">xpublic_key</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">depth</span> <span class="o">&gt;</span> <span class="mi">255</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;path depth should be &lt;= 255&quot;</span><span class="p">)</span>   <span class="c1"># pragma: no cover</span>
+    <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="n">HARDENED_KEY</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;derivation from extended public key impossible&quot;</span><span class="p">)</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">hmac_sha512</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">k</span> <span class="o">+</span> <span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;L&quot;</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span>
+    <span class="k">if</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">s</span><span class="p">[:</span><span class="mi">32</span><span class="p">],</span> <span class="n">byteorder</span><span class="o">=</span><span class="s1">&#39;big&#39;</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">ECDSA_SEC256K1_ORDER</span><span class="p">:</span> <span class="c1"># pragma: no cover</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="n">pk</span> <span class="o">=</span> <span class="n">__secp256k1_ec_pubkey_tweak_add__</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">s</span><span class="p">[:</span><span class="mi">32</span><span class="p">])</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pk</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span> <span class="c1"># pragma: no cover</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;pubkey_tweak_add error </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span><span class="n">pk</span><span class="p">)</span>
+    <span class="k">return</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">xpublic_key</span><span class="p">[:</span><span class="mi">4</span><span class="p">],</span>
+                     <span class="nb">bytes</span><span class="p">([</span><span class="n">depth</span><span class="p">]),</span>
+                     <span class="n">fingerprint</span><span class="p">,</span>
+                     <span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;L&quot;</span><span class="p">,</span> <span class="n">i</span><span class="p">),</span>
+                     <span class="n">s</span><span class="p">[</span><span class="mi">32</span><span class="p">:],</span>
+                     <span class="n">pk</span><span class="p">])</span>
+
+
+<div class="viewcode-block" id="public_from_xpublic_key"><a class="viewcode-back" href="../../../functional.html#pybgl.public_from_xpublic_key">[docs]</a><span class="k">def</span> <span class="nf">public_from_xpublic_key</span><span class="p">(</span><span class="n">xpublic_key</span><span class="p">,</span> <span class="nb">hex</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get public key from extended public key</span>
+
+<span class="sd">    :param bytes xpublic_key: extended public in base58, HEX or bytes string format.</span>
+<span class="sd">    :param boolean base58: (optional) return result as base58 encoded string, by default True.</span>
+<span class="sd">    :param boolean hex: (optional) return result as HEX encoded string, by default False.</span>
+<span class="sd">                        In case True base58 flag value will be ignored.</span>
+<span class="sd">    :return: public key  in HEX or bytes string format.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">xpublic_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">xpublic_key</span><span class="p">)</span> <span class="o">==</span> <span class="mi">156</span><span class="p">:</span>
+            <span class="n">xpublic_key</span> <span class="o">=</span> <span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="n">xpublic_key</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">xpublic_key</span> <span class="o">=</span> <span class="n">decode_base58</span><span class="p">(</span><span class="n">xpublic_key</span><span class="p">,</span> <span class="n">checksum</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">xpublic_key</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;xpublic_key should be HEX, Base58 or bytes string&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">xpublic_key</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="n">MAINNET_XPUBLIC_KEY_PREFIX</span><span class="p">,</span>
+                               <span class="n">TESTNET_XPUBLIC_KEY_PREFIX</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid extended public key&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">xpublic_key</span><span class="p">[</span><span class="mi">45</span><span class="p">:]</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hex</span> <span class="k">else</span> <span class="n">xpublic_key</span><span class="p">[</span><span class="mi">45</span><span class="p">:]</span></div>
+
+
+<div class="viewcode-block" id="private_from_xprivate_key"><a class="viewcode-back" href="../../../functional.html#pybgl.private_from_xprivate_key">[docs]</a><span class="k">def</span> <span class="nf">private_from_xprivate_key</span><span class="p">(</span><span class="n">xprivate_key</span><span class="p">,</span> <span class="n">wif</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="nb">hex</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get private key from extended private key</span>
+
+<span class="sd">    :param bytes xprivate_key: extended public in base58, HEX or bytes string format.</span>
+<span class="sd">    :param boolean wif: (optional) return result as WIF format, by default True.</span>
+<span class="sd">    :param boolean hex: (optional) return result as HEX encoded string, by default False.</span>
+<span class="sd">                        In case True WIF flag value will be ignored.</span>
+<span class="sd">    :return: private key  in HEX or bytes string format.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">xprivate_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">xprivate_key</span><span class="p">)</span> <span class="o">==</span> <span class="mi">156</span><span class="p">:</span>
+            <span class="n">xprivate_key</span> <span class="o">=</span> <span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="n">xprivate_key</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">xprivate_key</span> <span class="o">=</span> <span class="n">decode_base58</span><span class="p">(</span><span class="n">xprivate_key</span><span class="p">,</span> <span class="n">checksum</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">xprivate_key</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;xprivate_key should be HEX, Base58 or bytes string&quot;</span><span class="p">)</span>
+
+    <span class="n">prefix</span> <span class="o">=</span> <span class="n">xprivate_key</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">prefix</span> <span class="ow">in</span> <span class="p">(</span><span class="n">MAINNET_XPRIVATE_KEY_PREFIX</span><span class="p">,</span>
+                  <span class="n">MAINNET_M44_XPRIVATE_KEY_PREFIX</span><span class="p">,</span>
+                  <span class="n">MAINNET_M49_XPRIVATE_KEY_PREFIX</span><span class="p">,</span>
+                  <span class="n">MAINNET_M84_XPRIVATE_KEY_PREFIX</span><span class="p">):</span>
+        <span class="n">testnet</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">elif</span> <span class="n">prefix</span> <span class="ow">in</span> <span class="p">(</span><span class="n">TESTNET_XPRIVATE_KEY_PREFIX</span><span class="p">,</span>
+                    <span class="n">TESTNET_M44_XPRIVATE_KEY_PREFIX</span><span class="p">,</span>
+                    <span class="n">TESTNET_M49_XPRIVATE_KEY_PREFIX</span><span class="p">,</span>
+                    <span class="n">TESTNET_M84_XPRIVATE_KEY_PREFIX</span><span class="p">):</span>
+        <span class="n">testnet</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid extended private key&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">hex</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">xprivate_key</span><span class="p">[</span><span class="mi">46</span><span class="p">:]</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">wif</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">private_key_to_wif</span><span class="p">(</span><span class="n">xprivate_key</span><span class="p">[</span><span class="mi">46</span><span class="p">:],</span> <span class="n">testnet</span><span class="o">=</span><span class="n">testnet</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">xprivate_key</span><span class="p">[</span><span class="mi">46</span><span class="p">:]</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hex</span> <span class="k">else</span> <span class="n">xprivate_key</span><span class="p">[</span><span class="mi">46</span><span class="p">:]</span></div>
+
+
+<span class="k">def</span> <span class="nf">is_xprivate_key_valid</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check the extended private key is valid according to BIP-0032.</span>
+
+<span class="sd">    :param key: extended private key in BASE58, HEX or bytes string format.</span>
+<span class="sd">    :return: boolean.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">decode_base58</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">checksum</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="o">!=</span><span class="mi">78</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">key</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="n">MAINNET_XPRIVATE_KEY_PREFIX</span><span class="p">,</span>
+                       <span class="n">TESTNET_XPRIVATE_KEY_PREFIX</span><span class="p">,</span>
+                       <span class="n">MAINNET_M49_XPRIVATE_KEY_PREFIX</span><span class="p">,</span>
+                       <span class="n">TESTNET_M49_XPRIVATE_KEY_PREFIX</span><span class="p">,</span>
+                       <span class="n">MAINNET_M84_XPRIVATE_KEY_PREFIX</span><span class="p">,</span>
+                       <span class="n">TESTNET_M84_XPRIVATE_KEY_PREFIX</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="kc">True</span>
+
+
+<span class="k">def</span> <span class="nf">is_xpublic_key_valid</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check the extended private key is valid according to BIP-0032.</span>
+
+<span class="sd">    :param key: extended private key in BASE58, HEX or bytes string format.</span>
+<span class="sd">    :return: boolean.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">decode_base58</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">verify_checksum</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="o">!=</span><span class="mi">78</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="n">key</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="n">MAINNET_XPUBLIC_KEY_PREFIX</span><span class="p">,</span>
+                       <span class="n">TESTNET_XPUBLIC_KEY_PREFIX</span><span class="p">,</span>
+                       <span class="n">MAINNET_M49_XPUBLIC_KEY_PREFIX</span><span class="p">,</span>
+                       <span class="n">TESTNET_M49_XPUBLIC_KEY_PREFIX</span><span class="p">,</span>
+                       <span class="n">MAINNET_M84_XPUBLIC_KEY_PREFIX</span><span class="p">,</span>
+                       <span class="n">TESTNET_M84_XPUBLIC_KEY_PREFIX</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="kc">True</span>
+
+
+
+<span class="k">def</span> <span class="nf">path_xkey_to_bip32_xkey</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">base58</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="nb">hex</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">decode_base58</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">verify_checksum</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="o">!=</span><span class="mi">78</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid extended key&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">key</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="n">MAINNET_XPUBLIC_KEY_PREFIX</span><span class="p">,</span>
+                   <span class="n">TESTNET_XPUBLIC_KEY_PREFIX</span><span class="p">,</span>
+                   <span class="n">MAINNET_XPRIVATE_KEY_PREFIX</span><span class="p">,</span>
+                   <span class="n">TESTNET_XPRIVATE_KEY_PREFIX</span><span class="p">):</span>
+        <span class="k">pass</span>
+    <span class="k">elif</span> <span class="n">key</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="n">MAINNET_M49_XPUBLIC_KEY_PREFIX</span><span class="p">,</span> <span class="n">MAINNET_M84_XPUBLIC_KEY_PREFIX</span><span class="p">):</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">MAINNET_XPUBLIC_KEY_PREFIX</span> <span class="o">+</span> <span class="n">key</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span>
+    <span class="k">elif</span> <span class="n">key</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="n">TESTNET_M49_XPUBLIC_KEY_PREFIX</span><span class="p">,</span> <span class="n">TESTNET_M84_XPUBLIC_KEY_PREFIX</span><span class="p">):</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">TESTNET_XPUBLIC_KEY_PREFIX</span> <span class="o">+</span> <span class="n">key</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span>
+    <span class="k">elif</span> <span class="n">key</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="n">MAINNET_M49_XPRIVATE_KEY_PREFIX</span><span class="p">,</span> <span class="n">MAINNET_M84_XPRIVATE_KEY_PREFIX</span><span class="p">):</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">MAINNET_XPRIVATE_KEY_PREFIX</span> <span class="o">+</span> <span class="n">key</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span>
+    <span class="k">elif</span> <span class="n">key</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="n">TESTNET_M49_XPRIVATE_KEY_PREFIX</span><span class="p">,</span> <span class="n">TESTNET_M84_XPRIVATE_KEY_PREFIX</span><span class="p">):</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">TESTNET_XPRIVATE_KEY_PREFIX</span> <span class="o">+</span> <span class="n">key</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid extended key&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">hex</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">key</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">base58</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">encode_base58</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">checksum</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">key</span>
+
+<span class="k">def</span> <span class="nf">bip32_xkey_to_path_xkey</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">path_type</span><span class="p">,</span> <span class="n">base58</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="nb">hex</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">path_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;BIP44&quot;</span><span class="p">,</span> <span class="s2">&quot;BIP49&quot;</span><span class="p">,</span> <span class="s2">&quot;BIP84&quot;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;unsupported path type </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">path_type</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">decode_base58</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">verify_checksum</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">78</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid key&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">key</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="n">TESTNET_XPRIVATE_KEY_PREFIX</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">path_type</span> <span class="o">==</span> <span class="s2">&quot;BIP44&quot;</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">TESTNET_M44_XPRIVATE_KEY_PREFIX</span> <span class="o">+</span> <span class="n">key</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span>
+        <span class="k">elif</span> <span class="n">path_type</span> <span class="o">==</span> <span class="s2">&quot;BIP49&quot;</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">TESTNET_M49_XPRIVATE_KEY_PREFIX</span> <span class="o">+</span> <span class="n">key</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">TESTNET_M84_XPRIVATE_KEY_PREFIX</span> <span class="o">+</span> <span class="n">key</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span>
+
+    <span class="k">elif</span> <span class="n">key</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="n">MAINNET_XPRIVATE_KEY_PREFIX</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">path_type</span> <span class="o">==</span> <span class="s2">&quot;BIP44&quot;</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">MAINNET_M44_XPRIVATE_KEY_PREFIX</span> <span class="o">+</span> <span class="n">key</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span>
+        <span class="k">elif</span> <span class="n">path_type</span> <span class="o">==</span> <span class="s2">&quot;BIP49&quot;</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">MAINNET_M49_XPRIVATE_KEY_PREFIX</span> <span class="o">+</span> <span class="n">key</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">MAINNET_M84_XPRIVATE_KEY_PREFIX</span> <span class="o">+</span> <span class="n">key</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span>
+
+    <span class="k">elif</span> <span class="n">key</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="n">TESTNET_XPUBLIC_KEY_PREFIX</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">path_type</span> <span class="o">==</span> <span class="s2">&quot;BIP44&quot;</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">TESTNET_M44_XPUBLIC_KEY_PREFIX</span> <span class="o">+</span> <span class="n">key</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span>
+        <span class="k">elif</span> <span class="n">path_type</span> <span class="o">==</span> <span class="s2">&quot;BIP49&quot;</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">TESTNET_M49_XPUBLIC_KEY_PREFIX</span> <span class="o">+</span> <span class="n">key</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">TESTNET_M84_XPUBLIC_KEY_PREFIX</span> <span class="o">+</span> <span class="n">key</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span>
+
+    <span class="k">elif</span> <span class="n">key</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="n">MAINNET_XPUBLIC_KEY_PREFIX</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">path_type</span> <span class="o">==</span> <span class="s2">&quot;BIP44&quot;</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">MAINNET_M44_XPUBLIC_KEY_PREFIX</span> <span class="o">+</span> <span class="n">key</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span>
+        <span class="k">elif</span> <span class="n">path_type</span> <span class="o">==</span> <span class="s2">&quot;BIP49&quot;</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">MAINNET_M49_XPUBLIC_KEY_PREFIX</span> <span class="o">+</span> <span class="n">key</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">MAINNET_M84_XPUBLIC_KEY_PREFIX</span> <span class="o">+</span> <span class="n">key</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid key&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">hex</span><span class="p">:</span>
+
+        <span class="k">return</span> <span class="n">key</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">base58</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">encode_base58</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">checksum</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">key</span>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../../../index.html">
+    <img class="logo" src="../../../_static/pybtc.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+<p class="blurb"> </p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=bitaps-com&repo=pybgl&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../classes.html">Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../functional.html">Pure functions reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Contributing</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015-2020, bitaps.com.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+    <a href="https://github.com/bitaps-com/pybgl" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

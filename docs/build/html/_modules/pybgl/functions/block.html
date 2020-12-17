@@ -1,0 +1,431 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pybgl.functions.block &#8212; pybgl  documentation</title>
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pybgl.functions.block</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">pybgl.functions.tools</span> <span class="kn">import</span> <span class="n">s2rh</span><span class="p">,</span> <span class="n">bytes_from_hex</span><span class="p">,</span> <span class="n">int_from_bytes</span><span class="p">,</span> <span class="n">rh2s</span>
+<span class="kn">from</span> <span class="nn">pybgl.functions.hash</span> <span class="kn">import</span> <span class="n">sha3_256</span><span class="p">,</span> <span class="n">double_sha256</span><span class="p">,</span> <span class="n">sha256</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">deque</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">ceil</span><span class="p">,</span> <span class="n">log</span>
+
+<div class="viewcode-block" id="merkle_root"><a class="viewcode-back" href="../../../functional.html#pybgl.merkle_root">[docs]</a><span class="k">def</span> <span class="nf">merkle_root</span><span class="p">(</span><span class="n">tx_hash_list</span><span class="p">,</span> <span class="n">return_hex</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">receive_hex</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate merkle root from transaction hash list</span>
+
+<span class="sd">    :param tx_hash_list: list of transaction hashes in bytes or HEX encoded string.</span>
+<span class="sd">    :param return_hex:  (optional) If set to True return result in HEX format, by default is True.</span>
+<span class="sd">    :param receive_hex:  (optional) If set to False no internal check or decode from hex to bytes, by default is True.</span>
+<span class="sd">    :return: merkle root in bytes or HEX encoded string corresponding hex flag.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">receive_hex</span><span class="p">:</span>
+        <span class="n">tx_hash_list</span> <span class="o">=</span> <span class="n">deque</span><span class="p">([</span><span class="n">h</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="k">else</span> <span class="n">s2rh</span><span class="p">(</span><span class="n">h</span><span class="p">)</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">tx_hash_list</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">tx_hash_list</span> <span class="o">=</span> <span class="n">deque</span><span class="p">(</span><span class="n">tx_hash_list</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tx_hash_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">rh2s</span><span class="p">(</span><span class="n">tx_hash_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">if</span> <span class="n">return_hex</span> <span class="k">else</span> <span class="n">tx_hash_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">new_hash_list</span> <span class="o">=</span> <span class="n">deque</span><span class="p">()</span>
+        <span class="n">append</span> <span class="o">=</span> <span class="n">new_hash_list</span><span class="o">.</span><span class="n">append</span>
+        <span class="k">while</span> <span class="n">tx_hash_list</span><span class="p">:</span>
+            <span class="n">h1</span> <span class="o">=</span> <span class="n">tx_hash_list</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">h2</span> <span class="o">=</span> <span class="n">tx_hash_list</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">h2</span> <span class="o">=</span> <span class="n">h1</span>
+            <span class="n">append</span><span class="p">(</span><span class="n">double_sha256</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">h1</span><span class="p">,</span> <span class="n">h2</span><span class="p">))))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_hash_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">tx_hash_list</span> <span class="o">=</span> <span class="n">new_hash_list</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">new_hash_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">return_hex</span> <span class="k">else</span> <span class="n">rh2s</span><span class="p">(</span><span class="n">new_hash_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
+
+<span class="k">def</span> <span class="nf">merkle_root_double_sha256</span><span class="p">(</span><span class="n">tx_hash_list</span><span class="p">,</span> <span class="n">return_hex</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">receive_hex</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate merkle root from transaction hash list</span>
+<span class="sd">    :param tx_hash_list: list of transaction hashes in bytes or HEX encoded string.</span>
+<span class="sd">    :param return_hex:  (optional) If set to True return result in HEX format, by default is True.</span>
+<span class="sd">    :param receive_hex:  (optional) If set to False no internal check or decode from hex to bytes, by default is True.</span>
+<span class="sd">    :return: merkle root in bytes or HEX encoded string corresponding hex flag.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">receive_hex</span><span class="p">:</span>
+        <span class="n">tx_hash_list</span> <span class="o">=</span> <span class="n">deque</span><span class="p">([</span><span class="n">h</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="k">else</span> <span class="n">s2rh</span><span class="p">(</span><span class="n">h</span><span class="p">)</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">tx_hash_list</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">tx_hash_list</span> <span class="o">=</span> <span class="n">deque</span><span class="p">(</span><span class="n">tx_hash_list</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tx_hash_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">rh2s</span><span class="p">(</span><span class="n">tx_hash_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">if</span> <span class="n">return_hex</span> <span class="k">else</span> <span class="n">tx_hash_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">new_hash_list</span> <span class="o">=</span> <span class="n">deque</span><span class="p">()</span>
+        <span class="n">append</span> <span class="o">=</span> <span class="n">new_hash_list</span><span class="o">.</span><span class="n">append</span>
+        <span class="k">while</span> <span class="n">tx_hash_list</span><span class="p">:</span>
+            <span class="n">h1</span> <span class="o">=</span> <span class="n">tx_hash_list</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">h2</span> <span class="o">=</span> <span class="n">tx_hash_list</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">h2</span> <span class="o">=</span> <span class="n">h1</span>
+            <span class="n">append</span><span class="p">(</span><span class="n">double_sha256</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">h1</span><span class="p">,</span> <span class="n">h2</span><span class="p">))))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_hash_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">tx_hash_list</span> <span class="o">=</span> <span class="n">new_hash_list</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">new_hash_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">return_hex</span> <span class="k">else</span> <span class="n">rh2s</span><span class="p">(</span><span class="n">new_hash_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="k">def</span> <span class="nf">merkle_root_sha256</span><span class="p">(</span><span class="n">tx_hash_list</span><span class="p">,</span> <span class="n">return_hex</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">receive_hex</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate merkle root from transaction hash list</span>
+<span class="sd">    :param tx_hash_list: list of transaction hashes in bytes or HEX encoded string.</span>
+<span class="sd">    :param return_hex:  (optional) If set to True return result in HEX format, by default is True.</span>
+<span class="sd">    :param receive_hex:  (optional) If set to False no internal check or decode from hex to bytes, by default is True.</span>
+<span class="sd">    :return: merkle root in bytes or HEX encoded string corresponding hex flag.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">receive_hex</span><span class="p">:</span>
+        <span class="n">tx_hash_list</span> <span class="o">=</span> <span class="n">deque</span><span class="p">([</span><span class="n">h</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="k">else</span> <span class="n">s2rh</span><span class="p">(</span><span class="n">h</span><span class="p">)</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">tx_hash_list</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">tx_hash_list</span> <span class="o">=</span> <span class="n">deque</span><span class="p">(</span><span class="n">tx_hash_list</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tx_hash_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">rh2s</span><span class="p">(</span><span class="n">tx_hash_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">if</span> <span class="n">return_hex</span> <span class="k">else</span> <span class="n">tx_hash_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">new_hash_list</span> <span class="o">=</span> <span class="n">deque</span><span class="p">()</span>
+        <span class="n">append</span> <span class="o">=</span> <span class="n">new_hash_list</span><span class="o">.</span><span class="n">append</span>
+        <span class="k">while</span> <span class="n">tx_hash_list</span><span class="p">:</span>
+            <span class="n">h1</span> <span class="o">=</span> <span class="n">tx_hash_list</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">h2</span> <span class="o">=</span> <span class="n">tx_hash_list</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">h2</span> <span class="o">=</span> <span class="n">h1</span>
+            <span class="n">append</span><span class="p">(</span><span class="n">sha256</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">h1</span><span class="p">,</span> <span class="n">h2</span><span class="p">))))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_hash_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">tx_hash_list</span> <span class="o">=</span> <span class="n">new_hash_list</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">new_hash_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">return_hex</span> <span class="k">else</span> <span class="n">rh2s</span><span class="p">(</span><span class="n">new_hash_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="k">def</span> <span class="nf">merkle_root_sha3_256</span><span class="p">(</span><span class="n">tx_hash_list</span><span class="p">,</span> <span class="n">return_hex</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">receive_hex</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate merkle root from transaction hash list</span>
+<span class="sd">    :param tx_hash_list: list of transaction hashes in bytes or HEX encoded string.</span>
+<span class="sd">    :param return_hex:  (optional) If set to True return result in HEX format, by default is True.</span>
+<span class="sd">    :param receive_hex:  (optional) If set to False no internal check or decode from hex to bytes, by default is True.</span>
+<span class="sd">    :return: merkle root in bytes or HEX encoded string corresponding hex flag.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">receive_hex</span><span class="p">:</span>
+        <span class="n">tx_hash_list</span> <span class="o">=</span> <span class="n">deque</span><span class="p">([</span><span class="n">h</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="k">else</span> <span class="n">s2rh</span><span class="p">(</span><span class="n">h</span><span class="p">)</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">tx_hash_list</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">tx_hash_list</span> <span class="o">=</span> <span class="n">deque</span><span class="p">(</span><span class="n">tx_hash_list</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tx_hash_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">rh2s</span><span class="p">(</span><span class="n">tx_hash_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">if</span> <span class="n">return_hex</span> <span class="k">else</span> <span class="n">tx_hash_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">new_hash_list</span> <span class="o">=</span> <span class="n">deque</span><span class="p">()</span>
+        <span class="n">append</span> <span class="o">=</span> <span class="n">new_hash_list</span><span class="o">.</span><span class="n">append</span>
+        <span class="k">while</span> <span class="n">tx_hash_list</span><span class="p">:</span>
+            <span class="n">h1</span> <span class="o">=</span> <span class="n">tx_hash_list</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">h2</span> <span class="o">=</span> <span class="n">tx_hash_list</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">h2</span> <span class="o">=</span> <span class="n">h1</span>
+            <span class="n">append</span><span class="p">(</span><span class="n">sha3_256</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">h1</span><span class="p">,</span> <span class="n">h2</span><span class="p">))))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_hash_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">tx_hash_list</span> <span class="o">=</span> <span class="n">new_hash_list</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">new_hash_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">return_hex</span> <span class="k">else</span> <span class="n">rh2s</span><span class="p">(</span><span class="n">new_hash_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+
+
+<span class="k">def</span> <span class="nf">merkle_tree_depth</span><span class="p">(</span><span class="n">tx_hash_count</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tx_hash_count</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;hash_count must be an integer&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">tx_hash_count</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;hash_count must be at least 1&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ceil</span><span class="p">(</span><span class="n">log</span><span class="p">(</span><span class="n">tx_hash_count</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">merkle_tree</span><span class="p">(</span><span class="n">tx_hash_list</span><span class="p">,</span> <span class="n">return_hex</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">receive_hex</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">receive_hex</span><span class="p">:</span>
+        <span class="n">tx_hash_deque</span> <span class="o">=</span> <span class="n">deque</span><span class="p">()</span>
+        <span class="n">tx_hash_deque_append</span> <span class="o">=</span> <span class="n">tx_hash_deque</span><span class="o">.</span><span class="n">append</span>
+        <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">tx_hash_list</span><span class="p">:</span>
+            <span class="n">tx_hash_deque_append</span><span class="p">(</span><span class="n">h</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="k">else</span> <span class="n">s2rh</span><span class="p">(</span><span class="n">h</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">tx_hash_deque</span> <span class="o">=</span> <span class="n">deque</span><span class="p">(</span><span class="n">tx_hash_list</span><span class="p">)</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">merkle_tree_depth</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tx_hash_deque</span><span class="p">))</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="p">{</span><span class="n">c</span><span class="p">:</span> <span class="n">deque</span><span class="p">(</span><span class="n">tx_hash_deque</span><span class="p">)}</span>
+
+    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">tx_hash_deque</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">new_deque</span> <span class="o">=</span> <span class="n">deque</span><span class="p">()</span>
+        <span class="n">new_deque_append</span> <span class="o">=</span> <span class="n">new_deque</span><span class="o">.</span><span class="n">append</span>
+        <span class="k">while</span> <span class="n">tx_hash_deque</span><span class="p">:</span>
+            <span class="n">h1</span> <span class="o">=</span> <span class="n">tx_hash_deque</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+            <span class="k">try</span><span class="p">:</span> <span class="n">h2</span> <span class="o">=</span> <span class="n">tx_hash_deque</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+            <span class="k">except</span><span class="p">:</span> <span class="n">h2</span> <span class="o">=</span> <span class="n">h1</span>
+            <span class="n">hs</span> <span class="o">=</span> <span class="n">double_sha256</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">h1</span><span class="p">,</span> <span class="n">h2</span><span class="p">)))</span>
+            <span class="n">new_deque_append</span><span class="p">(</span><span class="n">hs</span><span class="p">)</span>
+        <span class="n">tx_hash_deque</span> <span class="o">=</span> <span class="n">new_deque</span>
+        <span class="n">c</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="n">m</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">deque</span><span class="p">(</span><span class="n">tx_hash_deque</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">return_hex</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">m</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="n">i</span><span class="p">])):</span>
+                <span class="n">m</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">rh2s</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">k</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">m</span>
+
+<span class="k">def</span> <span class="nf">merkle_proof</span><span class="p">(</span><span class="n">merkle_tree</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">return_hex</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">receive_hex</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">receive_hex</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">_merkle_tree</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">merkle_tree</span><span class="p">:</span>
+            <span class="n">_merkle_tree</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">merkle_tree</span><span class="p">[</span><span class="n">i</span><span class="p">])):</span>
+                <span class="n">h</span> <span class="o">=</span> <span class="n">merkle_tree</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">k</span><span class="p">]</span>
+                <span class="n">_merkle_tree</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">s2rh</span><span class="p">(</span><span class="n">h</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">h</span>
+        <span class="n">merkle_tree</span> <span class="o">=</span> <span class="n">_merkle_tree</span>
+    <span class="n">mp</span> <span class="o">=</span> <span class="n">deque</span><span class="p">()</span>
+    <span class="n">mp_append</span> <span class="o">=</span> <span class="n">mp</span><span class="o">.</span><span class="n">append</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">merkle_tree</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="k">while</span> <span class="n">c</span><span class="p">:</span>
+        <span class="k">if</span>  <span class="n">index</span> <span class="o">%</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">mp_append</span><span class="p">(</span><span class="n">merkle_tree</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="n">index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">merkle_tree</span><span class="p">[</span><span class="n">c</span><span class="p">])</span> <span class="o">&gt;</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">mp_append</span><span class="p">(</span><span class="n">merkle_tree</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">mp_append</span><span class="p">(</span><span class="n">merkle_tree</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="n">index</span><span class="p">])</span>
+        <span class="n">c</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">index</span><span class="o">//</span><span class="mi">2</span>
+
+    <span class="k">if</span> <span class="n">return_hex</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">rh2s</span><span class="p">(</span><span class="n">h</span><span class="p">)</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">mp</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">mp</span>
+
+<span class="k">def</span> <span class="nf">merkle_root_from_proof</span><span class="p">(</span><span class="n">merkle_proof</span><span class="p">,</span> <span class="n">tx_id</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">return_hex</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">receive_hex</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">merkle_proof</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">merkle_proof</span> <span class="o">=</span> <span class="n">bytes_from_hex</span><span class="p">(</span><span class="n">merkle_proof</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">merkle_proof</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+        <span class="n">merkle_proof</span> <span class="o">=</span> <span class="p">[</span><span class="n">merkle_proof</span><span class="p">[</span><span class="n">y</span> <span class="o">-</span> <span class="mi">32</span><span class="p">:</span><span class="n">y</span><span class="p">]</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">merkle_proof</span><span class="p">)</span> <span class="o">+</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">)]</span>
+
+    <span class="k">if</span> <span class="n">receive_hex</span><span class="p">:</span>
+        <span class="n">_merkle_proof</span> <span class="o">=</span> <span class="n">deque</span><span class="p">()</span>
+        <span class="n">_merkle_proof_append</span> <span class="o">=</span> <span class="n">_merkle_proof</span><span class="o">.</span><span class="n">append</span>
+        <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">merkle_proof</span><span class="p">:</span>
+            <span class="n">_merkle_proof_append</span><span class="p">(</span><span class="n">s2rh</span><span class="p">(</span><span class="n">h</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">h</span><span class="p">)</span>
+        <span class="n">merkle_proof</span> <span class="o">=</span> <span class="n">_merkle_proof</span>
+        <span class="n">tx_id</span> <span class="o">=</span> <span class="n">s2rh</span><span class="p">(</span><span class="n">tx_id</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tx_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">tx_id</span>
+
+    <span class="n">root</span> <span class="o">=</span> <span class="n">tx_id</span>
+    <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">merkle_proof</span><span class="p">:</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="n">double_sha256</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">h</span><span class="p">,</span> <span class="n">root</span><span class="p">)</span> <span class="k">if</span> <span class="n">index</span> <span class="o">%</span> <span class="mi">2</span> <span class="k">else</span> <span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">h</span><span class="p">)))</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">index</span> <span class="o">//</span> <span class="mi">2</span>
+
+    <span class="k">if</span> <span class="n">return_hex</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">rh2s</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">root</span>
+
+
+
+
+
+
+<div class="viewcode-block" id="merkle_branches"><a class="viewcode-back" href="../../../functional.html#pybgl.merkle_branches">[docs]</a><span class="k">def</span> <span class="nf">merkle_branches</span><span class="p">(</span><span class="n">tx_hash_list</span><span class="p">,</span> <span class="nb">hex</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate merkle branches for coinbase transacton</span>
+<span class="sd">    :param tx_hash_list: list of transaction hashes in bytes or HEX encoded string.</span>
+<span class="sd">    :param hex:  (optional) If set to True return result in HEX format, by default is True.</span>
+<span class="sd">    :return: list of merkle branches in bytes or HEX encoded string corresponding hex flag.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">tx_hash_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">h</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="k">else</span> <span class="n">s2rh</span><span class="p">(</span><span class="n">h</span><span class="p">)</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">tx_hash_list</span><span class="p">]</span>
+    <span class="n">branches</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tx_hash_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    <span class="n">tx_hash_list</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">branches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tx_hash_list</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+        <span class="n">new_hash_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">while</span> <span class="n">tx_hash_list</span><span class="p">:</span>
+            <span class="n">h1</span> <span class="o">=</span> <span class="n">tx_hash_list</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">h2</span> <span class="o">=</span> <span class="n">tx_hash_list</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">h2</span> <span class="o">=</span> <span class="n">h1</span>
+            <span class="n">new_hash_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">double_sha256</span><span class="p">(</span><span class="n">h1</span> <span class="o">+</span> <span class="n">h2</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_hash_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">tx_hash_list</span> <span class="o">=</span> <span class="n">new_hash_list</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">new_hash_list</span><span class="p">:</span>
+                <span class="n">branches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_hash_list</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">branches</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">hex</span> <span class="k">else</span> <span class="p">[</span><span class="n">h</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">branches</span><span class="p">]</span></div>
+
+
+<span class="k">def</span> <span class="nf">merkle_root_from_branches</span><span class="p">(</span><span class="n">merkle_branches</span><span class="p">,</span> <span class="n">coinbase_hash</span><span class="p">,</span> <span class="nb">hex</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate merkle root from merkle branches and coinbase transacton hash</span>
+<span class="sd">    :param merkle_branches: list merkle branches in bytes or HEX encoded string.</span>
+<span class="sd">    :param coinbase_hash: list coinbase transaction hash in bytes or HEX encoded string.</span>
+<span class="sd">    :param hex:  (optional) If set to True return result in HEX format, by default is True.</span>
+<span class="sd">    :return: merkle root in bytes or HEX encoded string corresponding hex flag.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">merkle_root</span> <span class="o">=</span> <span class="n">coinbase_hash</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">coinbase_hash</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">bytes_from_hex</span><span class="p">(</span><span class="n">coinbase_hash</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">merkle_branches</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">h</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="n">h</span> <span class="o">=</span> <span class="n">bytes_from_hex</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+        <span class="n">merkle_root</span> <span class="o">=</span> <span class="n">double_sha256</span><span class="p">(</span><span class="n">merkle_root</span> <span class="o">+</span> <span class="n">h</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">bytes_from_hex</span><span class="p">(</span><span class="n">merkle_root</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">hex</span> <span class="k">else</span> <span class="n">merkle_root</span>
+
+
+
+
+<div class="viewcode-block" id="bits_to_target"><a class="viewcode-back" href="../../../functional.html#pybgl.bits_to_target">[docs]</a><span class="k">def</span> <span class="nf">bits_to_target</span><span class="p">(</span><span class="n">bits</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate target from bits</span>
+
+<span class="sd">    :param bits: HEX string, bytes string or integer representation of bits.</span>
+<span class="sd">    :return: integer.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">bits</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">bits</span> <span class="o">=</span> <span class="n">bytes_from_hex</span><span class="p">(</span><span class="n">bits</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">bits</span><span class="p">)</span> <span class="o">==</span> <span class="nb">bytes</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">int_from_bytes</span><span class="p">(</span><span class="n">bits</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="s1">&#39;big&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="p">(</span><span class="mi">8</span> <span class="o">*</span> <span class="p">(</span><span class="n">bits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">3</span><span class="p">)))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">shift</span> <span class="o">=</span> <span class="n">bits</span> <span class="o">&gt;&gt;</span> <span class="mi">24</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="p">(</span><span class="n">bits</span> <span class="o">&amp;</span> <span class="mh">0xffffff</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="mi">8</span> <span class="o">*</span> <span class="p">(</span><span class="n">shift</span> <span class="o">-</span> <span class="mi">3</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="n">target</span></div>
+
+<div class="viewcode-block" id="target_to_difficulty"><a class="viewcode-back" href="../../../functional.html#pybgl.target_to_difficulty">[docs]</a><span class="k">def</span> <span class="nf">target_to_difficulty</span><span class="p">(</span><span class="n">target</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate difficulty from target</span>
+
+<span class="sd">    :param target: integer.</span>
+<span class="sd">    :return: float.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="mh">0x00000000FFFF0000000000000000000000000000000000000000000000000000</span> <span class="o">/</span> <span class="n">target</span></div>
+
+<div class="viewcode-block" id="bits_to_difficulty"><a class="viewcode-back" href="../../../functional.html#pybgl.bits_to_difficulty">[docs]</a><span class="k">def</span> <span class="nf">bits_to_difficulty</span><span class="p">(</span><span class="n">bits</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate difficulty from bits</span>
+
+<span class="sd">    :param bits: HEX string, bytes string or integer representation of bits.</span>
+<span class="sd">    :return: integer.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">target_to_difficulty</span><span class="p">(</span><span class="n">bits_to_target</span><span class="p">(</span><span class="n">bits</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="difficulty_to_target"><a class="viewcode-back" href="../../../functional.html#pybgl.difficulty_to_target">[docs]</a><span class="k">def</span> <span class="nf">difficulty_to_target</span><span class="p">(</span><span class="n">difficulty</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate target from difficulty</span>
+
+<span class="sd">    :param target: integer.</span>
+<span class="sd">    :return: float.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="mh">0x00000000FFFF0000000000000000000000000000000000000000000000000000</span> <span class="o">/</span> <span class="n">difficulty</span><span class="p">)</span></div>
+
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../../../index.html">
+    <img class="logo" src="../../../_static/pybtc.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+<p class="blurb"> </p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=bitaps-com&repo=pybgl&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../classes.html">Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../functional.html">Pure functions reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Contributing</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015-2020, bitaps.com.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+    <a href="https://github.com/bitaps-com/pybgl" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

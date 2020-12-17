@@ -1,0 +1,279 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pybgl.functions.key &#8212; pybgl  documentation</title>
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pybgl.functions.key</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">pybgl.constants</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pybgl.functions.encode</span> <span class="kn">import</span> <span class="n">encode_base58</span><span class="p">,</span> <span class="n">decode_base58</span>
+<span class="kn">from</span> <span class="nn">pybgl.functions.hash</span> <span class="kn">import</span> <span class="n">double_sha256</span>
+<span class="kn">from</span> <span class="nn">.bip39_mnemonic</span> <span class="kn">import</span> <span class="n">generate_entropy</span>
+<span class="n">bytes_from_hex</span> <span class="o">=</span> <span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span>
+<span class="kn">from</span> <span class="nn">pybgl.crypto</span> <span class="kn">import</span> <span class="n">__secp256k1_ec_pubkey_create__</span>
+
+
+<div class="viewcode-block" id="create_private_key"><a class="viewcode-back" href="../../../functional.html#pybgl.create_private_key">[docs]</a><span class="k">def</span> <span class="nf">create_private_key</span><span class="p">(</span><span class="n">compressed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">testnet</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">wif</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">hex</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create private key</span>
+
+<span class="sd">    :param compressed: (optional) Type of public key, by default set to compressed. </span>
+<span class="sd">                                 Using uncompressed public keys is deprecated in new SEGWIT addresses, </span>
+<span class="sd">                                 use this option only for backward compatibility.  </span>
+<span class="sd">    :param testnet: (optional) flag for testnet network, by default is False.</span>
+<span class="sd">    :param wif:  (optional) If set to True return key in WIF format, by default is True.</span>
+<span class="sd">    :param hex:  (optional) If set to True return key in HEX format, by default is False.</span>
+<span class="sd">    :return: Private key in wif format (default), hex encoded byte string in case of hex flag or</span>
+<span class="sd">             raw bytes string in case wif and hex flags set to False.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">wif</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">hex</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">wif</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">wif</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="n">wif</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">private_key_to_wif</span><span class="p">(</span><span class="n">generate_entropy</span><span class="p">(</span><span class="nb">hex</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span> <span class="n">compressed</span><span class="o">=</span><span class="n">compressed</span><span class="p">,</span> <span class="n">testnet</span><span class="o">=</span><span class="n">testnet</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">hex</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">generate_entropy</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">generate_entropy</span><span class="p">(</span><span class="nb">hex</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="private_key_to_wif"><a class="viewcode-back" href="../../../functional.html#pybgl.private_key_to_wif">[docs]</a><span class="k">def</span> <span class="nf">private_key_to_wif</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">compressed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">testnet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Encode private key in HEX or RAW bytes format to WIF format.</span>
+
+<span class="sd">    :param h: private key 32 byte string or HEX encoded string.</span>
+<span class="sd">    :param compressed: (optional) flag of public key compressed format, by default set to True.  </span>
+<span class="sd">    :param testnet: (optional) flag for testnet network, by default is False.</span>
+<span class="sd">    :return: Private key in WIF format.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># uncompressed: 0x80 + [32-byte secret] + [4 bytes of Hash() of previous 33 bytes], base58 encoded.</span>
+    <span class="c1"># compressed: 0x80 + [32-byte secret] + 0x01 + [4 bytes of Hash() previous 34 bytes], base58 encoded.</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">bytes_from_hex</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">h</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">32</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;private key must be a 32 bytes or hex encoded string&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">testnet</span><span class="p">:</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">TESTNET_PRIVATE_KEY_BYTE_PREFIX</span> <span class="o">+</span> <span class="n">h</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">MAINNET_PRIVATE_KEY_BYTE_PREFIX</span> <span class="o">+</span> <span class="n">h</span>
+    <span class="k">if</span> <span class="n">compressed</span><span class="p">:</span>
+        <span class="n">h</span> <span class="o">+=</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x01</span><span class="s1">&#39;</span>
+    <span class="n">h</span> <span class="o">+=</span> <span class="n">double_sha256</span><span class="p">(</span><span class="n">h</span><span class="p">)[:</span><span class="mi">4</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">encode_base58</span><span class="p">(</span><span class="n">h</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="wif_to_private_key"><a class="viewcode-back" href="../../../functional.html#pybgl.wif_to_private_key">[docs]</a><span class="k">def</span> <span class="nf">wif_to_private_key</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="nb">hex</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Decode WIF private key to bytes string or HEX encoded string</span>
+
+<span class="sd">    :param hex:  (optional) if set to True return key in HEX format, by default is True.</span>
+<span class="sd">    :return: Private key HEX encoded string or raw bytes string.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">decode_base58</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">double_sha256</span><span class="p">(</span><span class="n">h</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">])[:</span><span class="mi">4</span><span class="p">]</span> <span class="o">!=</span> <span class="n">h</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;invalid wif key&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">h</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">33</span><span class="p">]</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hex</span> <span class="k">else</span> <span class="n">h</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">33</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="is_wif_valid"><a class="viewcode-back" href="../../../functional.html#pybgl.is_wif_valid">[docs]</a><span class="k">def</span> <span class="nf">is_wif_valid</span><span class="p">(</span><span class="n">wif</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check is private key in WIF format string is valid.</span>
+
+<span class="sd">    :param wif: private key in WIF format string.</span>
+<span class="sd">    :return: boolean.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">wif</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">wif</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">PRIVATE_KEY_PREFIX_LIST</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">decode_base58</span><span class="p">(</span><span class="n">wif</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="n">checksum</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span>
+    <span class="k">if</span> <span class="n">wif</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="n">MAINNET_PRIVATE_KEY_UNCOMPRESSED_PREFIX</span><span class="p">,</span>
+                  <span class="n">TESTNET_PRIVATE_KEY_UNCOMPRESSED_PREFIX</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">h</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">37</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">h</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">38</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">double_sha256</span><span class="p">(</span><span class="n">h</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">])[:</span><span class="mi">4</span><span class="p">]</span> <span class="o">!=</span> <span class="n">checksum</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="private_to_public_key"><a class="viewcode-back" href="../../../functional.html#pybgl.private_to_public_key">[docs]</a><span class="k">def</span> <span class="nf">private_to_public_key</span><span class="p">(</span><span class="n">private_key</span><span class="p">,</span> <span class="n">compressed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="nb">hex</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get public key from private key using ECDSA secp256k1</span>
+
+<span class="sd">    :param private_key: private key in WIF, HEX or bytes.</span>
+<span class="sd">    :param compressed: (optional) flag of public key compressed format, by default set to True.</span>
+<span class="sd">                       In case private_key in WIF format, this flag is set in accordance with </span>
+<span class="sd">                       the key format specified in WIF string.</span>
+<span class="sd">    :param hex:  (optional) if set to True return key in HEX format, by default is True.</span>
+<span class="sd">    :return: 33/65 bytes public key in HEX or bytes string.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">private_key</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">private_key</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">):</span>
+            <span class="n">private_key</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">private_key</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">private_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">private_key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="n">MAINNET_PRIVATE_KEY_UNCOMPRESSED_PREFIX</span><span class="p">,</span>
+                                      <span class="n">TESTNET_PRIVATE_KEY_UNCOMPRESSED_PREFIX</span><span class="p">):</span>
+                    <span class="n">compressed</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">h</span> <span class="o">=</span> <span class="n">decode_base58</span><span class="p">(</span><span class="n">private_key</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">double_sha256</span><span class="p">(</span><span class="n">h</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">])[:</span><span class="mi">4</span><span class="p">]</span> <span class="o">!=</span> <span class="n">h</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">()</span>
+                <span class="n">private_key</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">33</span><span class="p">]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">private_key</span> <span class="o">=</span> <span class="n">bytes_from_hex</span><span class="p">(</span><span class="n">private_key</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;private key HEX or WIF invalid&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;private key must be a bytes or WIF or hex encoded string&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">private_key</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">32</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;private key length invalid&quot;</span><span class="p">)</span>
+    <span class="n">pub</span> <span class="o">=</span> <span class="n">__secp256k1_ec_pubkey_create__</span><span class="p">(</span><span class="n">private_key</span><span class="p">,</span> <span class="nb">bool</span><span class="p">(</span><span class="n">compressed</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">pub</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hex</span> <span class="k">else</span> <span class="n">pub</span></div>
+
+
+<div class="viewcode-block" id="is_public_key_valid"><a class="viewcode-back" href="../../../functional.html#pybgl.is_public_key_valid">[docs]</a><span class="k">def</span> <span class="nf">is_public_key_valid</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check public key is valid.</span>
+
+<span class="sd">    :param key: public key in HEX or bytes string format.</span>
+<span class="sd">    :return: boolean.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">bytes_from_hex</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">33</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">elif</span> <span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mh">0x04</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">65</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">elif</span> <span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mh">0x02</span> <span class="ow">or</span> <span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mh">0x03</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">33</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="ow">not</span> <span class="p">((</span><span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="ow">or</span> <span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="p">))</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../../../index.html">
+    <img class="logo" src="../../../_static/pybtc.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+<p class="blurb"> </p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=bitaps-com&repo=pybgl&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../classes.html">Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../functional.html">Pure functions reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Contributing</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015-2020, bitaps.com.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+    <a href="https://github.com/bitaps-com/pybgl" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

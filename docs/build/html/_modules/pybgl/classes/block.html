@@ -1,0 +1,404 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pybgl.classes.block &#8212; pybgl  documentation</title>
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pybgl.classes.block</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">struct</span> <span class="kn">import</span> <span class="n">unpack</span><span class="p">,</span> <span class="n">pack</span>
+<span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">BytesIO</span>
+<span class="kn">from</span> <span class="nn">pybgl.functions.block</span> <span class="kn">import</span> <span class="n">bits_to_target</span><span class="p">,</span> <span class="n">target_to_difficulty</span><span class="p">,</span> <span class="n">merkle_root_double_sha256</span>
+<span class="kn">from</span> <span class="nn">pybgl.functions.block</span> <span class="kn">import</span> <span class="n">merkle_root</span><span class="p">,</span> <span class="n">merkle_branches</span><span class="p">,</span> <span class="n">merkle_root_from_branches</span>
+<span class="kn">from</span> <span class="nn">pybgl.functions.hash</span> <span class="kn">import</span> <span class="n">sha3_256</span><span class="p">,</span> <span class="n">double_sha256</span>
+<span class="kn">from</span> <span class="nn">pybgl.functions.tools</span> <span class="kn">import</span> <span class="n">var_int_to_int</span><span class="p">,</span> <span class="n">read_var_int</span><span class="p">,</span> <span class="n">var_int_len</span><span class="p">,</span> <span class="n">rh2s</span><span class="p">,</span> <span class="n">reverse_hash</span><span class="p">,</span> <span class="n">s2rh</span><span class="p">,</span> <span class="n">s2rh_step4</span>
+<span class="kn">from</span> <span class="nn">pybgl.functions.tools</span> <span class="kn">import</span> <span class="n">bytes_from_hex</span><span class="p">,</span> <span class="n">int_to_var_int</span>
+<span class="kn">from</span> <span class="nn">pybgl.classes.transaction</span> <span class="kn">import</span> <span class="n">Transaction</span>
+<span class="kn">import</span> <span class="nn">math</span>
+
+<div class="viewcode-block" id="Block"><a class="viewcode-back" href="../../../block.html#pybgl.Block">[docs]</a><span class="k">class</span> <span class="nc">Block</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw_block</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;decoded&quot;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">536870912</span><span class="p">,</span> <span class="n">testnet</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">keep_raw_tx</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">format</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;decoded&quot;</span><span class="p">,</span> <span class="s2">&quot;raw&quot;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;tx_format error, raw or decoded allowed&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;format&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">format</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;testnet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">testnet</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;header&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;hash&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;version&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">version</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;versionHex&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;L&quot;</span><span class="p">,</span> <span class="n">version</span><span class="p">)</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;previousBlockHash&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;merkleRoot&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;tx&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;bits&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;nonce&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;size&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">80</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;strippedSize&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">80</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;amount&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;difficulty&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;targetDifficulty&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">raw_block</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;size&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw_block</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">raw_block</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">raw_block</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_stream</span><span class="p">(</span><span class="n">raw_block</span><span class="p">)</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;format&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;raw&quot;</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;version&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;&lt;L&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;versionHex&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;L&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;version&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;previousBlockHash&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;merkleRoot&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;&lt;L&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;bits&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bits_to_target</span><span class="p">(</span><span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;&lt;L&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;bits&quot;</span><span class="p">])[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;targetDifficulty&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">target_to_difficulty</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="n">byteorder</span><span class="o">=</span><span class="s2">&quot;little&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;nonce&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;&lt;L&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="o">-</span><span class="mi">80</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;header&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">80</span><span class="p">)</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;hash&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sha3_256</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="s2">&quot;header&quot;</span><span class="p">])</span>
+
+        <span class="n">block_target</span> <span class="o">=</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="s2">&quot;hash&quot;</span><span class="p">],</span> <span class="n">byteorder</span><span class="o">=</span><span class="s2">&quot;little&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;difficulty&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">target_to_difficulty</span><span class="p">(</span><span class="n">block_target</span><span class="p">)</span>
+        <span class="n">tx_count</span> <span class="o">=</span> <span class="n">var_int_to_int</span><span class="p">(</span><span class="n">read_var_int</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;tx&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">tx_count</span><span class="p">):</span>
+            <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;tx&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Transaction</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;raw&quot;</span><span class="p">,</span> <span class="n">keep_raw_tx</span><span class="o">=</span><span class="n">keep_raw_tx</span><span class="p">)</span>
+            <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;amount&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;tx&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;amount&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;strippedSize&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;tx&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;bSize&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;strippedSize&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">var_int_len</span><span class="p">(</span><span class="n">tx_count</span><span class="p">)</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;strippedSize&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">+</span> <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;size&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">&quot;decoded&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">testnet</span><span class="o">=</span><span class="n">testnet</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testnet</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;format&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;decoded&quot;</span>
+        <span class="k">if</span> <span class="n">testnet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;testnet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">testnet</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="s2">&quot;hash&quot;</span><span class="p">],</span> <span class="nb">bytes</span><span class="p">):</span>
+            <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;hash&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rh2s</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="s2">&quot;hash&quot;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">],</span> <span class="nb">bytes</span><span class="p">):</span>
+            <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rh2s</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="s2">&quot;previousBlockHash&quot;</span><span class="p">],</span> <span class="nb">bytes</span><span class="p">):</span>
+            <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;previousBlockHash&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rh2s</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="s2">&quot;previousBlockHash&quot;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="s2">&quot;nextBlockHash&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="s2">&quot;nextBlockHash&quot;</span><span class="p">],</span> <span class="nb">bytes</span><span class="p">):</span>
+                <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;nextBlockHash&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rh2s</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="s2">&quot;nextBlockHash&quot;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="s2">&quot;merkleRoot&quot;</span><span class="p">],</span> <span class="nb">bytes</span><span class="p">):</span>
+            <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;merkleRoot&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rh2s</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="s2">&quot;merkleRoot&quot;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="s2">&quot;header&quot;</span><span class="p">],</span> <span class="nb">bytes</span><span class="p">):</span>
+            <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;header&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;header&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="s2">&quot;bits&quot;</span><span class="p">],</span> <span class="nb">bytes</span><span class="p">):</span>
+            <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;bits&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rh2s</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="s2">&quot;bits&quot;</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;tx&quot;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;tx&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">testnet</span><span class="o">=</span><span class="n">testnet</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_stream</span><span class="p">(</span><span class="n">stream</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span> <span class="o">!=</span> <span class="n">BytesIO</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+                <span class="n">stream</span> <span class="o">=</span> <span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span> <span class="o">==</span> <span class="nb">bytes</span><span class="p">:</span>
+                <span class="n">stream</span> <span class="o">=</span> <span class="n">BytesIO</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span>
+        <span class="k">return</span> <span class="n">stream</span></div>
+
+<span class="k">class</span> <span class="nc">BlockTemplate</span><span class="p">():</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">coinbase_output_address</span><span class="p">,</span> <span class="n">testnet</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">coinbase_message</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                 <span class="n">extranonce1</span> <span class="o">=</span> <span class="s2">&quot;00000000&quot;</span><span class="p">,</span>
+                 <span class="n">extranonce1_size</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+                 <span class="n">extranonce2_size</span> <span class="o">=</span> <span class="mi">4</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">testnet</span> <span class="o">=</span> <span class="n">testnet</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;version&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;big&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">previous_block_hash</span> <span class="o">=</span> <span class="n">reverse_hash</span><span class="p">(</span><span class="n">s2rh</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;previousblockhash&quot;</span><span class="p">]))</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;curtime&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;big&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bits</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;bits&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">block_reward</span> <span class="o">=</span> <span class="mi">200</span> <span class="o">*</span> <span class="mi">100000000</span> <span class="o">&gt;&gt;</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">]</span> <span class="o">//</span> <span class="mi">210000</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coinbasevalue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">block_reward</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extranonce1</span> <span class="o">=</span> <span class="n">extranonce1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extranonce1_size</span> <span class="o">=</span> <span class="n">extranonce1_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extranonce2</span> <span class="o">=</span> <span class="s2">&quot;00000000&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extranonce2_size</span> <span class="o">=</span> <span class="n">extranonce2_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coinbase_output_address</span> <span class="o">=</span> <span class="n">coinbase_output_address</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sigoplimit</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;sigoplimit&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weightlimit</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;weightlimit&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sigop</span><span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1"># if type(coinbase_message) == bytes:</span>
+        <span class="c1">#     coinbase_message = coinbase_message.hex()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coinbase_message</span> <span class="o">=</span> <span class="n">coinbase_message</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">transactions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;transactions&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">txid_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scan_tx_list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coinbase_tx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_coinbase_transaction</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coinb1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coinb2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">split_coinbase</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="n">bits_to_target</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bits</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">difficulty</span> <span class="o">=</span> <span class="n">target_to_difficulty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">)</span>
+        <span class="c1"># print(&quot;&lt;&gt;&gt;&gt;&gt;&gt;&gt;&quot;,self.coinbase_tx[&quot;txId&quot;])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">merkle_branches</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">merkle_branches</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">coinbase_tx</span><span class="p">[</span><span class="s2">&quot;txId&quot;</span><span class="p">],]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">txid_list</span><span class="p">)]</span>
+
+
+    <span class="k">def</span> <span class="nf">scan_tx_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coinbasevalue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">block_reward</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sigop</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">txid_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">tx_fee</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">tx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">transactions</span><span class="p">:</span>
+            <span class="n">txid</span> <span class="o">=</span> <span class="n">s2rh</span><span class="p">(</span><span class="n">tx</span><span class="p">[</span><span class="s2">&quot;txid&quot;</span><span class="p">])</span>
+            <span class="n">tx_fee</span> <span class="o">+=</span> <span class="n">tx</span><span class="p">[</span><span class="s2">&quot;fee&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">+=</span> <span class="n">tx</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sigop</span> <span class="o">+=</span> <span class="n">tx</span><span class="p">[</span><span class="s2">&quot;sigops&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">txid_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">txid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coinbasevalue</span>  <span class="o">+=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">tx_fee</span> <span class="o">/</span> <span class="mi">10</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">calculate_commitment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">witness_reserved_value</span><span class="p">):</span>
+        <span class="c1"># print(&quot;calculate_commitment&quot;)</span>
+        <span class="n">wtxid_list</span> <span class="o">=</span> <span class="p">[</span><span class="sa">b</span><span class="s2">&quot;</span><span class="se">\x00</span><span class="s2">&quot;</span> <span class="o">*</span> <span class="mi">32</span><span class="p">,]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">transactions</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">tx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">transactions</span><span class="p">:</span>
+                <span class="n">wtxid_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s2rh</span><span class="p">(</span><span class="n">tx</span><span class="p">[</span><span class="s2">&quot;hash&quot;</span><span class="p">]))</span>
+        <span class="c1"># print(&quot;wtxid_list&quot;, wtxid_list)</span>
+        <span class="c1"># print(&quot;wtxid_list&quot;, wtxid_list)</span>
+        <span class="c1"># print(&quot;commitment &quot;, double_sha256(merkle_root_double_sha256(wtxid_list, return_hex=0) + witness_reserved_value))</span>
+        <span class="k">return</span> <span class="n">double_sha256</span><span class="p">(</span><span class="n">merkle_root_double_sha256</span><span class="p">(</span><span class="n">wtxid_list</span><span class="p">,</span> <span class="n">return_hex</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="n">witness_reserved_value</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">split_coinbase</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">tx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coinbase_tx</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="n">segwit</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">hex</span><span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">len_coinbase</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coinbase_tx</span><span class="p">[</span><span class="s2">&quot;vIn&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;scriptSig&quot;</span><span class="p">])</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">extranonce_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extranonce1_size</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">extranonce2_size</span>
+        <span class="k">return</span> <span class="n">tx</span><span class="p">[:</span><span class="mi">42</span> <span class="o">+</span> <span class="n">len_coinbase</span> <span class="o">-</span> <span class="n">extranonce_len</span><span class="p">]</span><span class="o">.</span><span class="n">hex</span><span class="p">(),</span>\
+               <span class="n">tx</span><span class="p">[</span><span class="mi">42</span> <span class="o">+</span> <span class="n">len_coinbase</span><span class="p">:]</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span>
+
+
+    <span class="k">def</span> <span class="nf">create_coinbase_transaction</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">tx</span> <span class="o">=</span> <span class="n">Transaction</span><span class="p">()</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x02</span><span class="s1">&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">&gt;</span> <span class="mh">0x7fff</span><span class="p">:</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x03</span><span class="s1">&#39;</span>
+        <span class="n">coinbase</span> <span class="o">=</span> <span class="n">k</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="s1">&#39;little&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">coinbase_message</span>
+        <span class="n">coinbase</span> <span class="o">+=</span> <span class="sa">b</span><span class="s2">&quot;</span><span class="se">\x00</span><span class="s2">&quot;</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extranonce1_size</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">extranonce2_size</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">coinbase</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">100</span>
+        <span class="n">tx</span><span class="o">.</span><span class="n">add_input</span><span class="p">(</span><span class="n">script_sig</span><span class="o">=</span><span class="n">coinbase</span><span class="p">)</span>
+        <span class="n">commitment</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_commitment</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x00</span><span class="s1">&#39;</span><span class="o">*</span><span class="mi">32</span><span class="p">)</span>
+        <span class="n">tx</span><span class="o">.</span><span class="n">add_output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coinbasevalue</span><span class="p">,</span> <span class="n">address</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coinbase_output_address</span><span class="p">)</span>
+        <span class="n">tx</span><span class="o">.</span><span class="n">add_output</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">script_pub_key</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;j$</span><span class="se">\xaa</span><span class="s1">!</span><span class="se">\xa9\xed</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">commitment</span><span class="p">)</span>
+        <span class="c1"># tx.add_output(0, script_pub_key = bytes_from_hex(&quot;6a24aa21a9ede2f61c3f71d1defd3fa999dfa36953755c690689799962b48bebd836974e8cf9&quot;))</span>
+        <span class="n">tx</span><span class="o">.</span><span class="n">coinbase</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">tx</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="c1"># print(&quot;coinbase tx&quot;, tx[&quot;txId&quot;])</span>
+        <span class="c1"># print(&quot;coinbase tx &gt;&gt;&gt;&gt;&quot;, tx)</span>
+        <span class="k">return</span> <span class="n">tx</span>
+
+    <span class="k">def</span> <span class="nf">get_job</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job_id</span><span class="p">,</span> <span class="n">clean_jobs</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        job_id - ID of the job. Use this ID while submitting share generated from this job.</span>
+<span class="sd">        prevhash - Hash of previous block.</span>
+<span class="sd">        coinb1 - Initial part of coinbase transaction.</span>
+<span class="sd">        coinb2 - Final part of coinbase transaction.</span>
+<span class="sd">        merkle_branch - List of hashes, will be used for calculation of merkle root. This is not a list of all</span>
+<span class="sd">        transactions, it only contains prepared hashes of steps of merkle tree algorithm. Please read some</span>
+<span class="sd">        materials for understanding how merkle trees calculation works.</span>
+<span class="sd">        version - Bitcoin block version.</span>
+<span class="sd">        nbits - Encoded current network difficulty</span>
+<span class="sd">        ntime - Current ntime/</span>
+<span class="sd">        clean_jobs - When true, server indicates that submitting shares from previous jobs don&#39;t have a</span>
+<span class="sd">        sense and such shares will be rejected. When this flag is set, miner should also drop all previous</span>
+<span class="sd">         jobs, so job_ids can be eventually rotated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">job_id</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">previous_block_hash</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">coinb1</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">coinb2</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">merkle_branches</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">bits</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">,</span>
+                <span class="n">clean_jobs</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">submit_job</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extra_nonce_1</span><span class="p">,</span> <span class="n">extra_nonce_2</span><span class="p">,</span> <span class="n">nonce</span><span class="p">,</span> <span class="n">time</span><span class="p">):</span>
+        <span class="n">version</span> <span class="o">=</span> <span class="n">s2rh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+        <span class="n">prev_hash</span> <span class="o">=</span> <span class="n">s2rh_step4</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">previous_block_hash</span><span class="p">)</span>
+        <span class="n">cb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coinb1</span> <span class="o">+</span> <span class="n">extra_nonce_1</span> <span class="o">+</span> <span class="n">extra_nonce_2</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">coinb2</span>
+        <span class="c1"># print(&quot;ccoinbase&quot;, cb)</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="n">s2rh</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+        <span class="n">bits</span> <span class="o">=</span> <span class="n">s2rh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bits</span><span class="p">)</span>
+        <span class="n">nonce</span> <span class="o">=</span> <span class="n">s2rh</span><span class="p">(</span><span class="n">nonce</span><span class="p">)</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">Transaction</span><span class="p">(</span><span class="n">cb</span><span class="p">)</span>
+        <span class="n">cbh</span> <span class="o">=</span>  <span class="n">s2rh</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="s2">&quot;txId&quot;</span><span class="p">])</span>
+        <span class="n">merkle_root</span> <span class="o">=</span> <span class="n">merkle_root_from_branches</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">merkle_branches</span><span class="p">,</span> <span class="n">cbh</span><span class="p">)</span>
+        <span class="c1"># print(&quot;version &quot;, version.hex())</span>
+        <span class="c1"># print(&quot;prev_hash &quot;, self.previous_block_hash)</span>
+        <span class="c1"># print(&quot;cbh &quot;, cbh.hex())</span>
+        <span class="c1"># print(&quot;cbh2 &quot;, s2rh(c[&quot;txId&quot;]))</span>
+        <span class="c1"># merkle_root = bytes_from_hex(&quot;6a24aa21a9ede2f61c3f71d1defd3fa999dfa36953755c690689799962b48bebd836974e8cf9&quot;)</span>
+        <span class="c1"># merkle_root = s2rh(c[&quot;txId&quot;])</span>
+        <span class="c1"># print(&quot;merkle_root &quot;, merkle_root.hex())</span>
+        <span class="c1"># print(&quot;merkle_root &quot;, s2rh(c[&quot;txId&quot;]))</span>
+        <span class="c1"># print(&quot;branches &quot;, self.merkle_branches)</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="n">version</span> <span class="o">+</span> <span class="n">prev_hash</span> <span class="o">+</span> <span class="n">merkle_root</span> <span class="o">+</span> <span class="n">time</span> <span class="o">+</span> <span class="n">bits</span> <span class="o">+</span> <span class="n">nonce</span>
+        <span class="c1"># print(&quot;header&quot;, header.hex())</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span>
+        <span class="n">block</span> <span class="o">+=</span><span class="n">int_to_var_int</span><span class="p">(</span><span class="nb">len</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transactions</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span>
+        <span class="n">block</span> <span class="o">+=</span> <span class="n">cb</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">transactions</span><span class="p">:</span>
+            <span class="n">block</span> <span class="o">+=</span> <span class="n">t</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">sha3_256</span><span class="p">(</span><span class="n">header</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">block</span>
+
+
+    <span class="k">def</span> <span class="nf">mn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  <span class="n">nonce</span><span class="p">):</span>
+
+        <span class="n">header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h1</span> <span class="o">+</span>  <span class="n">s2rh</span><span class="p">(</span><span class="n">nonce</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">h1</span>
+        <span class="k">return</span> <span class="n">sha3_256</span><span class="p">(</span><span class="n">header</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">cb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coinb1</span> <span class="o">+</span> <span class="n">extra_nonce_1</span> <span class="o">+</span> <span class="n">extra_nonce_2</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">coinb2</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="n">s2rh</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+        <span class="n">bits</span> <span class="o">=</span> <span class="n">s2rh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bits</span><span class="p">)</span>
+        <span class="n">nonce</span> <span class="o">=</span> <span class="n">s2rh</span><span class="p">(</span><span class="n">nonce</span><span class="p">)</span>
+        <span class="n">cbh</span> <span class="o">=</span> <span class="n">sha3_256</span><span class="p">(</span><span class="n">bytes_from_hex</span><span class="p">(</span><span class="n">cb</span><span class="p">))</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">Transaction</span><span class="p">(</span><span class="n">cb</span><span class="p">)</span>
+        <span class="c1"># cbh = sha3_256(c[&quot;txId&quot;])</span>
+        <span class="n">merkle_root</span> <span class="o">=</span> <span class="n">merkle_root_from_branches</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">merkle_branches</span><span class="p">,</span> <span class="n">cbh</span><span class="p">)</span>
+        <span class="c1"># print(&quot;cbh &quot;, cbh.hex())</span>
+        <span class="c1"># print(&quot;cbh2 &quot;, s2rh(c[&quot;txId&quot;]))</span>
+        <span class="c1">#</span>
+        <span class="c1"># print(&quot;merkle_root &quot;, merkle_root.hex())</span>
+        <span class="c1"># print(&quot;branches &quot;, self.merkle_branches)</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="n">version</span> <span class="o">+</span> <span class="n">prev_hash</span> <span class="o">+</span> <span class="n">merkle_root</span> <span class="o">+</span> <span class="n">time</span> <span class="o">+</span> <span class="n">bits</span> <span class="o">+</span> <span class="n">nonce</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span>
+        <span class="n">block</span> <span class="o">+=</span><span class="n">int_to_var_int</span><span class="p">(</span><span class="nb">len</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transactions</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span>
+        <span class="n">block</span> <span class="o">+=</span> <span class="n">cb</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">transactions</span><span class="p">:</span>
+            <span class="n">block</span> <span class="o">+=</span> <span class="n">t</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">sha3_256</span><span class="p">(</span><span class="n">header</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">block</span>
+    <span class="c1"># def build_orphan(self, hash, ntime):</span>
+    <span class="c1">#     self.previous_block_hash =  reverse_hash(s2rh(hash)).decode()</span>
+    <span class="c1">#     self.time = hexlify(ntime.to_bytes(4, &quot;big&quot;)).decode()</span>
+    <span class="c1">#     self.height += 1</span>
+    <span class="c1">#     self.transactions = list()</span>
+    <span class="c1">#     self.txid_list = list()</span>
+    <span class="c1">#     self.scan_tx_list()</span>
+    <span class="c1">#     self.coinbase_tx = self.create_coinbase_transaction()</span>
+    <span class="c1">#     self.coinb1, self.coinb2 = self.split_coinbase()</span>
+    <span class="c1">#     self.target = bits2target(self.bits)</span>
+    <span class="c1">#     self.difficulty = target2difficulty(self.target)</span>
+    <span class="c1">#     self.merkle_branches = [hexlify(i).decode() for i in merkle_branches([self.coinbase_tx.hash, ] + self.txid_list)]</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../../../index.html">
+    <img class="logo" src="../../../_static/pybtc.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+<p class="blurb"> </p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=bitaps-com&repo=pybgl&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../classes.html">Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../functional.html">Pure functions reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Contributing</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015-2020, bitaps.com.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+    <a href="https://github.com/bitaps-com/pybgl" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>
