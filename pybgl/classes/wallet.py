@@ -56,7 +56,7 @@ class Wallet():
                     if len(init_vector) == 156:
                         self._init_vector = bytes.fromhex(init_vector)
                     else:
-                        self._init_vector = decode_base58_with_checksum(init_vector)
+                        self._init_vector = encode_base58(init_vector,checksum=True)
                     self._init_vector_type = "xprivate_key"
 
                     if path_type is None:
