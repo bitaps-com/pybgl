@@ -33,7 +33,9 @@ Quick library Installation
 
 .. code-block:: bash
 
-   $ pip install pybgl
+   $ git clone git://github.com/bitaps-com/pybgl
+   $ cd pybgl
+   $ python3 setup.py install
 
 
 Getting Started
