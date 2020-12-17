@@ -77,6 +77,21 @@ def xprivate_to_xpublic_key(xprivate_key, base58=True, hex=False):
         return key
 
 
+def decode_path(path, sub_path=False):
+    path = path.split('/')
+    if not sub_path:
+        if path[0] != 'm':
+            raise ValueError("invalid path")
+
+    r = []
+    for k in path if sub_path else path[1:]:
+        if k[-1] == "'":
+            k = int(k[:-1]) + HARDENED_KEY
+        else:
+            k = int(k)
+        r.append(k)
+    return r
+
 
 def derive_xkey(xkey, path, base58=None, hex=None):
     """
@@ -89,6 +104,8 @@ def derive_xkey(xkey, path, base58=None, hex=None):
                         In case True base58 flag value will be ignored.
     :return: extended child private/public key  in base58, HEX or bytes string format.
     """
+    if isinstance(path, str):
+        path = decode_path(path)
     if isinstance(xkey, str):
         xkey = decode_base58(xkey, checksum=True)
     if xkey[:4] in [MAINNET_XPRIVATE_KEY_PREFIX, TESTNET_XPRIVATE_KEY_PREFIX]:
