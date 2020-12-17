@@ -11,8 +11,9 @@ class Wallet():
 
     :param init_vector: (optional) initialization vector should be mnemonic phrase, extended public key,
                         extended private key, by default None (generate new wallet).
-    :param compressed: (optional) if set to True private key corresponding compressed public key,
-                       by default set to True. Recommended use only compressed public key.
+    :param passphrase: (optional) addition to mnemonic phrase
+    :param path_type: (optional) "BIP44", "BIP49", "BIP84"
+    :param address_type: (optional) "P2PKH", "P2SH_P2WPKH", "P2WPKH"
     :param testnet: (optional) if set to True mean that this private key for testnet Bitcoin network.
 
     """
@@ -23,10 +24,10 @@ class Wallet():
         self._init_vector = None
         self.account_public_xkey = None
         self.account_private_xkey = None
-        self.external_chain_private_xkey = None
+        self.external_chain_public_xkey = None
         self.external_chain_private_xkey = None
         self.internal_chain_public_xkey = None
-        self.internal_chain_public_xkey = None
+        self.internal_chain_private_xkey = None
         self.hardened = hardened
 
         if path_type in (None, "BIP44", "BIP49", "BIP84"):
@@ -50,13 +51,16 @@ class Wallet():
             self.seed = mnemonic_to_seed(m, passphrase=passphrase)
             self._init_vector = create_master_xprivate_key(self.seed, base58=False, testnet=testnet)
             self._init_vector_type = "xprivate_key"
+            if path_type is None:
+                self.path_type = "BIP84"
+
         else:
             if isinstance(init_vector, str):
                 if is_xprivate_key_valid(init_vector):
                     if len(init_vector) == 156:
                         self._init_vector = bytes.fromhex(init_vector)
                     else:
-                        self._init_vector = decode_base58(init_vector)
+                        self._init_vector = decode_base58(init_vector, checksum = True)
                     self._init_vector_type = "xprivate_key"
 
                     if path_type is None:
@@ -139,16 +143,16 @@ class Wallet():
 
                 self._init_vector = path_xkey_to_bip32_xkey(self._init_vector, base58=False)
 
-                key = derive_xkey(self._init_vector, *(self.path))
+                key = derive_xkey(self._init_vector, self.path)
                 self.account_private_xkey = bip32_xkey_to_path_xkey(key, self.path_type)
                 self.account_public_xkey = bip32_xkey_to_path_xkey(xprivate_to_xpublic_key(key), self.path_type)
 
-                key = derive_xkey(self._init_vector, *(self.path + [0]))
+                key = derive_xkey(self._init_vector, self.path + [0])
                 self.external_chain_private_xkey = bip32_xkey_to_path_xkey(key, self.path_type)
                 self.external_chain_public_xkey = bip32_xkey_to_path_xkey(xprivate_to_xpublic_key(key), self.path_type)
 
 
-                key = derive_xkey(self._init_vector, *(self.path + [1]))
+                key = derive_xkey(self._init_vector, self.path + [1])
 
                 self.internal_chain_private_xkey = bip32_xkey_to_path_xkey(key, self.path_type)
                 self.internal_chain_public_xkey = bip32_xkey_to_path_xkey(xprivate_to_xpublic_key(key), self.path_type)
@@ -183,6 +187,13 @@ class Wallet():
             raise ValueError("unknown path type %s" % path_type)
 
     def get_address(self, i, chain="external"):
+        """
+        The class method for creating a wallet address.
+
+        :param i: index
+        :param chain: "external", "internal"
+
+        """
         if chain not in ("external", "internal"):
             raise ValueError("invalid chain, should be [external, internal]")
         if self.hardened:
@@ -190,20 +201,20 @@ class Wallet():
 
         if chain == "external":
             if self.external_chain_private_xkey:
-                key = derive_xkey(path_xkey_to_bip32_xkey(self.external_chain_private_xkey), i)
+                key = derive_xkey(path_xkey_to_bip32_xkey(self.external_chain_private_xkey), [i])
                 private_key = private_from_xprivate_key(key)
                 pub_key = private_to_public_key(private_key)
             else:
-                key = derive_xkey(path_xkey_to_bip32_xkey(self.external_chain_public_xkey), i)
+                key = derive_xkey(path_xkey_to_bip32_xkey(self.external_chain_public_xkey), [i])
                 pub_key = public_from_xpublic_key(key)
                 private_key = None
         else:
             if self.internal_chain_private_xkey:
-                key = derive_xkey(path_xkey_to_bip32_xkey(self.internal_chain_private_xkey), i)
+                key = derive_xkey(path_xkey_to_bip32_xkey(self.internal_chain_private_xkey), [i])
                 private_key = private_from_xprivate_key(key)
                 pub_key = private_to_public_key(private_key)
             else:
-                key = derive_xkey(path_xkey_to_bip32_xkey(self.internal_chain_public_xkey), i)
+                key = derive_xkey(path_xkey_to_bip32_xkey(self.internal_chain_public_xkey), [i])
                 pub_key = public_from_xpublic_key(key)
                 private_key = None
 
@@ -219,7 +230,3 @@ class Wallet():
         else:
             r = {"address": address, "public_key": pub_key}
         return r
-
-
-
-
