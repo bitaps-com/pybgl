@@ -2,7 +2,7 @@
 Wallet
 ======
 
-The class for creating transaction.
+The class for creating HD wallet (BIP32).
 
 
 

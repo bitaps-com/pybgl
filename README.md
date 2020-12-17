@@ -29,7 +29,7 @@ To install pybgl
 
 ### Documentation
 
-Documentation is available at https://pybtc.readthedocs.io
+Documentation is available at https://pybgl.readthedocs.io
 
 
 ### How to Contribute

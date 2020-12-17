@@ -35,11 +35,26 @@
             
   <div class="section" id="blocks">
 <h1>Blocks<a class="headerlink" href="#blocks" title="Permalink to this headline">¶</a></h1>
-<p>The class for creating transaction.</p>
+<p>The class for creating block.</p>
 <dl class="py class">
 <dt id="pybgl.Block">
 <em class="property">class </em><code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">Block</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">raw_block</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">format</span><span class="o">=</span><span class="default_value">'decoded'</span></em>, <em class="sig-param"><span class="n">version</span><span class="o">=</span><span class="default_value">536870912</span></em>, <em class="sig-param"><span class="n">testnet</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">keep_raw_tx</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/classes/block.html#Block"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.Block" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>The class for Block object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>raw_block</strong> – (optional) raw raw_block in bytes or HEX encoded string, if no raw raw_block provided
+well be created new empty block template.</p></li>
+<li><p><strong>format</strong> – “raw” or “decoded” format. Raw format is mean that it represented in bytes for best performance.
+Decoded block is represented in human readable format using base68, hex, bech32,
+asm and opcodes. By default “decoded” format using.</p></li>
+<li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – block version for new template, by default 536870912.</p></li>
+<li><p><strong>testnet</strong> (<em>boolean</em>) – block type for “decoded” block representation.</p></li>
+<li><p><strong>keep_raw_tx</strong> (<em>boolean</em>) – raw tx option</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 </div>
 

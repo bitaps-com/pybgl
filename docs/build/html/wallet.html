@@ -35,7 +35,7 @@
             
   <div class="section" id="wallet">
 <h1>Wallet<a class="headerlink" href="#wallet" title="Permalink to this headline">¶</a></h1>
-<p>The class for creating transaction.</p>
+<p>The class for creating HD wallet (BIP32).</p>
 <dl class="py class">
 <dt id="pybgl.Wallet">
 <em class="property">class </em><code class="sig-prename descclassname">pybgl.</code><code class="sig-name descname">Wallet</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">init_vector</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">passphrase</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">path_type</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">init_account</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">address_type</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">testnet</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">hardened</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgl/classes/wallet.html#Wallet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgl.Wallet" title="Permalink to this definition">¶</a></dt>
@@ -45,8 +45,9 @@
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>init_vector</strong> – (optional) initialization vector should be mnemonic phrase, extended public key,
 extended private key, by default None (generate new wallet).</p></li>
-<li><p><strong>compressed</strong> – (optional) if set to True private key corresponding compressed public key,
-by default set to True. Recommended use only compressed public key.</p></li>
+<li><p><strong>passphrase</strong> – (optional) addition to mnemonic phrase</p></li>
+<li><p><strong>path_type</strong> – (optional) “BIP44”, “BIP49”, “BIP84”</p></li>
+<li><p><strong>address_type</strong> – (optional) “P2PKH”, “P2SH_P2WPKH”, “P2WPKH”</p></li>
 <li><p><strong>testnet</strong> – (optional) if set to True mean that this private key for testnet Bitcoin network.</p></li>
 </ul>
 </dd>

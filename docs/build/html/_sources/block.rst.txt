@@ -2,7 +2,7 @@
 Blocks
 ======
 
-The class for creating transaction.
+The class for creating block.
 
 
 

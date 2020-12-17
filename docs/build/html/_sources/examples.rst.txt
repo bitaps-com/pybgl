@@ -23,18 +23,6 @@ will be created P2WPKH address for mainnet.
       >>> a.private_key.wif
       'L1LAHLFBWcW2E1xRsUooVL9ajxJXtsAUjJJ4GuPTgHKAKNhy6fsD'
       >>>
-      >>> # create P2PKH legacy format
-      >>> pybgl.Address(address_type="P2PKH").address
-      '1FGruSGTHj5WVDe8G8G2dJgkLyTMizHo8G'
-      >>>
-      >>> # create testnet address
-      >>> pybgl.Address(address_type="P2PKH", testnet=True).address
-      'n1giVCK9XA9FfDAVuNtDEeHJhH4aaNbMPq'
-      >>>
-      >>> # create P2SH_P2WPKH SEGWIT adoption address
-      >>> pybgl.Address(address_type="P2SH_P2WPKH").address
-      '32UHE8g2XFvhC6FTKkERtdkeuQYikZNsWR'
-      >>>
 
 
 
@@ -78,39 +66,55 @@ Create private key
       False
       >>>
 
-Get public key from private key
-
-.. code-block:: bash
-
-      >>> import pybgl
-      >>> pybgl.private_to_public_key('5JCnJEggRKX5rscdGiqasmYdsyQ2fCYyLA7xYqSDRLEbWY7mZtq')
-      '04153e10a2c18ffe097d10d431023590d22508765509fc74f6fd504bea9442e0ad0782ec8c446d82e40cec6e04981c016e39fca1d50009f2008cbe9621a05ddb72'
-      >>>
-      >>> pybgl.public_key_to_address('04153e10a2c18ffe097d10d431023590d22508765509fc74f6fd504bea9442e0ad0782ec8c446d82e40cec6e04981c016e39fca1d50009f2008cbe9621a05ddb72')
-      >>>
-      >>> # this is uncompressed public key, so we can't create witness address
-      >>> # we have to set witness_version to None to get non segwit address
-      >>> pub = pybgl.private_to_public_key('5JCnJEggRKX5rscdGiqasmYdsyQ2fCYyLA7xYqSDRLEbWY7mZtq')
-      >>> pybgl.public_key_to_address(pub, witness_version=None)
-      '1Nj5GErZy4Q58XEEJPwh5ZiFVKpp2BRSxZ'
-      >>>
 
 Tools
 
 .. code-block:: bash
 
-      >>> pybgl.is_address_valid('1Nj5GErZy4Q58XEEJPwh5ZiFVKpp2BRSxZ')
+      >>> pybgl.is_address_valid('bgl1qdzjn6rd7e84lt2m5d3yf9jcg42ncdje7vhp4rl')
       True
-      >>> pybgl.address_type('1Nj5GErZy4Q58XEEJPwh5ZiFVKpp2BRSxZ')
-      'P2PKH'
-      >>> pybgl.address_net_type('1Nj5GErZy4Q58XEEJPwh5ZiFVKpp2BRSxZ')
+      >>> pybgl.address_type('bgl1qdzjn6rd7e84lt2m5d3yf9jcg42ncdje7vhp4rl')
+      'P2WPKH'
+      >>> pybgl.address_net_type('bgl1qdzjn6rd7e84lt2m5d3yf9jcg42ncdje7vhp4rl')
       'mainnet'
       >>>
 
 
 
+Create wallet
+--------------
+
+This is example of usage Wallet class.
+
+
+
+.. code-block:: bash
+
+      >>> import pybgl
+      >>> w=pybgl.Wallet(path_type='BIP84')
+      >>> w.mnemonic
+      'wet talent menu also ill comic smart unfold bone tape settle kangaroo caught tree wrap write diagram stomach have time addict unknown cruise polar'
+      >>> w.account_private_xkey
+      'zprvAchpNzD1oB4ndfzR6UBSeaFLuP2fNvbqsoP1PAfTwTLPESD8AFBbXigaoYzaZBjkJSxeYEXGQaVHzwZeSVYWCtX82GScZ9MwPYCmhBCFzJs'
+      >>> w.account_public_xkey
+      'zpub6qhAnVjudYd5rA4tCViT1iC5TQs9nPKhF2JcBZ55VnsN7EYGhnVr5X14enqueqWuz2nBBaDr77WT1Rnx82R1mTAbr9FbJq8oNdcf8UgndVA'
+      >>> w=pybgl.Wallet('wet talent menu also ill comic smart unfold bone tape settle kangaroo caught tree wrap write diagram stomach have time addict unknown cruise polar',path_type='BIP84')
+      >>> w.account_private_xkey
+      'zprvAchpNzD1oB4ndfzR6UBSeaFLuP2fNvbqsoP1PAfTwTLPESD8AFBbXigaoYzaZBjkJSxeYEXGQaVHzwZeSVYWCtX82GScZ9MwPYCmhBCFzJs'
+      >>> w.account_public_xkey
+      'zpub6qhAnVjudYd5rA4tCViT1iC5TQs9nPKhF2JcBZ55VnsN7EYGhnVr5X14enqueqWuz2nBBaDr77WT1Rnx82R1mTAbr9FbJq8oNdcf8UgndVA'
 
 
 
 
 
+Get wallet addresses
+--------------------
+
+
+.. code-block:: bash
+
+       >>> w.get_address(0)
+      {'address': 'bgl1qjc46yw4zgggj4e0x6ew6htuu234j4y9vds66e2', 'public_key': '037269845622edcc243d7b203de508c899c33963e1e2d45a47884b7df5ab4be1ce', 'private_key': 'L1U3Fviv4PGDxQatgXimWnU8yLy6jVz12wAyxjjP4XLyjDx7aycU'}
+      >>> w.get_address(1)
+      {'address': 'bgl1qxepx0uqdu696vjwvszcel3r8lzss9m0htq6n8u', 'public_key': '03739adff69d48d2f8bac2bfacfbb1dcf6264fad4e67761c1d6890bde7ed858571', 'private_key': 'KxGZ8JWxZpjBsz1QERdnrBRT2THEVkjr7q8fqCrJ7bFN1ys7EKPi'}

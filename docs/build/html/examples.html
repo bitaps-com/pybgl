@@ -49,18 +49,6 @@ will be created P2WPKH address for mainnet.</p>
 &gt;&gt;&gt; a.private_key.wif
 <span class="s1">&#39;L1LAHLFBWcW2E1xRsUooVL9ajxJXtsAUjJJ4GuPTgHKAKNhy6fsD&#39;</span>
 &gt;&gt;&gt;
-&gt;&gt;&gt; <span class="c1"># create P2PKH legacy format</span>
-&gt;&gt;&gt; pybgl.Address<span class="o">(</span><span class="nv">address_type</span><span class="o">=</span><span class="s2">&quot;P2PKH&quot;</span><span class="o">)</span>.address
-<span class="s1">&#39;1FGruSGTHj5WVDe8G8G2dJgkLyTMizHo8G&#39;</span>
-&gt;&gt;&gt;
-&gt;&gt;&gt; <span class="c1"># create testnet address</span>
-&gt;&gt;&gt; pybgl.Address<span class="o">(</span><span class="nv">address_type</span><span class="o">=</span><span class="s2">&quot;P2PKH&quot;</span>, <span class="nv">testnet</span><span class="o">=</span>True<span class="o">)</span>.address
-<span class="s1">&#39;n1giVCK9XA9FfDAVuNtDEeHJhH4aaNbMPq&#39;</span>
-&gt;&gt;&gt;
-&gt;&gt;&gt; <span class="c1"># create P2SH_P2WPKH SEGWIT adoption address</span>
-&gt;&gt;&gt; pybgl.Address<span class="o">(</span><span class="nv">address_type</span><span class="o">=</span><span class="s2">&quot;P2SH_P2WPKH&quot;</span><span class="o">)</span>.address
-<span class="s1">&#39;32UHE8g2XFvhC6FTKkERtdkeuQYikZNsWR&#39;</span>
-&gt;&gt;&gt;
 </pre></div>
 </div>
 </div>
@@ -99,29 +87,42 @@ False
 &gt;&gt;&gt;
 </pre></div>
 </div>
-<p>Get public key from private key</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;&gt;&gt; import pybgl
-&gt;&gt;&gt; pybgl.private_to_public_key<span class="o">(</span><span class="s1">&#39;5JCnJEggRKX5rscdGiqasmYdsyQ2fCYyLA7xYqSDRLEbWY7mZtq&#39;</span><span class="o">)</span>
-<span class="s1">&#39;04153e10a2c18ffe097d10d431023590d22508765509fc74f6fd504bea9442e0ad0782ec8c446d82e40cec6e04981c016e39fca1d50009f2008cbe9621a05ddb72&#39;</span>
-&gt;&gt;&gt;
-&gt;&gt;&gt; pybgl.public_key_to_address<span class="o">(</span><span class="s1">&#39;04153e10a2c18ffe097d10d431023590d22508765509fc74f6fd504bea9442e0ad0782ec8c446d82e40cec6e04981c016e39fca1d50009f2008cbe9621a05ddb72&#39;</span><span class="o">)</span>
-&gt;&gt;&gt;
-&gt;&gt;&gt; <span class="c1"># this is uncompressed public key, so we can&#39;t create witness address</span>
-&gt;&gt;&gt; <span class="c1"># we have to set witness_version to None to get non segwit address</span>
-&gt;&gt;&gt; <span class="nv">pub</span> <span class="o">=</span> pybgl.private_to_public_key<span class="o">(</span><span class="s1">&#39;5JCnJEggRKX5rscdGiqasmYdsyQ2fCYyLA7xYqSDRLEbWY7mZtq&#39;</span><span class="o">)</span>
-&gt;&gt;&gt; pybgl.public_key_to_address<span class="o">(</span>pub, <span class="nv">witness_version</span><span class="o">=</span>None<span class="o">)</span>
-<span class="s1">&#39;1Nj5GErZy4Q58XEEJPwh5ZiFVKpp2BRSxZ&#39;</span>
+<p>Tools</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;&gt;&gt; pybgl.is_address_valid<span class="o">(</span><span class="s1">&#39;bgl1qdzjn6rd7e84lt2m5d3yf9jcg42ncdje7vhp4rl&#39;</span><span class="o">)</span>
+True
+&gt;&gt;&gt; pybgl.address_type<span class="o">(</span><span class="s1">&#39;bgl1qdzjn6rd7e84lt2m5d3yf9jcg42ncdje7vhp4rl&#39;</span><span class="o">)</span>
+<span class="s1">&#39;P2WPKH&#39;</span>
+&gt;&gt;&gt; pybgl.address_net_type<span class="o">(</span><span class="s1">&#39;bgl1qdzjn6rd7e84lt2m5d3yf9jcg42ncdje7vhp4rl&#39;</span><span class="o">)</span>
+<span class="s1">&#39;mainnet&#39;</span>
 &gt;&gt;&gt;
 </pre></div>
 </div>
-<p>Tools</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;&gt;&gt; pybgl.is_address_valid<span class="o">(</span><span class="s1">&#39;1Nj5GErZy4Q58XEEJPwh5ZiFVKpp2BRSxZ&#39;</span><span class="o">)</span>
-True
-&gt;&gt;&gt; pybgl.address_type<span class="o">(</span><span class="s1">&#39;1Nj5GErZy4Q58XEEJPwh5ZiFVKpp2BRSxZ&#39;</span><span class="o">)</span>
-<span class="s1">&#39;P2PKH&#39;</span>
-&gt;&gt;&gt; pybgl.address_net_type<span class="o">(</span><span class="s1">&#39;1Nj5GErZy4Q58XEEJPwh5ZiFVKpp2BRSxZ&#39;</span><span class="o">)</span>
-<span class="s1">&#39;mainnet&#39;</span>
-&gt;&gt;&gt;
+</div>
+<div class="section" id="create-wallet">
+<h2>Create wallet<a class="headerlink" href="#create-wallet" title="Permalink to this headline">¶</a></h2>
+<p>This is example of usage Wallet class.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;&gt;&gt; import pybgl
+&gt;&gt;&gt; <span class="nv">w</span><span class="o">=</span>pybgl.Wallet<span class="o">(</span><span class="nv">path_type</span><span class="o">=</span><span class="s1">&#39;BIP84&#39;</span><span class="o">)</span>
+&gt;&gt;&gt; w.mnemonic
+<span class="s1">&#39;wet talent menu also ill comic smart unfold bone tape settle kangaroo caught tree wrap write diagram stomach have time addict unknown cruise polar&#39;</span>
+&gt;&gt;&gt; w.account_private_xkey
+<span class="s1">&#39;zprvAchpNzD1oB4ndfzR6UBSeaFLuP2fNvbqsoP1PAfTwTLPESD8AFBbXigaoYzaZBjkJSxeYEXGQaVHzwZeSVYWCtX82GScZ9MwPYCmhBCFzJs&#39;</span>
+&gt;&gt;&gt; w.account_public_xkey
+<span class="s1">&#39;zpub6qhAnVjudYd5rA4tCViT1iC5TQs9nPKhF2JcBZ55VnsN7EYGhnVr5X14enqueqWuz2nBBaDr77WT1Rnx82R1mTAbr9FbJq8oNdcf8UgndVA&#39;</span>
+&gt;&gt;&gt; <span class="nv">w</span><span class="o">=</span>pybgl.Wallet<span class="o">(</span><span class="s1">&#39;wet talent menu also ill comic smart unfold bone tape settle kangaroo caught tree wrap write diagram stomach have time addict unknown cruise polar&#39;</span>,path_type<span class="o">=</span><span class="s1">&#39;BIP84&#39;</span><span class="o">)</span>
+&gt;&gt;&gt; w.account_private_xkey
+<span class="s1">&#39;zprvAchpNzD1oB4ndfzR6UBSeaFLuP2fNvbqsoP1PAfTwTLPESD8AFBbXigaoYzaZBjkJSxeYEXGQaVHzwZeSVYWCtX82GScZ9MwPYCmhBCFzJs&#39;</span>
+&gt;&gt;&gt; w.account_public_xkey
+<span class="s1">&#39;zpub6qhAnVjudYd5rA4tCViT1iC5TQs9nPKhF2JcBZ55VnsN7EYGhnVr5X14enqueqWuz2nBBaDr77WT1Rnx82R1mTAbr9FbJq8oNdcf8UgndVA&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="get-wallet-addresses">
+<h2>Get wallet addresses<a class="headerlink" href="#get-wallet-addresses" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span> &gt;&gt;&gt; w.get_address<span class="o">(</span><span class="m">0</span><span class="o">)</span>
+<span class="o">{</span><span class="s1">&#39;address&#39;</span>: <span class="s1">&#39;bgl1qjc46yw4zgggj4e0x6ew6htuu234j4y9vds66e2&#39;</span>, <span class="s1">&#39;public_key&#39;</span>: <span class="s1">&#39;037269845622edcc243d7b203de508c899c33963e1e2d45a47884b7df5ab4be1ce&#39;</span>, <span class="s1">&#39;private_key&#39;</span>: <span class="s1">&#39;L1U3Fviv4PGDxQatgXimWnU8yLy6jVz12wAyxjjP4XLyjDx7aycU&#39;</span><span class="o">}</span>
+&gt;&gt;&gt; w.get_address<span class="o">(</span><span class="m">1</span><span class="o">)</span>
+<span class="o">{</span><span class="s1">&#39;address&#39;</span>: <span class="s1">&#39;bgl1qxepx0uqdu696vjwvszcel3r8lzss9m0htq6n8u&#39;</span>, <span class="s1">&#39;public_key&#39;</span>: <span class="s1">&#39;03739adff69d48d2f8bac2bfacfbb1dcf6264fad4e67761c1d6890bde7ed858571&#39;</span>, <span class="s1">&#39;private_key&#39;</span>: <span class="s1">&#39;KxGZ8JWxZpjBsz1QERdnrBRT2THEVkjr7q8fqCrJ7bFN1ys7EKPi&#39;</span><span class="o">}</span>
 </pre></div>
 </div>
 </div>
@@ -164,6 +165,8 @@ True
 <li class="toctree-l2"><a class="reference internal" href="#create-address">Create address</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#get-address-from-key">Get address from key</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pure-functions-for-address">Pure functions for address</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#create-wallet">Create wallet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#get-wallet-addresses">Get wallet addresses</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="classes.html">Reference</a></li>

@@ -110,6 +110,7 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">key</span></div>
 
+
 <span class="k">def</span> <span class="nf">decode_path</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">sub_path</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">sub_path</span><span class="p">:</span>
@@ -126,14 +127,12 @@
     <span class="k">return</span> <span class="n">r</span>
 
 
-
-
 <div class="viewcode-block" id="derive_xkey"><a class="viewcode-back" href="../../../functional.html#pybgl.derive_xkey">[docs]</a><span class="k">def</span> <span class="nf">derive_xkey</span><span class="p">(</span><span class="n">xkey</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">base58</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">hex</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Child Key derivation for extended private/public keys</span>
 <span class="sd">    </span>
 <span class="sd">    :param bytes xkey: extended private/public in base58, HEX or bytes string format.</span>
-<span class="sd">    :param list path_level: list of derivation path levels. For hardened derivation use HARDENED_KEY flag.</span>
+<span class="sd">    :param list path: list of derivation path levels. For hardened derivation use HARDENED_KEY flag.</span>
 <span class="sd">    :param boolean base58: (optional) return result as base58 encoded string, by default True.</span>
 <span class="sd">    :param boolean hex: (optional) return result as HEX encoded string, by default False.</span>
 <span class="sd">                        In case True base58 flag value will be ignored.</span>

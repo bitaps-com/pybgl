@@ -9,9 +9,22 @@ from pybgl.classes.transaction import Transaction
 import math
 
 class Block(dict):
+    """
+    The class for Block object
+
+    :param raw_block: (optional) raw raw_block in bytes or HEX encoded string, if no raw raw_block provided
+                well be created new empty block template.
+    :param format: "raw" or "decoded" format. Raw format is mean that it represented in bytes for best performance.
+                      Decoded block is represented in human readable format using base68, hex, bech32,
+                      asm and opcodes. By default "decoded" format using.
+    :param int version: block version for new template, by default 536870912.
+    :param boolean testnet: block type for "decoded" block representation.
+    :param boolean keep_raw_tx: raw tx option
+
+    """
     def __init__(self, raw_block=None, format="decoded", version=536870912, testnet=False, keep_raw_tx=False):
         if format not in ("decoded", "raw"):
-            raise ValueError("tx_format error, raw or decoded allowed")
+            raise ValueError("block_format error, raw or decoded allowed")
         self["format"] = format
         self["testnet"] = testnet
         self["header"] = None
@@ -150,14 +163,10 @@ class BlockTemplate():
         self.coinbasevalue  += math.floor(tx_fee / 10)
 
     def calculate_commitment(self, witness_reserved_value):
-        # print("calculate_commitment")
         wtxid_list = [b"\x00" * 32,]
         if self.transactions:
             for tx in self.transactions:
                 wtxid_list.append(s2rh(tx["hash"]))
-        # print("wtxid_list", wtxid_list)
-        # print("wtxid_list", wtxid_list)
-        # print("commitment ", double_sha256(merkle_root_double_sha256(wtxid_list, return_hex=0) + witness_reserved_value))
         return double_sha256(merkle_root_double_sha256(wtxid_list, return_hex=0) + witness_reserved_value)
 
     def split_coinbase(self):
@@ -224,17 +233,7 @@ class BlockTemplate():
         c = Transaction(cb)
         cbh =  s2rh(c["txId"])
         merkle_root = merkle_root_from_branches(self.merkle_branches, cbh)
-        # print("version ", version.hex())
-        # print("prev_hash ", self.previous_block_hash)
-        # print("cbh ", cbh.hex())
-        # print("cbh2 ", s2rh(c["txId"]))
-        # merkle_root = bytes_from_hex("6a24aa21a9ede2f61c3f71d1defd3fa999dfa36953755c690689799962b48bebd836974e8cf9")
-        # merkle_root = s2rh(c["txId"])
-        # print("merkle_root ", merkle_root.hex())
-        # print("merkle_root ", s2rh(c["txId"]))
-        # print("branches ", self.merkle_branches)
         header = version + prev_hash + merkle_root + time + bits + nonce
-        # print("header", header.hex())
         block = header.hex()
         block +=int_to_var_int(len (self.transactions) + 1).hex()
         block += cb
@@ -253,13 +252,7 @@ class BlockTemplate():
         nonce = s2rh(nonce)
         cbh = sha3_256(bytes_from_hex(cb))
         c = Transaction(cb)
-        # cbh = sha3_256(c["txId"])
         merkle_root = merkle_root_from_branches(self.merkle_branches, cbh)
-        # print("cbh ", cbh.hex())
-        # print("cbh2 ", s2rh(c["txId"]))
-        #
-        # print("merkle_root ", merkle_root.hex())
-        # print("branches ", self.merkle_branches)
         header = version + prev_hash + merkle_root + time + bits + nonce
         block = header.hex()
         block +=int_to_var_int(len (self.transactions) + 1).hex()
@@ -267,15 +260,3 @@ class BlockTemplate():
         for t in self.transactions:
             block += t["data"]
         return sha3_256(header,1), block
-    # def build_orphan(self, hash, ntime):
-    #     self.previous_block_hash =  reverse_hash(s2rh(hash)).decode()
-    #     self.time = hexlify(ntime.to_bytes(4, "big")).decode()
-    #     self.height += 1
-    #     self.transactions = list()
-    #     self.txid_list = list()
-    #     self.scan_tx_list()
-    #     self.coinbase_tx = self.create_coinbase_transaction()
-    #     self.coinb1, self.coinb2 = self.split_coinbase()
-    #     self.target = bits2target(self.bits)
-    #     self.difficulty = target2difficulty(self.target)
-    #     self.merkle_branches = [hexlify(i).decode() for i in merkle_branches([self.coinbase_tx.hash, ] + self.txid_list)]

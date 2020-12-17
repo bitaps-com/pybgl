@@ -45,8 +45,9 @@
 
 <span class="sd">    :param init_vector: (optional) initialization vector should be mnemonic phrase, extended public key,</span>
 <span class="sd">                        extended private key, by default None (generate new wallet).</span>
-<span class="sd">    :param compressed: (optional) if set to True private key corresponding compressed public key,</span>
-<span class="sd">                       by default set to True. Recommended use only compressed public key.</span>
+<span class="sd">    :param passphrase: (optional) addition to mnemonic phrase</span>
+<span class="sd">    :param path_type: (optional) &quot;BIP44&quot;, &quot;BIP49&quot;, &quot;BIP84&quot;</span>
+<span class="sd">    :param address_type: (optional) &quot;P2PKH&quot;, &quot;P2SH_P2WPKH&quot;, &quot;P2WPKH&quot;</span>
 <span class="sd">    :param testnet: (optional) if set to True mean that this private key for testnet Bitcoin network.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -57,10 +58,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_init_vector</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">account_public_xkey</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">account_private_xkey</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">external_chain_private_xkey</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">external_chain_public_xkey</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">external_chain_private_xkey</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">internal_chain_public_xkey</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">internal_chain_public_xkey</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">internal_chain_private_xkey</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">hardened</span> <span class="o">=</span> <span class="n">hardened</span>
 
         <span class="k">if</span> <span class="n">path_type</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;BIP44&quot;</span><span class="p">,</span> <span class="s2">&quot;BIP49&quot;</span><span class="p">,</span> <span class="s2">&quot;BIP84&quot;</span><span class="p">):</span>
@@ -84,13 +85,16 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="n">mnemonic_to_seed</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">passphrase</span><span class="o">=</span><span class="n">passphrase</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_init_vector</span> <span class="o">=</span> <span class="n">create_master_xprivate_key</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">,</span> <span class="n">base58</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">testnet</span><span class="o">=</span><span class="n">testnet</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_init_vector_type</span> <span class="o">=</span> <span class="s2">&quot;xprivate_key&quot;</span>
+            <span class="k">if</span> <span class="n">path_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">path_type</span> <span class="o">=</span> <span class="s2">&quot;BIP84&quot;</span>
+
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">init_vector</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">is_xprivate_key_valid</span><span class="p">(</span><span class="n">init_vector</span><span class="p">):</span>
                     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">init_vector</span><span class="p">)</span> <span class="o">==</span> <span class="mi">156</span><span class="p">:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">_init_vector</span> <span class="o">=</span> <span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="n">init_vector</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">_init_vector</span> <span class="o">=</span> <span class="n">decode_base58_with_checksum</span><span class="p">(</span><span class="n">init_vector</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_init_vector</span> <span class="o">=</span> <span class="n">decode_base58</span><span class="p">(</span><span class="n">init_vector</span><span class="p">,</span> <span class="n">checksum</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_init_vector_type</span> <span class="o">=</span> <span class="s2">&quot;xprivate_key&quot;</span>
 
                     <span class="k">if</span> <span class="n">path_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -173,16 +177,16 @@
 
                 <span class="bp">self</span><span class="o">.</span><span class="n">_init_vector</span> <span class="o">=</span> <span class="n">path_xkey_to_bip32_xkey</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_init_vector</span><span class="p">,</span> <span class="n">base58</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-                <span class="n">key</span> <span class="o">=</span> <span class="n">derive_xkey</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_init_vector</span><span class="p">,</span> <span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="n">derive_xkey</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_init_vector</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">account_private_xkey</span> <span class="o">=</span> <span class="n">bip32_xkey_to_path_xkey</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">path_type</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">account_public_xkey</span> <span class="o">=</span> <span class="n">bip32_xkey_to_path_xkey</span><span class="p">(</span><span class="n">xprivate_to_xpublic_key</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">path_type</span><span class="p">)</span>
 
-                <span class="n">key</span> <span class="o">=</span> <span class="n">derive_xkey</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_init_vector</span><span class="p">,</span> <span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">+</span> <span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="n">derive_xkey</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_init_vector</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">+</span> <span class="p">[</span><span class="mi">0</span><span class="p">])</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">external_chain_private_xkey</span> <span class="o">=</span> <span class="n">bip32_xkey_to_path_xkey</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">path_type</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">external_chain_public_xkey</span> <span class="o">=</span> <span class="n">bip32_xkey_to_path_xkey</span><span class="p">(</span><span class="n">xprivate_to_xpublic_key</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">path_type</span><span class="p">)</span>
 
 
-                <span class="n">key</span> <span class="o">=</span> <span class="n">derive_xkey</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_init_vector</span><span class="p">,</span> <span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">+</span> <span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="n">derive_xkey</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_init_vector</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">+</span> <span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 
                 <span class="bp">self</span><span class="o">.</span><span class="n">internal_chain_private_xkey</span> <span class="o">=</span> <span class="n">bip32_xkey_to_path_xkey</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">path_type</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">internal_chain_public_xkey</span> <span class="o">=</span> <span class="n">bip32_xkey_to_path_xkey</span><span class="p">(</span><span class="n">xprivate_to_xpublic_key</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">path_type</span><span class="p">)</span>
@@ -217,6 +221,13 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;unknown path type </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">path_type</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">get_address</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">chain</span><span class="o">=</span><span class="s2">&quot;external&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The class method for creating a wallet address.</span>
+
+<span class="sd">        :param i: index</span>
+<span class="sd">        :param chain: &quot;external&quot;, &quot;internal&quot;</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">chain</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;external&quot;</span><span class="p">,</span> <span class="s2">&quot;internal&quot;</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid chain, should be [external, internal]&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hardened</span><span class="p">:</span>
@@ -224,20 +235,20 @@
 
         <span class="k">if</span> <span class="n">chain</span> <span class="o">==</span> <span class="s2">&quot;external&quot;</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">external_chain_private_xkey</span><span class="p">:</span>
-                <span class="n">key</span> <span class="o">=</span> <span class="n">derive_xkey</span><span class="p">(</span><span class="n">path_xkey_to_bip32_xkey</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">external_chain_private_xkey</span><span class="p">),</span> <span class="n">i</span><span class="p">)</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="n">derive_xkey</span><span class="p">(</span><span class="n">path_xkey_to_bip32_xkey</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">external_chain_private_xkey</span><span class="p">),</span> <span class="p">[</span><span class="n">i</span><span class="p">])</span>
                 <span class="n">private_key</span> <span class="o">=</span> <span class="n">private_from_xprivate_key</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
                 <span class="n">pub_key</span> <span class="o">=</span> <span class="n">private_to_public_key</span><span class="p">(</span><span class="n">private_key</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">key</span> <span class="o">=</span> <span class="n">derive_xkey</span><span class="p">(</span><span class="n">path_xkey_to_bip32_xkey</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">external_chain_public_xkey</span><span class="p">),</span> <span class="n">i</span><span class="p">)</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="n">derive_xkey</span><span class="p">(</span><span class="n">path_xkey_to_bip32_xkey</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">external_chain_public_xkey</span><span class="p">),</span> <span class="p">[</span><span class="n">i</span><span class="p">])</span>
                 <span class="n">pub_key</span> <span class="o">=</span> <span class="n">public_from_xpublic_key</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
                 <span class="n">private_key</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">internal_chain_private_xkey</span><span class="p">:</span>
-                <span class="n">key</span> <span class="o">=</span> <span class="n">derive_xkey</span><span class="p">(</span><span class="n">path_xkey_to_bip32_xkey</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">internal_chain_private_xkey</span><span class="p">),</span> <span class="n">i</span><span class="p">)</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="n">derive_xkey</span><span class="p">(</span><span class="n">path_xkey_to_bip32_xkey</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">internal_chain_private_xkey</span><span class="p">),</span> <span class="p">[</span><span class="n">i</span><span class="p">])</span>
                 <span class="n">private_key</span> <span class="o">=</span> <span class="n">private_from_xprivate_key</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
                 <span class="n">pub_key</span> <span class="o">=</span> <span class="n">private_to_public_key</span><span class="p">(</span><span class="n">private_key</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">key</span> <span class="o">=</span> <span class="n">derive_xkey</span><span class="p">(</span><span class="n">path_xkey_to_bip32_xkey</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">internal_chain_public_xkey</span><span class="p">),</span> <span class="n">i</span><span class="p">)</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="n">derive_xkey</span><span class="p">(</span><span class="n">path_xkey_to_bip32_xkey</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">internal_chain_public_xkey</span><span class="p">),</span> <span class="p">[</span><span class="n">i</span><span class="p">])</span>
                 <span class="n">pub_key</span> <span class="o">=</span> <span class="n">public_from_xpublic_key</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
                 <span class="n">private_key</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -253,10 +264,6 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">r</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;address&quot;</span><span class="p">:</span> <span class="n">address</span><span class="p">,</span> <span class="s2">&quot;public_key&quot;</span><span class="p">:</span> <span class="n">pub_key</span><span class="p">}</span>
         <span class="k">return</span> <span class="n">r</span></div>
-
-
-
-
 </pre></div>
 
           </div>
