@@ -92,17 +92,18 @@ This is example of usage Wallet class.
 
       >>> import pybgl
       >>> w=pybgl.Wallet(path_type='BIP84')
-      >>> w.get_mnemonic()
+      >>> w.mnemonic
       'wet talent menu also ill comic smart unfold bone tape settle kangaroo caught tree wrap write diagram stomach have time addict unknown cruise polar'
-      >>> w.get_account_private_xkey()
+      >>> w.account_private_xkey
       'zprvAchpNzD1oB4ndfzR6UBSeaFLuP2fNvbqsoP1PAfTwTLPESD8AFBbXigaoYzaZBjkJSxeYEXGQaVHzwZeSVYWCtX82GScZ9MwPYCmhBCFzJs'
-      >>> w.get_account_public_xkey()
+      >>> w.account_public_xkey
       'zpub6qhAnVjudYd5rA4tCViT1iC5TQs9nPKhF2JcBZ55VnsN7EYGhnVr5X14enqueqWuz2nBBaDr77WT1Rnx82R1mTAbr9FbJq8oNdcf8UgndVA'
       >>> w=pybgl.Wallet('wet talent menu also ill comic smart unfold bone tape settle kangaroo caught tree wrap write diagram stomach have time addict unknown cruise polar',path_type='BIP84')
-      >>> w.get_account_private_xkey()
+      >>> w.account_private_xkey
       'zprvAchpNzD1oB4ndfzR6UBSeaFLuP2fNvbqsoP1PAfTwTLPESD8AFBbXigaoYzaZBjkJSxeYEXGQaVHzwZeSVYWCtX82GScZ9MwPYCmhBCFzJs'
-      >>> w.get_account_public_xkey()
+      >>> w.account_public_xkey
       'zpub6qhAnVjudYd5rA4tCViT1iC5TQs9nPKhF2JcBZ55VnsN7EYGhnVr5X14enqueqWuz2nBBaDr77WT1Rnx82R1mTAbr9FbJq8oNdcf8UgndVA'
+      >>>
 
 
 
@@ -126,3 +127,4 @@ Get wallet addresses
        'KxGZ8JWxZpjBsz1QERdnrBRT2THEVkjr7q8fqCrJ7bFN1ys7EKPi'
        >>> w.get_address(1)['public_key']
        '03739adff69d48d2f8bac2bfacfbb1dcf6264fad4e67761c1d6890bde7ed858571'
+       >>>

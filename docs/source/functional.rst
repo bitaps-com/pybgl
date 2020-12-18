@@ -94,7 +94,9 @@ Hash encoding
 Merkle root
 ===========
 
-.. autofunction:: pybgl.merkle_root
+.. autofunction:: pybgl.merkle_root_double_sha256
+.. autofunction:: pybgl.merkle_root_sha256
+.. autofunction:: pybgl.merkle_root_sha3_256
 .. autofunction:: pybgl.merkle_branches
 
 
@@ -110,6 +112,9 @@ Difficulty
 Tools
 =====
 
+
+.. autofunction:: pybgl.encode_base58
+.. autofunction:: pybgl.decode_base58
 .. autofunction:: pybgl.bytes_needed
 .. autofunction:: pybgl.int_to_bytes
 .. autofunction:: pybgl.bytes_to_int
