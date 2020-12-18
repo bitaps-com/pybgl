@@ -50,7 +50,7 @@ def s2rh(hash_string):
     """
     Decode HEX  transaction hash to bytes with byte order change
 
-    :param raw_hash: transaction hash in bytes string.
+    :param hash_string: HEX encoded string.
     :return:  bytes string.
     """
     return bytes_from_hex(hash_string)[::-1]

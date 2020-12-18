@@ -16,27 +16,40 @@ for n, i in enumerate(base32charset_upcase):
     int_base32_map[i] = n
 
 
-def encode_base58(b, checksum = False):
+def encode_base58(bytes, checksum = False):
 
-    """Encode bytes to a base58-encoded string"""
+    """Encode bytes to a base58-encoded string
+      :param bytes: bytes string.
+      :param checksum: (optional) boolean, by default is False.
+      :return: base58 string format.
+
+    """
+
     # Convert big-endian bytes to integer
-    if not b:
+    if not bytes:
         return ''
-    b = get_bytes(b)
+    b = get_bytes(bytes)
     if checksum:
         return __encode_base58__(b"%s%s" % (b, double_sha256(b)[:4]))
     return __encode_base58__(b)
 
 
-def decode_base58(s, hex = False, checksum = False, verify_checksum = False):
-    """Decode a base58-encoding string, returning bytes"""
+def decode_base58(string_base58, hex = False, checksum = False, verify_checksum = False):
+    """Decode a base58-encoding string
+      :param string_base58: base58 string.
+      :param hex: (optional) return result as HEX encoded string, by default False.
+      :param checksum: (optional) boolean, by default is False.
+      :param verify_checksum: (optional) boolean, by default is False.
+      :return: HEX or bytes string format.
+    """
+
     if verify_checksum:
         checksum = True
-    if not s:
+    if not string_base58:
         return b''
-    if not isinstance(s, str):
+    if not isinstance(string_base58, str):
         raise ValueError("base58 string required")
-    b = __decode_base58__(s)
+    b = __decode_base58__(string_base58)
     if checksum:
         if verify_checksum:
             if double_sha256(b[:-4])[:4] != b[-4:]:

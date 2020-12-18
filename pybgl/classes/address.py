@@ -19,7 +19,7 @@ class PrivateKey():
                 new random private key will be created.
     :param compressed: (optional) if set to True private key corresponding compressed public key,
                        by default set to True. Recommended use only compressed public key.
-    :param testnet: (optional) if set to True mean that this private key for testnet Bitcoin network.
+    :param testnet: (optional) flag for testnet network, by default is False.
 
     """
     def __init__(self, key=None, compressed=True, testnet=False):
@@ -30,7 +30,6 @@ class PrivateKey():
             self.compressed = compressed
             #: flag for testnet network private key  (boolean)
             self.testnet = testnet
-
             #: private key in  bytes (bytes)
             self.key = create_private_key(wif=False)
             #: private key in HEX (string)
@@ -91,7 +90,7 @@ class PublicKey():
                 
     :param compressed: (optional) if set to True private key corresponding compressed public key,
                        by default set to True. Recommended use only compressed public key.
-    :param testnet: (optional) if set to True mean that this private key for testnet Bitcoin network.
+    :param testnet: (optional) flag for testnet network, by default is False.
 
     """
     def __init__(self, key, compressed=True, testnet=False):
@@ -120,7 +119,7 @@ class PublicKey():
                                                compressed=key.compressed,
                                                hex=False)
 
-        #: public key in  bytes (bytes)
+        #: public key in bytes (bytes)
         self.key = public_key
         #: public key in HEX (string)
         self.hex = self.key.hex()
@@ -142,9 +141,9 @@ class Address():
                 
                 In case no key specified new Address will be created with random keys.
     :param address_type: (optional) P2PKH, PUBKEY, P2WPKH, P2SH_P2WPKH, by default P2WPKH.
+    :param testnet: (optional) flag for testnet network, by default is False.
     :param compressed: (optional) if set to True private key corresponding compressed public key,
                        by default set to True. Recommended use only compressed public key.
-    :param testnet: (optional) if set to True mean that this private key for testnet Bitcoin network.
 
     In case instance is created from WIF private key, ``PrivateKey`` or ``PublicKey`` compressed and testnet flags
     already contain in initial key parameter and will be ignored.

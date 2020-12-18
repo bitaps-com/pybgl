@@ -26,13 +26,14 @@ class Transaction(dict):
 
     :param raw_tx: (optional) raw transaction in bytes or HEX encoded string, if no raw transaction provided
                 well be created new empty transaction template.
-    :param tx_format: "raw" or "decoded" format. Raw format is mean that all transaction represented in bytes
-                      for best performance.
-                      Decoded transaction is represented in human readable format using base68, hex, bech32, 
-                      asm and opcodes. By default "decoded" format using.
-    :param int version: transaction version for new template, by default 1.
-    :param int lock_time: transaction lock time for new template, by default 0.
-    :param boolean testnet: address type for "decoded" transaction representation.
+    :param format: (optional) "raw" or "decoded" format. Raw format is mean that all transaction represented in bytes for best performance.
+                    Decoded transaction is represented in human readable format using base68, hex, bech32,
+                    asm and opcodes. By default "decoded" format using.
+    :param version: (optional)  transaction version for new template, by default 1.
+    :param lock_time: (optional)  transaction lock time for new template, by default 0.
+    :param testnet: (optional) flag for testnet network, by default is False.
+    :param auto_commit: (optional) boolean, by default is True.
+    :param keep_raw_tx: (optional) boolean, by default is False.
 
     """
     def __init__(self, raw_tx=None, format="decoded", version=1,
@@ -178,8 +179,7 @@ class Transaction(dict):
         """
         change Transaction object representation to "decoded" human readable format
 
-        :param bool testnet: (optional) address type for "decoded" transaction representation, by default None.
-                            if None used type from transaction property "format".
+        :param testnet: (optional) flag for testnet network, by default is False.
         """
         if self["format"] == "decoded":
             self.encode()
@@ -350,9 +350,9 @@ class Transaction(dict):
         """
         Get serialized transaction 
         
-        :param bool segwit: (optional) flag for segwit representation of serialized transaction, by 
+        :param segwit: (optional) flag for segwit representation of serialized transaction, by
                             default True.
-        :param bool hex: (optional) if set to True return HEX encoded string, by default True.
+        :param hex: (optional) if set to True return HEX encoded string, by default True.
         :return str,bytes: serialized transaction in HEX or bytes.
          """
         chunks = []

@@ -11,8 +11,8 @@ def generate_entropy(strength=256, hex=True):
     """
     Generate 128-256 bits entropy bytes string
 
-    :param int strength: entropy bits strength, by default is 256 bit.
-    :param boolean hex: return HEX encoded string result flag, by default True.
+    :param strength: (optional) entropy bits strength, by default is 256 bit.
+    :param hex: (optional) return HEX encoded string result flag, by default True.
     :return: HEX encoded or bytes entropy string.
     """
     if strength not in [128, 160, 192, 224, 256]:
@@ -33,9 +33,9 @@ def load_word_list(language='english', word_list_dir=None):
     """
     Load the word list from local file.
 
-    :param str language: (optional) uses word list language (chinese_simplified, chinese_traditional, english, french,
+    :param language: (optional) uses word list language (chinese_simplified, chinese_traditional, english, french,
                          italian, japanese, korean, spanish), by default is english.
-    :param str word_list_dir: (optional) path to a directory containing a list of words,
+    :param word_list_dir: (optional) path to a directory containing a list of words,
                               by default None (use BIP39 standard list)
     :return: list of words.
     """
@@ -55,12 +55,12 @@ def entropy_to_mnemonic(entropy, language='english', word_list_dir=None, word_li
     """
     Convert entropy to mnemonic words string.
 
-    :param str,bytes entropy: random entropy HEX encoded or bytes string.
-    :param str language: (optional) uses word list language (chinese_simplified, chinese_traditional, english, french,
+    :param entropy: random entropy HEX encoded or bytes string.
+    :param language: (optional) uses word list language (chinese_simplified, chinese_traditional, english, french,
                          italian, japanese, korean, spanish), by default is english.
-    :param str word_list_dir: (optional) path to a directory containing a list of words,
+    :param word_list_dir: (optional) path to a directory containing a list of words,
                               by default None (use BIP39 standard list)
-    :param list word_list: (optional) already loaded word list, by default None    
+    :param word_list: (optional) already loaded word list, by default None
     :return: mnemonic words string.
     """
     entropy = get_bytes(entropy)
@@ -85,13 +85,13 @@ def mnemonic_to_entropy(mnemonic, language='english', word_list_dir=None,
     """
     Converting mnemonic words to entropy.
     
-    :param str mnemonic: mnemonic words string (space separated)
-    :param str language: (optional) uses word list language (chinese_simplified, chinese_traditional, english, french,
+    :param mnemonic: mnemonic words string (space separated)
+    :param language: (optional) uses word list language (chinese_simplified, chinese_traditional, english, french,
                          italian, japanese, korean, spanish), by default is english.
-    :param str word_list_dir: (optional) path to a directory containing a list of words,
+    :param word_list_dir: (optional) path to a directory containing a list of words,
                               by default None (use BIP39 standard list)
-    :param list word_list: (optional) already loaded word list, by default None    
-    :param boolean hex: return HEX encoded string result flag, by default True.
+    :param word_list: (optional) already loaded word list, by default None
+    :param hex: return HEX encoded string result flag, by default True.
     :return: bytes string.
     """
     if word_list is None:
@@ -146,10 +146,10 @@ def mnemonic_to_seed(mnemonic, passphrase="", hex=True):
     """
     Converting mnemonic words string to seed for uses in key derivation (BIP-0032).
 
-    :param str mnemonic: mnemonic words string (space separated)
-    :param str passphrase: (optional) passphrase to get ability use 2FA approach for 
+    :param mnemonic: mnemonic words string (space separated)
+    :param passphrase: (optional) passphrase to get ability use 2FA approach for
                           creating seed, by default empty string.
-    :param boolean hex: return HEX encoded string result flag, by default True.
+    :param hex: (optional) return HEX encoded string result flag, by default True.
     :return: HEX encoded or bytes string.
     """
     if not isinstance(mnemonic, str):

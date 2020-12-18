@@ -11,10 +11,11 @@ class Wallet():
 
     :param init_vector: (optional) initialization vector should be mnemonic phrase, extended public key,
                         extended private key, by default None (generate new wallet).
-    :param passphrase: (optional) addition to mnemonic phrase
-    :param path_type: (optional) "BIP44", "BIP49", "BIP84"
+    :param passphrase: (optional) passphrase to get ability use 2FA approach for
+                          creating seed, by default empty string.
+    :param path_type: (optional) "BIP44", "BIP49", "BIP84", by default "BIP84"
     :param address_type: (optional) "P2PKH", "P2SH_P2WPKH", "P2WPKH"
-    :param testnet: (optional) if set to True mean that this private key for testnet Bitcoin network.
+    :param testnet: (optional) flag for testnet network, by default is False.
 
     """
     def __init__(self, init_vector=None, passphrase="", path_type=None,
@@ -195,8 +196,12 @@ class Wallet():
         The class method for creating a wallet address.
 
         :param i: index
-        :param chain: "external", "internal"
+        :param chain: (optional) "external", "internal", by default "external"
+        :return: dictionary:
 
+                - address
+                - public_key
+                - private_key (in case wallet is restored from private xkey or mnemonic)
         """
         if chain not in ("external", "internal"):
             raise ValueError("invalid chain, should be [external, internal]")

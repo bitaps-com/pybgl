@@ -12,14 +12,14 @@ class Block(dict):
     """
     The class for Block object
 
-    :param raw_block: (optional) raw raw_block in bytes or HEX encoded string, if no raw raw_block provided
+    :param raw_block: (optional) raw_block in bytes or HEX encoded string, if no raw raw_block provided
                 well be created new empty block template.
-    :param format: "raw" or "decoded" format. Raw format is mean that it represented in bytes for best performance.
+    :param format: (optional) "raw" or "decoded" format. Raw format is mean that it represented in bytes for best performance.
                       Decoded block is represented in human readable format using base68, hex, bech32,
                       asm and opcodes. By default "decoded" format using.
-    :param int version: block version for new template, by default 536870912.
-    :param boolean testnet: block type for "decoded" block representation.
-    :param boolean keep_raw_tx: raw tx option
+    :param version: (optional) block version for new template, by default 536870912.
+    :param testnet: (optional) flag for testnet network, by default is False.
+    :param keep_raw_tx: (optional) boolean, by default is False.
 
     """
     def __init__(self, raw_block=None, format="decoded", version=536870912, testnet=False, keep_raw_tx=False):
@@ -79,6 +79,11 @@ class Block(dict):
             self.decode(testnet=testnet)
 
     def decode(self, testnet=None):
+        """
+        Decoded block is represented in human readable format
+
+        :param testnet: (optional) flag for testnet network, by default is False.
+        """
         self["format"] = "decoded"
         if testnet is not None:
             self["testnet"] = testnet
