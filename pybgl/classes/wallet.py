@@ -20,9 +20,12 @@ class Wallet():
     def __init__(self, init_vector=None, passphrase="", path_type=None,
                  init_account=None, address_type=None, testnet=False, hardened=False):
         self.seed = None
+        #: mnemonic (string)
         self.mnemonic = None
         self._init_vector = None
+        #: account_public_xkey (string)
         self.account_public_xkey = None
+        #: account_private_xkey (string)
         self.account_private_xkey = None
         self.external_chain_public_xkey = None
         self.external_chain_private_xkey = None
@@ -185,27 +188,6 @@ class Wallet():
             pass
         else:
             raise ValueError("unknown path type %s" % path_type)
-
-    def get_mnemonic(self):
-        """
-        The class method to get wallet mnemonic.
-        """
-        mnemonic=self.mnemonic
-        return mnemonic
-
-    def get_account_public_xkey(self):
-        """
-        The class method to get wallet account public  xkey.
-        """
-        account_public_xkey=self.account_public_xkey
-        return account_public_xkey
-
-    def get_account_private_xkey(self):
-        """
-        The class method to get wallet account private  xkey.
-        """
-        account_private_xkey=self.account_private_xkey
-        return account_private_xkey
 
 
     def get_address(self, i, chain="external"):
