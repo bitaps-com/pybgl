@@ -57,7 +57,7 @@ release = ''
 # ones.
 import mock
 
-MOCK_MODULES = ['git+https://github.com/bitaps-com/pybtc']
+MOCK_MODULES = ['_sha3_hash','_secp256k1','_bitarray','cache_strategies']
 for mod_name in MOCK_MODULES:
    sys.modules[mod_name] = mock.Mock()
 
