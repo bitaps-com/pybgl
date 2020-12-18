@@ -78,7 +78,7 @@ class Wallet():
                     if len(init_vector) == 156:
                         self._init_vector = bytes.fromhex(init_vector)
                     else:
-                        self._init_vector = decode_base58(init_vector)
+                        self._init_vector = decode_base58(init_vector, checksum = True)
                     self._init_vector_type = "xpublic_key"
                     if path_type is None:
                         if self._init_vector[:4] in (MAINNET_M49_XPUBLIC_KEY_PREFIX,
@@ -172,11 +172,11 @@ class Wallet():
                 self.account_private_xkey = None
                 self.account_public_xkey = bip32_xkey_to_path_xkey(self._init_vector, self.path_type)
 
-                key = derive_xkey(self._init_vector, 0)
+                key = derive_xkey(self._init_vector, [0])
                 self.external_chain_private_xkey = None
                 self.external_chain_public_xkey = bip32_xkey_to_path_xkey(key, self.path_type)
 
-                key = derive_xkey(self._init_vector, 1)
+                key = derive_xkey(self._init_vector, [1])
                 self.internal_chain_private_xkey = None
                 self.internal_chain_public_xkey = bip32_xkey_to_path_xkey(key, self.path_type)
         elif self.path_type == "Custom":
@@ -185,6 +185,28 @@ class Wallet():
             pass
         else:
             raise ValueError("unknown path type %s" % path_type)
+
+    def get_mnemonic(self):
+        """
+        The class method to get wallet mnemonic.
+        """
+        mnemonic=self.mnemonic
+        return mnemonic
+
+    def get_account_public_xkey(self):
+        """
+        The class method to get wallet account public  xkey.
+        """
+        account_public_xkey=self.account_public_xkey
+        return account_public_xkey
+
+    def get_account_private_xkey(self):
+        """
+        The class method to get wallet account private  xkey.
+        """
+        account_private_xkey=self.account_private_xkey
+        return account_private_xkey
+
 
     def get_address(self, i, chain="external"):
         """

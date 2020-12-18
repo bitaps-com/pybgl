@@ -92,16 +92,16 @@ This is example of usage Wallet class.
 
       >>> import pybgl
       >>> w=pybgl.Wallet(path_type='BIP84')
-      >>> w.mnemonic
+      >>> w.get_mnemonic()
       'wet talent menu also ill comic smart unfold bone tape settle kangaroo caught tree wrap write diagram stomach have time addict unknown cruise polar'
-      >>> w.account_private_xkey
+      >>> w.get_account_private_xkey()
       'zprvAchpNzD1oB4ndfzR6UBSeaFLuP2fNvbqsoP1PAfTwTLPESD8AFBbXigaoYzaZBjkJSxeYEXGQaVHzwZeSVYWCtX82GScZ9MwPYCmhBCFzJs'
-      >>> w.account_public_xkey
+      >>> w.get_account_public_xkey()
       'zpub6qhAnVjudYd5rA4tCViT1iC5TQs9nPKhF2JcBZ55VnsN7EYGhnVr5X14enqueqWuz2nBBaDr77WT1Rnx82R1mTAbr9FbJq8oNdcf8UgndVA'
       >>> w=pybgl.Wallet('wet talent menu also ill comic smart unfold bone tape settle kangaroo caught tree wrap write diagram stomach have time addict unknown cruise polar',path_type='BIP84')
-      >>> w.account_private_xkey
+      >>> w.get_account_private_xkey()
       'zprvAchpNzD1oB4ndfzR6UBSeaFLuP2fNvbqsoP1PAfTwTLPESD8AFBbXigaoYzaZBjkJSxeYEXGQaVHzwZeSVYWCtX82GScZ9MwPYCmhBCFzJs'
-      >>> w.account_public_xkey
+      >>> w.get_account_public_xkey()
       'zpub6qhAnVjudYd5rA4tCViT1iC5TQs9nPKhF2JcBZ55VnsN7EYGhnVr5X14enqueqWuz2nBBaDr77WT1Rnx82R1mTAbr9FbJq8oNdcf8UgndVA'
 
 
@@ -114,7 +114,15 @@ Get wallet addresses
 
 .. code-block:: bash
 
-       >>> w.get_address(0)
-      {'address': 'bgl1qjc46yw4zgggj4e0x6ew6htuu234j4y9vds66e2', 'public_key': '037269845622edcc243d7b203de508c899c33963e1e2d45a47884b7df5ab4be1ce', 'private_key': 'L1U3Fviv4PGDxQatgXimWnU8yLy6jVz12wAyxjjP4XLyjDx7aycU'}
-      >>> w.get_address(1)
-      {'address': 'bgl1qxepx0uqdu696vjwvszcel3r8lzss9m0htq6n8u', 'public_key': '03739adff69d48d2f8bac2bfacfbb1dcf6264fad4e67761c1d6890bde7ed858571', 'private_key': 'KxGZ8JWxZpjBsz1QERdnrBRT2THEVkjr7q8fqCrJ7bFN1ys7EKPi'}
+       >>> w.get_address(0)['address']
+      'bgl1qjc46yw4zgggj4e0x6ew6htuu234j4y9vds66e2'
+       >>> w.get_address(0)['private_key']
+      'L1U3Fviv4PGDxQatgXimWnU8yLy6jVz12wAyxjjP4XLyjDx7aycU'
+       >>> w.get_address(0)['public_key']
+      '037269845622edcc243d7b203de508c899c33963e1e2d45a47884b7df5ab4be1ce'
+       >>> w.get_address(1)['address']
+       'bgl1qxepx0uqdu696vjwvszcel3r8lzss9m0htq6n8u'
+       >>> w.get_address(1)['private_key']
+       'KxGZ8JWxZpjBsz1QERdnrBRT2THEVkjr7q8fqCrJ7bFN1ys7EKPi'
+       >>> w.get_address(1)['public_key']
+       '03739adff69d48d2f8bac2bfacfbb1dcf6264fad4e67761c1d6890bde7ed858571'
