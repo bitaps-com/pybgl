@@ -55,6 +55,12 @@ release = ''
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
+import mock
+
+MOCK_MODULES = ['git+https://github.com/bitaps-com/pybtc']
+for mod_name in MOCK_MODULES:
+   sys.modules[mod_name] = mock.Mock()
+
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.doctest',
