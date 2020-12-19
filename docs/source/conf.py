@@ -109,7 +109,7 @@ pygments_style = 'sphinx'
 html_theme = 'alabaster'
 
 html_theme_options = {
-    'logo': 'pybtc.png',
+    'logo': 'pybgl.png',
     'description': ' ',
     'github_banner': True,
     'github_button': True,

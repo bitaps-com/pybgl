@@ -1,4 +1,4 @@
-<img src="docs/img/pybtc.png" width="100">
+<img src="docs/img/pybgl.png" width="100">
 
 ## Python bitgesell library
 
