@@ -22,7 +22,7 @@ Workflow is pretty straightforward:
 
   4. Add a record intp file into ``change.log``.
 
-  5. Commit changes to own aiohttp clone
+  5. Commit changes to own pybgl clone
 
   6. Make pull request from github page for your clone against master branch
 
