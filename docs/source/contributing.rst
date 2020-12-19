@@ -20,7 +20,7 @@ Workflow is pretty straightforward:
 
   3. Make sure all tests passed
 
-  4. Add a record intp file into ``change.log``.
+  4. Add a record into file into ``change.log``.
 
   5. Commit changes to own pybgl clone
 
@@ -31,6 +31,6 @@ Tests coverage
 --------------
 
 We are trying hard to have good test coverage; please don't make it worse.
-All tests located in ``tests/`` folder.
+All tests located in ``test/`` folder.
 
 
