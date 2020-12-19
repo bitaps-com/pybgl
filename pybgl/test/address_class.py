@@ -7,7 +7,7 @@ parentPath = os.path.abspath("..")
 if parentPath not in sys.path:
     sys.path.insert(0, parentPath)
 
-# from pybtc.transaction import *
+# from pybgl.transaction import *
 from pybgl import OPCODE
 from binascii import unhexlify
 import pybgl

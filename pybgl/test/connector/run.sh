@@ -4,5 +4,5 @@ docker build -t test-connector .
 docker run --rm  \
            --name connector \
            --net=host \
-           -v $(pwd)/../../../:/pybtc \
+           -v $(pwd)/../../../:/pybgl \
            -it test-connector
