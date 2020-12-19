@@ -31,6 +31,46 @@ To install pybgl
 
 Documentation is available at https://pybgl.readthedocs.io
 
+### Example of usage
+
+##### Create address
+
+      >>> import pybgl
+      >>> a = pybgl.Address()
+      >>> a.address
+      'bgl1qdzjn6rd7e84lt2m5d3yf9jcg42ncdje7vhp4rl'
+      >>> a.private_key.wif
+      'L1LAHLFBWcW2E1xRsUooVL9ajxJXtsAUjJJ4GuPTgHKAKNhy6fsD'
+      >>> a = pybgl.Address('L1LAHLFBWcW2E1xRsUooVL9ajxJXtsAUjJJ4GuPTgHKAKNhy6fsD')
+      >>> a.address
+      'bgl1qdzjn6rd7e84lt2m5d3yf9jcg42ncdje7vhp4rl'
+
+##### Create private key
+
+
+      >>> import pybgl
+      >>> pybgl.create_private_key()
+      'L38PPqhzCbyTH3nd7e2ExEY3LSdaYhaF1d7pXYBEz83avPfpBbZ6'
+      >>> pybgl.create_private_key(compressed=False)
+      '5JCnJEggRKX5rscdGiqasmYdsyQ2fCYyLA7xYqSDRLEbWY7mZtq'
+
+
+##### Create wallet
+
+      >>> import pybgl
+      >>> w=pybgl.Wallet(path_type='BIP84')
+      >>> w.mnemonic
+      'wet talent menu also ill comic smart unfold bone tape settle kangaroo caught tree wrap write diagram stomach have time addict unknown cruise polar'
+      >>> w.account_public_xkey
+      'zpub6qhAnVjudYd5rA4tCViT1iC5TQs9nPKhF2JcBZ55VnsN7EYGhnVr5X14enqueqWuz2nBBaDr77WT1Rnx82R1mTAbr9FbJq8oNdcf8UgndVA'
+      >>> w=pybgl.Wallet('wet talent menu also ill comic smart unfold bone tape settle kangaroo caught tree wrap write diagram stomach have time addict unknown cruise polar',path_type='BIP84')
+      >>> w.account_public_xkey
+      'zpub6qhAnVjudYd5rA4tCViT1iC5TQs9nPKhF2JcBZ55VnsN7EYGhnVr5X14enqueqWuz2nBBaDr77WT1Rnx82R1mTAbr9FbJq8oNdcf8UgndVA'
+      >>> w.get_address(0)['address']
+      'bgl1qjc46yw4zgggj4e0x6ew6htuu234j4y9vds66e2'
+      >>> w.get_address(0)['private_key']
+      'L1U3Fviv4PGDxQatgXimWnU8yLy6jVz12wAyxjjP4XLyjDx7aycU'
+      >>> w.get_address(0)['public_key']
 
 ### How to Contribute
 
