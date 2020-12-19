@@ -58,12 +58,12 @@ Documentation is available at https://pybgl.readthedocs.io
 ##### Create wallet
 
       >>> import pybgl
-      >>> w=pybgl.Wallet(path_type='BIP84')
+      >>> w = pybgl.Wallet(path_type='BIP84')
       >>> w.mnemonic
       'wet talent menu also ill comic smart unfold bone tape settle kangaroo caught tree wrap write diagram stomach have time addict unknown cruise polar'
       >>> w.account_public_xkey
       'zpub6qhAnVjudYd5rA4tCViT1iC5TQs9nPKhF2JcBZ55VnsN7EYGhnVr5X14enqueqWuz2nBBaDr77WT1Rnx82R1mTAbr9FbJq8oNdcf8UgndVA'
-      >>> w=pybgl.Wallet('wet talent menu also ill comic smart unfold bone tape settle kangaroo caught tree wrap write diagram stomach have time addict unknown cruise polar',path_type='BIP84')
+      >>> w = pybgl.Wallet('wet talent menu also ill comic smart unfold bone tape settle kangaroo caught tree wrap write diagram stomach have time addict unknown cruise polar',path_type='BIP84')
       >>> w.account_public_xkey
       'zpub6qhAnVjudYd5rA4tCViT1iC5TQs9nPKhF2JcBZ55VnsN7EYGhnVr5X14enqueqWuz2nBBaDr77WT1Rnx82R1mTAbr9FbJq8oNdcf8UgndVA'
       >>> w.get_address(0)['address']
