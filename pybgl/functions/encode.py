@@ -37,7 +37,7 @@ def encode_base58(bytes, checksum = False):
 def decode_base58(string_base58, hex = False, checksum = False, verify_checksum = False):
     """Decode a base58-encoding string
       :param string_base58: base58 string.
-      :param hex: (optional) return result as HEX encoded string, by default False.
+      :param hex: (optional) return result as HEX encoded string, by default is False.
       :param checksum: (optional) boolean, by default is False.
       :param verify_checksum: (optional) boolean, by default is False.
       :return: HEX or bytes string format.

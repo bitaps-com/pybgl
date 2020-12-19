@@ -21,7 +21,7 @@ def parse_script(script, segwit=True):
     Parse script and return script type, script address and required signatures count.
 
     :param script: script in bytes string or HEX encoded string format.
-    :param segwit:  (optional) If set to True recognize P2WPKH and P2WSH sripts, by default set to True.
+    :param segwit:  (optional) If set to True recognize P2WPKH and P2WSH sripts, by default is True.
 
     :return: dictionary:
 
@@ -150,7 +150,7 @@ def decode_script(script, asm=False):
     Decode script to ASM format or to human readable OPCODES string.
 
     :param script: script in bytes string or HEX encoded string format.
-    :param asm:  (optional) If set to True decode to ASM format, by default set to False.
+    :param asm:  (optional) If set to True decode to ASM format, by default is False.
     :return: script in ASM format string or OPCODES string.
     """
 
@@ -210,7 +210,7 @@ def decode_script(script, asm=False):
 
 def delete_from_script(script, sub_script):
     """
-    Decode OP_CODE or subscript from script.
+    Delete OP_CODE or subscript from script.
 
     :param script: target script in bytes or HEX encoded string.
     :param sub_script:  sub_script which is necessary to remove from target script in bytes or HEX encoded string.
@@ -263,7 +263,7 @@ def script_to_hash(script, witness=False, hex=True):
     :param witness:  (optional) If set to True return SHA256 hash for P2WSH, by default is False.
     :param hex:  (optional) If set to True return key in HEX format, by default is True.
     :param sub_script:  sub_script which is necessary to remove from target script in bytes or HEX encoded string.
-    :return: script in bytes or HEX encoded string corresponding to the format of target script.
+    :return: hash HASH160 or SHA256 of script in bytes or HEX encoded.
     """
     script = get_bytes(script)
     return sha256(script, hex) if witness else hash160(script, hex)

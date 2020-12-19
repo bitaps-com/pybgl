@@ -85,8 +85,8 @@ def int_to_bytes(i, byteorder='big'):
     """
     Convert integer to bytes.
 
-    :param n: integer.
-    :param byteorder: (optional) byte order 'big' or 'little', by default 'big'.
+    :param i: integer.
+    :param byteorder: (optional) byte order 'big' or 'little', by default is 'big'.
     :return: bytes.
     """
     return i.to_bytes(bytes_needed(i), byteorder=byteorder, signed=False)
@@ -97,7 +97,7 @@ def bytes_to_int(i, byteorder='big'):
     Convert bytes to integer.
 
     :param i: bytes.
-    :param byteorder: (optional) byte order 'big' or 'little', by default 'big'.
+    :param byteorder: (optional) byte order 'big' or 'little', by default is 'big'.
     :return: integer.
     """
     return int_from_bytes(i, byteorder=byteorder, signed=False)

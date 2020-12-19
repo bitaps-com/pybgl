@@ -29,8 +29,8 @@ class Transaction(dict):
     :param format: (optional) "raw" or "decoded" format. Raw format is mean that all transaction represented in bytes for best performance.
                     Decoded transaction is represented in human readable format using base68, hex, bech32,
                     asm and opcodes. By default "decoded" format using.
-    :param version: (optional)  transaction version for new template, by default 1.
-    :param lock_time: (optional)  transaction lock time for new template, by default 0.
+    :param version: (optional)  transaction version for new template, by default is 1.
+    :param lock_time: (optional)  transaction lock time for new template, by default is 0.
     :param testnet: (optional) flag for testnet network, by default is False.
     :param auto_commit: (optional) boolean, by default is True.
     :param keep_raw_tx: (optional) boolean, by default is False.
@@ -348,11 +348,11 @@ class Transaction(dict):
 
     def serialize(self, segwit=True, hex=True):
         """
-        Get serialized transaction 
+        get serialized Transaction
         
         :param segwit: (optional) flag for segwit representation of serialized transaction, by
                             default True.
-        :param hex: (optional) if set to True return HEX encoded string, by default True.
+        :param hex: (optional) if set to True return HEX encoded string, by default is True.
         :return str,bytes: serialized transaction in HEX or bytes.
          """
         chunks = []
@@ -399,7 +399,7 @@ class Transaction(dict):
 
     def json(self):
         """
-        Get json transaction representation
+        get json Transaction representation
 
         """
         try:

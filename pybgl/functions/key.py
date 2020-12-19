@@ -10,9 +10,7 @@ def create_private_key(compressed=True, testnet=False, wif=None, hex=None):
     """
     Create private key
 
-    :param compressed: (optional) Type of public key, by default set to compressed. 
-                                 Using uncompressed public keys is deprecated in new SEGWIT addresses, 
-                                 use this option only for backward compatibility.  
+    :param compressed: (optional) flag of private key compressed format, by default is True.
     :param testnet: (optional) flag for testnet network, by default is False.
     :param wif:  (optional) If set to True return key in WIF format, by default is True.
     :param hex:  (optional) If set to True return key in HEX format, by default is False.
@@ -38,7 +36,7 @@ def private_key_to_wif(h, compressed=True, testnet=False):
     Encode private key in HEX or RAW bytes format to WIF format.
 
     :param h: private key 32 byte string or HEX encoded string.
-    :param compressed: (optional) flag of public key compressed format, by default set to True.  
+    :param compressed: (optional) flag of public key compressed format, by default is True.
     :param testnet: (optional) flag for testnet network, by default is False.
     :return: Private key in WIF format.
     """
@@ -62,6 +60,7 @@ def wif_to_private_key(h, hex=True):
     """
     Decode WIF private key to bytes string or HEX encoded string
 
+    :param h:  private key in WIF format string.
     :param hex:  (optional) if set to True return key in HEX format, by default is True.
     :return: Private key HEX encoded string or raw bytes string.
     """
@@ -103,7 +102,7 @@ def private_to_public_key(private_key, compressed=True, hex=True):
     Get public key from private key using ECDSA secp256k1
 
     :param private_key: private key in WIF, HEX or bytes.
-    :param compressed: (optional) flag of public key compressed format, by default set to True.
+    :param compressed: (optional) flag of public key compressed format, by default is True.
                        In case private_key in WIF format, this flag is set in accordance with 
                        the key format specified in WIF string.
     :param hex:  (optional) if set to True return key in HEX format, by default is True.

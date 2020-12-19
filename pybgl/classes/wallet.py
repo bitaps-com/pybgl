@@ -10,12 +10,14 @@ class Wallet():
     The class for creating wallet object.
 
     :param init_vector: (optional) initialization vector should be mnemonic phrase, extended public key,
-                        extended private key, by default None (generate new wallet).
+                        extended private key, by default is None (generate new wallet).
     :param passphrase: (optional) passphrase to get ability use 2FA approach for
-                          creating seed, by default empty string.
-    :param path_type: (optional) "BIP44", "BIP49", "BIP84", by default "BIP84"
+                          creating seed, by default is empty string.
+    :param path_type: (optional) "BIP44", "BIP49", "BIP84", by default is "BIP84"
+    :param init_account: (optional) integer
     :param address_type: (optional) "P2PKH", "P2SH_P2WPKH", "P2WPKH"
     :param testnet: (optional) flag for testnet network, by default is False.
+    :param hardened: (optional) boolean, by default is False.
 
     """
     def __init__(self, init_vector=None, passphrase="", path_type=None,
@@ -24,9 +26,9 @@ class Wallet():
         #: mnemonic (string)
         self.mnemonic = None
         self._init_vector = None
-        #: account_public_xkey (string)
+        #: account public xkey (string)
         self.account_public_xkey = None
-        #: account_private_xkey (string)
+        #: account private xkey (string)
         self.account_private_xkey = None
         self.external_chain_public_xkey = None
         self.external_chain_private_xkey = None
@@ -193,10 +195,10 @@ class Wallet():
 
     def get_address(self, i, chain="external"):
         """
-        The class method for creating a wallet address.
+        the class method for creating a wallet address.
 
         :param i: index
-        :param chain: (optional) "external", "internal", by default "external"
+        :param chain: (optional) "external", "internal", by default is "external"
         :return: dictionary:
 
                 - address

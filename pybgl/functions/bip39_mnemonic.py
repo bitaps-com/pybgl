@@ -12,7 +12,7 @@ def generate_entropy(strength=256, hex=True):
     Generate 128-256 bits entropy bytes string
 
     :param strength: (optional) entropy bits strength, by default is 256 bit.
-    :param hex: (optional) return HEX encoded string result flag, by default True.
+    :param hex: (optional) return HEX encoded string result flag, by default is True.
     :return: HEX encoded or bytes entropy string.
     """
     if strength not in [128, 160, 192, 224, 256]:
@@ -36,7 +36,7 @@ def load_word_list(language='english', word_list_dir=None):
     :param language: (optional) uses word list language (chinese_simplified, chinese_traditional, english, french,
                          italian, japanese, korean, spanish), by default is english.
     :param word_list_dir: (optional) path to a directory containing a list of words,
-                              by default None (use BIP39 standard list)
+                              by default is None (use BIP39 standard list)
     :return: list of words.
     """
     if not word_list_dir: # pragma: no cover
@@ -59,8 +59,8 @@ def entropy_to_mnemonic(entropy, language='english', word_list_dir=None, word_li
     :param language: (optional) uses word list language (chinese_simplified, chinese_traditional, english, french,
                          italian, japanese, korean, spanish), by default is english.
     :param word_list_dir: (optional) path to a directory containing a list of words,
-                              by default None (use BIP39 standard list)
-    :param word_list: (optional) already loaded word list, by default None
+                              by default is None (use BIP39 standard list)
+    :param word_list: (optional) already loaded word list, by default is None
     :return: mnemonic words string.
     """
     entropy = get_bytes(entropy)
@@ -90,9 +90,9 @@ def mnemonic_to_entropy(mnemonic, language='english', word_list_dir=None,
                          italian, japanese, korean, spanish), by default is english.
     :param word_list_dir: (optional) path to a directory containing a list of words,
                               by default None (use BIP39 standard list)
-    :param word_list: (optional) already loaded word list, by default None
-    :param hex: return HEX encoded string result flag, by default True.
-    :return: bytes string.
+    :param word_list: (optional) already loaded word list, by default is None
+    :param hex: (optional) return HEX encoded string result flag, by default is True.
+    :return: HEX encoded or bytes string.
     """
     if word_list is None:
         word_list = load_word_list(language, word_list_dir)
@@ -148,8 +148,8 @@ def mnemonic_to_seed(mnemonic, passphrase="", hex=True):
 
     :param mnemonic: mnemonic words string (space separated)
     :param passphrase: (optional) passphrase to get ability use 2FA approach for
-                          creating seed, by default empty string.
-    :param hex: (optional) return HEX encoded string result flag, by default True.
+                          creating seed, by default is empty string.
+    :param hex: (optional) return HEX encoded string result flag, by default is True.
     :return: HEX encoded or bytes string.
     """
     if not isinstance(mnemonic, str):

@@ -17,7 +17,7 @@ class Block(dict):
     :param format: (optional) "raw" or "decoded" format. Raw format is mean that it represented in bytes for best performance.
                       Decoded block is represented in human readable format using base68, hex, bech32,
                       asm and opcodes. By default "decoded" format using.
-    :param version: (optional) block version for new template, by default 536870912.
+    :param version: (optional) block version for new template, by default is 536870912.
     :param testnet: (optional) flag for testnet network, by default is False.
     :param keep_raw_tx: (optional) boolean, by default is False.
 

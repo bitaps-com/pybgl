@@ -90,6 +90,7 @@ The ``pybgl`` package was initially written by `Aleksey Karpov <https://github.c
 Recent contributors:
 
 - `Aleksey Karpov <https://github.com/4tochka>`_
+- `Nadezhda Karpova <https://github.com/madnadyka>`_
 
 It's *GPL-3.0* licensed and freely available.
 

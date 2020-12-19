@@ -18,7 +18,7 @@ class PrivateKey():
     :param key: (optional) private key in HEX,  bytes string or WIF format. In case no key specified
                 new random private key will be created.
     :param compressed: (optional) if set to True private key corresponding compressed public key,
-                       by default set to True. Recommended use only compressed public key.
+                       by default is True. Recommended use only compressed public key.
     :param testnet: (optional) flag for testnet network, by default is False.
 
     """
@@ -89,7 +89,7 @@ class PublicKey():
                 according to the length of key.
                 
     :param compressed: (optional) if set to True private key corresponding compressed public key,
-                       by default set to True. Recommended use only compressed public key.
+                       by default is True. Recommended use only compressed public key.
     :param testnet: (optional) flag for testnet network, by default is False.
 
     """
@@ -140,10 +140,10 @@ class Address():
                 - instance of ``PublicKey``
                 
                 In case no key specified new Address will be created with random keys.
-    :param address_type: (optional) P2PKH, PUBKEY, P2WPKH, P2SH_P2WPKH, by default P2WPKH.
+    :param address_type: (optional) P2PKH, PUBKEY, P2WPKH, P2SH_P2WPKH, by default is P2WPKH.
     :param testnet: (optional) flag for testnet network, by default is False.
     :param compressed: (optional) if set to True private key corresponding compressed public key,
-                       by default set to True. Recommended use only compressed public key.
+                       by default is True. Recommended use only compressed public key.
 
     In case instance is created from WIF private key, ``PrivateKey`` or ``PublicKey`` compressed and testnet flags
     already contain in initial key parameter and will be ignored.
@@ -174,7 +174,7 @@ class Address():
         if not compressed:
             if address_type not in ("P2PKH", "PUBKEY", "P2SH"):
                 raise TypeError("compressed public key invalid")
-        #: flag for testnet network address  (boolean)
+        #: address type (string)
         self.type = address_type
 
         if address_type == "PUBKEY":

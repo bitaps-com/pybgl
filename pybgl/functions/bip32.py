@@ -12,8 +12,8 @@ def create_master_xprivate_key(seed, testnet=False, base58=None, hex=None):
 
     :param seed: seed HEX or bytes string.
     :param testnet: (optional) flag for testnet network, by default is False.
-    :param base58: (optional) return result as base58 encoded string, by default True.
-    :param hex: (optional) return result as HEX encoded string, by default False.
+    :param base58: (optional) return result as base58 encoded string, by default is True.
+    :param hex: (optional) return result as HEX encoded string, by default is False.
                         In case True base58 flag value will be ignored.
     :return: extended private key  in base58, HEX or bytes string format.
     """
@@ -44,8 +44,8 @@ def xprivate_to_xpublic_key(xprivate_key, base58=True, hex=False):
     Get extended public key from extended private key using ECDSA secp256k1
 
     :param xprivate_key: extended private key in base58, HEX or bytes string.
-    :param base58: (optional) return result as base58 encoded string, by default True.
-    :param hex: (optional) return result as HEX encoded string, by default False.
+    :param base58: (optional) return result as base58 encoded string, by default is True.
+    :param hex: (optional) return result as HEX encoded string, by default is False.
                         In case True base58 flag value will be ignored.
     :return: extended public key  in base58, HEX or bytes string format.
     """
@@ -100,8 +100,8 @@ def derive_xkey(xkey, path, base58=None, hex=None):
     
     :param xkey: extended private/public in base58, HEX or bytes string format.
     :param path: list of derivation path levels. For hardened derivation use HARDENED_KEY flag.
-    :param base58: (optional) return result as base58 encoded string, by default True.
-    :param hex: (optional) return result as HEX encoded string, by default False.
+    :param base58: (optional) return result as base58 encoded string, by default is True.
+    :param hex: (optional) return result as HEX encoded string, by default is False.
                         In case True base58 flag value will be ignored.
     :return: extended child private/public key  in base58, HEX or bytes string format.
     """
@@ -186,8 +186,8 @@ def public_from_xpublic_key(xpublic_key, hex=True):
     Get public key from extended public key
 
     :param xpublic_key: extended public in base58, HEX or bytes string format.
-    :param base58: (optional) return result as base58 encoded string, by default True.
-    :param hex: (optional) return result as HEX encoded string, by default False.
+    :param base58: (optional) return result as base58 encoded string, by default is True.
+    :param hex: (optional) return result as HEX encoded string, by default is False.
                         In case True base58 flag value will be ignored.
     :return: public key  in HEX or bytes string format.
     """
@@ -209,9 +209,9 @@ def private_from_xprivate_key(xprivate_key, wif=True, hex=False):
     """
     Get private key from extended private key
 
-    :param xprivate_key: extended public in base58, HEX or bytes string format.
-    :param wif: (optional) return result as WIF format, by default True.
-    :param hex: (optional) return result as HEX encoded string, by default False.
+    :param xprivate_key: extended private in base58, HEX or bytes string format.
+    :param wif: (optional) return result as WIF format, by default is True.
+    :param hex: (optional) return result as HEX encoded string, by default is False.
                         In case True WIF flag value will be ignored.
     :return: private key  in HEX or bytes string format.
     """
