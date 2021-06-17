@@ -72,3 +72,13 @@ class WalletClassTests(unittest.TestCase):
         self.assertEqual(w3.get_address(0)["private_key"], p84_0)
         self.assertEqual(w3.get_address(1)["private_key"], p84_1)
 
+        xpriv84root="tprv8ZgxMBicQKsPd7Uf69XL1XwhmjHopUGep8GuEiJDZmbQz6o58LninorQAfcKZWARbtRtfnLcJ5MQ2AtHcQJCCRUcMRvmDUjyEmNUWwx8UbK"
+        w4 = Wallet(xpriv84root,"BIP44", testnet=True)
+
+        w5 = Wallet(xpriv84root, "BIP49")
+
+        w6 = Wallet(xpriv84root, "BIP84")
+
+
+
+

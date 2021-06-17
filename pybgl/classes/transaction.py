@@ -37,12 +37,13 @@ class Transaction(dict):
 
     """
     def __init__(self, raw_tx=None, format="decoded", version=1,
-                 lock_time=0, testnet=False, auto_commit=True, keep_raw_tx=False):
+                 lock_time=0, testnet=False, auto_commit=True, keep_raw_tx=False, regtest=False):
         if format not in ("decoded", "raw"):
             raise ValueError("format error, raw or decoded allowed")
         self.auto_commit = auto_commit
         self["format"] = format
         self["testnet"] = testnet
+        self["regtest"]= regtest
         self["segwit"] = False
         self["rbf"] = False
         self["txId"] = None
@@ -175,7 +176,7 @@ class Transaction(dict):
         if self["format"] == "decoded":
             self.decode()
 
-    def decode(self, testnet=None):
+    def decode(self, testnet=None,regtest=None):
         """
         change Transaction object representation to "decoded" human readable format
 
@@ -186,6 +187,8 @@ class Transaction(dict):
         self["format"] = "decoded"
         if testnet is not None:
             self["testnet"] = testnet
+        if regtest is not None:
+            self["regtest"] = regtest
         if type(self["txId"]) == bytes:
             self["txId"] = rh2s(self["txId"])
         if "flag" in self:
@@ -219,7 +222,7 @@ class Transaction(dict):
                 self["vIn"][i]["address"] = hash_to_address(self["vIn"][i]["addressHash"],
                                                             self["testnet"],
                                                             sh,
-                                                            witness_version)
+                                                            witness_version, self["regtest"])
             except:
                 pass
             if "scriptPubKey" in self["vIn"][i]:
@@ -249,7 +252,8 @@ class Transaction(dict):
                 self["vOut"][i]["address"] = hash_to_address(self["vOut"][i]["addressHash"],
                                                              self["testnet"],
                                                              sh,
-                                                             witness_version)
+                                                             witness_version,
+                                                             self["regtest"])
             except:
                 pass
             self["vOut"][i]["scriptPubKeyOpcodes"] = decode_script(self["vOut"][i]["scriptPubKey"])
@@ -578,7 +582,8 @@ class Transaction(dict):
                 self["vOut"][k]["address"] = hash_to_address(self["vOut"][k]["addressHash"],
                                                              self["testnet"],
                                                              sh,
-                                                             witness_version)
+                                                             witness_version,
+                                                             self["regtest"])
         if self.auto_commit:
             self.commit()
         return self

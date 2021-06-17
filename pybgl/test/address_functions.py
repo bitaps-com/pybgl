@@ -70,16 +70,17 @@ class AddressFunctionsTests(unittest.TestCase):
         pc = "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
         h = tools.hash160(pc)
         s =  bytes([len(unhexlify(pc))])+unhexlify(pc) + BYTE_OPCODE["OP_CHECKSIG"]
-        self.assertEqual(functions.hash_to_address(h), "bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4")
-        self.assertEqual(functions.hash_to_address(h, testnet=1), "tb1qw508d6qejxtdg4y5r3zarvary0c5xw7kxpjzsx")
+        self.assertEqual(functions.hash_to_address(h), "bgl1qw508d6qejxtdg4y5r3zarvary0c5xw7k0fy5a3")
+        self.assertEqual(functions.hash_to_address(h, testnet=1), "tbgl1qw508d6qejxtdg4y5r3zarvary0c5xw7kcm8awm")
+        self.assertEqual(functions.hash_to_address(h, testnet=1, regtest=1), "rbgl1qw508d6qejxtdg4y5r3zarvary0c5xw7kahx879")
         h = tools.script_to_hash(s, 1, 1)
-        self.assertEqual(functions.hash_to_address(h), "bc1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3qccfmv3")
-        self.assertEqual(functions.hash_to_address(h, testnet=1), "tb1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3q0sl5k7")
+        self.assertEqual(functions.hash_to_address(h), "bgl1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3qwkcqlq")
+        self.assertEqual(functions.hash_to_address(h, testnet=1), "tbgl1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3q9eu7q4")
         pk = "03b635dbdc16dbdf4bb9cf5b55e7d03e514fb04dcef34208155c7d3ec88e9045f4"
         h = tools.hash160(pk)
-        self.assertEqual(functions.hash_to_address(h, witness_version=None), "1Fs2Xqrk4P2XADaJeZWykaGXJ4HEb6RyT1")
+        self.assertEqual(functions.hash_to_address(h, witness_version=None), "5HF4NvqdABfHLYyAtkrAbpzPb6rfiq5c76")
         self.assertEqual(functions.hash_to_address(h, witness_version=None, testnet=1),
-                         "mvNyptwisQTmwL3vN8VMaVUrA3swVCX83c")
+                         "EwMY1XzYCWnJxxKFUpqpEqXGhD3Jj6QTUX")
         # p2wpkh inside p2sh
         p = "L32a8Mo1LgvjrVDbzcc3NkuUfkpoLsf2Y2oEWkV4t1KpQdFzuyff"
         pk = functions.private_to_public_key(p)
@@ -87,97 +88,94 @@ class AddressFunctionsTests(unittest.TestCase):
         script_hash = tools.hash160(script)
         self.assertEqual(functions.hash_to_address(script_hash,
                                                    script_hash=1,
-                                                   witness_version=None), "33am12q3Bncnn3BfvLYHczyv23Sq2Wbwjw")
+                                                   witness_version=None), "B6LphCnoPPtK8hyQQjCfKWRec8bhJXgcLU")
         self.assertEqual(functions.hash_to_address(script_hash,
                                                    script_hash=1,
                                                    witness_version=None,
-                                                   testnet=1), "2Mu8y4mm4oF88yppDbUAAEwyBEPezrx7CLh")
+                                                   testnet=1), "M9nuJvF18uUDaYTa2DXdSeEKLk3H6TtYjh")
 
     def test_address_to_hash(self):
         h = "751e76e8199196d454941c45d1b3a323f1433bd6"
-        self.assertEqual(functions.address_to_hash("bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4", 1), h)
-        self.assertEqual(functions.address_to_hash("tb1qw508d6qejxtdg4y5r3zarvary0c5xw7kxpjzsx", 1), h)
+        self.assertEqual(functions.address_to_hash("bgl1qw508d6qejxtdg4y5r3zarvary0c5xw7k0fy5a3", 1), h)
+        self.assertEqual(functions.address_to_hash("tbgl1qw508d6qejxtdg4y5r3zarvary0c5xw7kcm8awm", 1), h)
         h  = "1863143c14c5166804bd19203356da136c985678cd4d27a1b8c6329604903262"
-        self.assertEqual(functions.address_to_hash("bc1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3qccfmv3", 1), h)
+        self.assertEqual(functions.address_to_hash("bgl1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3qwkcqlq", 1), h)
         h = "a307d67484911deee457779b17505cedd20e1fe9"
-        self.assertEqual(functions.address_to_hash("1Fs2Xqrk4P2XADaJeZWykaGXJ4HEb6RyT1", 1), h)
-        self.assertEqual(functions.address_to_hash("mvNyptwisQTmwL3vN8VMaVUrA3swVCX83c", 1), h)
+        self.assertEqual(functions.address_to_hash("5HF4NvqdABfHLYyAtkrAbpzPb6rfiq5c76", 1), h)
+        self.assertEqual(functions.address_to_hash("EwMY1XzYCWnJxxKFUpqpEqXGhD3Jj6QTUX", 1), h)
         h = "14c14c8d26acbea970757b78e6429ad05a6ac6bb"
-        self.assertEqual(functions.address_to_hash("33am12q3Bncnn3BfvLYHczyv23Sq2Wbwjw", 1), h)
-        self.assertEqual(functions.address_to_hash("2Mu8y4mm4oF88yppDbUAAEwyBEPezrx7CLh", 1), h)
+        self.assertEqual(functions.address_to_hash("B6LphCnoPPtK8hyQQjCfKWRec8bhJXgcLU", 1), h)
+        self.assertEqual(functions.address_to_hash("M9nuJvF18uUDaYTa2DXdSeEKLk3H6TtYjh", 1), h)
 
     def test_address_type(self):
-        self.assertEqual(functions.address_type("bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4"), 'P2WPKH')
-        self.assertEqual(functions.address_type("tb1qw508d6qejxtdg4y5r3zarvary0c5xw7kxpjzsx"), 'P2WPKH')
-        self.assertEqual(functions.address_type("bc1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3qccfmv3"), 'P2WSH')
-        self.assertEqual(functions.address_type("tb1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3q0sl5k7"), 'P2WSH')
-        self.assertEqual(functions.address_type("1Fs2Xqrk4P2XADaJeZWykaGXJ4HEb6RyT1"), 'P2PKH')
-        self.assertEqual(functions.address_type("mvNyptwisQTmwL3vN8VMaVUrA3swVCX83c"), 'P2PKH')
-        self.assertEqual(functions.address_type("33am12q3Bncnn3BfvLYHczyv23Sq2Wbwjw"), 'P2SH')
-        self.assertEqual(functions.address_type("2Mu8y4mm4oF88yppDbUAAEwyBEPezrx7CLh"), 'P2SH')
+        self.assertEqual(functions.address_type("bgl1qw508d6qejxtdg4y5r3zarvary0c5xw7k0fy5a3"), 'P2WPKH')
+        self.assertEqual(functions.address_type("tbgl1qw508d6qejxtdg4y5r3zarvary0c5xw7kcm8awm"), 'P2WPKH')
+        self.assertEqual(functions.address_type("bgl1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3qwkcqlq"), 'P2WSH')
+        self.assertEqual(functions.address_type("tbgl1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3q9eu7q4"), 'P2WSH')
+        self.assertEqual(functions.address_type("5HF4NvqdABfHLYyAtkrAbpzPb6rfiq5c76"), 'P2PKH')
+        self.assertEqual(functions.address_type("EwMY1XzYCWnJxxKFUpqpEqXGhD3Jj6QTUX"), 'P2PKH')
+        self.assertEqual(functions.address_type("B6LphCnoPPtK8hyQQjCfKWRec8bhJXgcLU"), 'P2SH')
+        self.assertEqual(functions.address_type("M9nuJvF18uUDaYTa2DXdSeEKLk3H6TtYjh"), 'P2SH')
 
     def test_address_net_type(self):
-        self.assertEqual(functions.address_net_type("bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4"), 'mainnet')
-        self.assertEqual(functions.address_net_type("tb1qw508d6qejxtdg4y5r3zarvary0c5xw7kxpjzsx"), 'testnet')
-        self.assertEqual(functions.address_net_type("bc1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3qccfmv3"),
+        self.assertEqual(functions.address_net_type("bgl1qw508d6qejxtdg4y5r3zarvary0c5xw7k0fy5a3"), 'mainnet')
+        self.assertEqual(functions.address_net_type("tbgl1qw508d6qejxtdg4y5r3zarvary0c5xw7kcm8awm"), 'testnet')
+        self.assertEqual(functions.address_net_type("bgl1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3qwkcqlq"),
                          'mainnet')
-        self.assertEqual(functions.address_net_type("tb1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3q0sl5k7"),
+        self.assertEqual(functions.address_net_type("tbgl1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3q9eu7q4"),
                          'testnet')
-        self.assertEqual(functions.address_net_type("1Fs2Xqrk4P2XADaJeZWykaGXJ4HEb6RyT1"), 'mainnet')
-        self.assertEqual(functions.address_net_type("mvNyptwisQTmwL3vN8VMaVUrA3swVCX83c"), 'testnet')
-        self.assertEqual(functions.address_net_type("33am12q3Bncnn3BfvLYHczyv23Sq2Wbwjw"), 'mainnet')
-        self.assertEqual(functions.address_net_type("2Mu8y4mm4oF88yppDbUAAEwyBEPezrx7CLh"), 'testnet')
+        self.assertEqual(functions.address_net_type("5HF4NvqdABfHLYyAtkrAbpzPb6rfiq5c76"), 'mainnet')
+        self.assertEqual(functions.address_net_type("EwMY1XzYCWnJxxKFUpqpEqXGhD3Jj6QTUX"), 'testnet')
+        self.assertEqual(functions.address_net_type("B6LphCnoPPtK8hyQQjCfKWRec8bhJXgcLU"), 'mainnet')
+        self.assertEqual(functions.address_net_type("M9nuJvF18uUDaYTa2DXdSeEKLk3H6TtYjh"), 'testnet')
 
     def test_public_key_to_address(self):
         pc = "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
-        self.assertEqual(functions.public_key_to_address(pc), "bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4")
-        self.assertEqual(functions.public_key_to_address(pc, testnet=1), "tb1qw508d6qejxtdg4y5r3zarvary0c5xw7kxpjzsx")
+        self.assertEqual(functions.public_key_to_address(pc), "bgl1qw508d6qejxtdg4y5r3zarvary0c5xw7k0fy5a3")
+        self.assertEqual(functions.public_key_to_address(pc, testnet=1), "tbgl1qw508d6qejxtdg4y5r3zarvary0c5xw7kcm8awm")
         pc = "03b635dbdc16dbdf4bb9cf5b55e7d03e514fb04dcef34208155c7d3ec88e9045f4"
         self.assertEqual(functions.public_key_to_address(pc,
                                                      witness_version=None,
-                                                     testnet=0), "1Fs2Xqrk4P2XADaJeZWykaGXJ4HEb6RyT1")
+                                                     testnet=0), "5HF4NvqdABfHLYyAtkrAbpzPb6rfiq5c76")
         self.assertEqual(functions.public_key_to_address(pc, witness_version=None,
-                                                     testnet=1), "mvNyptwisQTmwL3vN8VMaVUrA3swVCX83c")
+                                                     testnet=1), "EwMY1XzYCWnJxxKFUpqpEqXGhD3Jj6QTUX")
         p = "L32a8Mo1LgvjrVDbzcc3NkuUfkpoLsf2Y2oEWkV4t1KpQdFzuyff"
         pk = functions.private_to_public_key(p)
         self.assertEqual(functions.public_key_to_address(pk, p2sh_p2wpkh=1,
-                                                     witness_version=None), "33am12q3Bncnn3BfvLYHczyv23Sq2Wbwjw")
+                                                     witness_version=None), "B6LphCnoPPtK8hyQQjCfKWRec8bhJXgcLU")
 
     def test_is_address_valid(self):
-        self.assertEqual(functions.is_address_valid("bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4"), 1)
-        self.assertEqual(functions.is_address_valid("tb1qw508d6qejxtdg4y5r3zarvary0c5xw7kxpjzsx", 1), 1)
-        self.assertEqual(functions.is_address_valid("tb1qw508d6qejxtdg4y5r3zarvary0c5xw7kxpjzsx"), 0)
-        self.assertEqual(functions.is_address_valid("bc1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3qccfmv3"), 1)
-        self.assertEqual(functions.is_address_valid("tb1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3q0sl5k7", 1), 1)
-        self.assertEqual(functions.is_address_valid("1Fs2Xqrk4P2XADaJeZWykaGXJ4HEb6RyT1"), 1)
-        self.assertEqual(functions.is_address_valid("mvNyptwisQTmwL3vN8VMaVUrA3swVCX83c", 1), 1)
-        self.assertEqual(functions.is_address_valid("33am12q3Bncnn3BfvLYHczyv23Sq2Wbwjw"), 1)
-        self.assertEqual(functions.is_address_valid("2Mu8y4mm4oF88yppDbUAAEwyBEPezrx7CLh",1), 1)
-        self.assertEqual(functions.is_address_valid("2Mu8y4mm4oF89yppDbUAAEwyBEPezrx7CLh",1), 0)
-        self.assertEqual(functions.is_address_valid("bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4", 1), 0)
-        self.assertEqual(functions.is_address_valid("tb1qw508d6qejxtdg4W5r3zarvary0c5xw7kxpjzsx",1), 0)
-        self.assertEqual(functions.is_address_valid("bc1qrp33g0q5c5txsp8arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3qccfmv3"), 0)
-        self.assertEqual(functions.is_address_valid("tb1qrp23g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3q0sl5k7",1), 0)
-        self.assertEqual(functions.is_address_valid("1Fs2Xqrk4P2XADaJeZWykaGXJ2HEb6RyT1"), 0)
-        self.assertEqual(functions.is_address_valid("mvNyptwisQTkwL3vN8VMaVUrA3swVCX83c", 1), 0)
-        self.assertEqual(functions.is_address_valid("33am12q3Bncmn3BfvLYHczyv23Sq2Wbwjw"), 0)
-        self.assertEqual(functions.is_address_valid("2Mu8y4mm4oF78yppDbUAAEwyBEPezrx7CLh", 1), 0)
+        self.assertEqual(functions.is_address_valid("bgl1qw508d6qejxtdg4y5r3zarvary0c5xw7k0fy5a3"), 1)
+        self.assertEqual(functions.is_address_valid("tbgl1qw508d6qejxtdg4y5r3zarvary0c5xw7kcm8awm", 1), 1)
+        self.assertEqual(functions.is_address_valid("tbgl1qw508d6qejxtdg4y5r3zarvary0c5xw7kcm8awm"), 0)
+        self.assertEqual(functions.is_address_valid("bgl1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3qwkcqlq"), 1)
+        self.assertEqual(functions.is_address_valid("tbgl1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3q9eu7q4", 1), 1)
+        self.assertEqual(functions.is_address_valid("5HF4NvqdABfHLYyAtkrAbpzPb6rfiq5c76"), 1)
+        self.assertEqual(functions.is_address_valid("EwMY1XzYCWnJxxKFUpqpEqXGhD3Jj6QTUX", 1), 1)
+        self.assertEqual(functions.is_address_valid("B6LphCnoPPtK8hyQQjCfKWRec8bhJXgcLU"), 1)
+        self.assertEqual(functions.is_address_valid("M9nuJvF18uUDaYTa2DXdSeEKLk3H6TtYjh",1), 1)
+        self.assertEqual(functions.is_address_valid("bgl1qw508d6qejxtdg4y5r3zarvary0c5xw7k0fy5a3", 1), 0)
+        self.assertEqual(functions.is_address_valid("tbgl1qw508d6qejxtdg4y5r3zarvary0c5xw7kcm8awm",1), 1)
+        self.assertEqual(functions.is_address_valid("bgl1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3qwkcql3"), 0)
+        self.assertEqual(functions.is_address_valid("tbgl1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3q9eu7q2",1), 0)
+        self.assertEqual(functions.is_address_valid("5HF4NvqdABfHLYyAtkrAbpzPb6rfiq5c36"), 0)
+        self.assertEqual(functions.is_address_valid("EwMY1XzYCWnJxxKFUpqpEqXGhD3Jj6QTxX", 1), 0)
+        self.assertEqual(functions.is_address_valid("B6LphCnoPPtK8hyQQjCfKWRec8bhJXgcrU"), 0)
 
     def test_address_to_script(self):
-        self.assertEqual(functions.address_to_script("17rPqUf4Hqu6Lvpgfsavt1CzRy2GL19GD3", 1),
+        self.assertEqual(functions.address_to_script("59ERgZdwPeXrXGDYv4v7jFvrj1bhSTiDYk", 1),
                          "76a9144b2832feeda5692c96c0594a6314136a998f515788ac")
-        self.assertEqual(functions.address_to_script("33RYUa9jT541UNPsKdV7V1DmwMiQHpVfD3", 1),
-                         "a914130319921ecbcfa33fec2a8503c4ae1c86e4419387")
-        self.assertEqual(functions.address_to_script("bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4", 1),
+        self.assertEqual(functions.address_to_script("BLn1jVFVtM4z6W5UMKyxeYSP3DVJPdW6pw", 1),
+                         "a914b316ac9bdd0816ecdec6773d1192c0eaf52ae66487")
+        self.assertEqual(functions.address_to_script("bgl1qw508d6qejxtdg4y5r3zarvary0c5xw7k0fy5a3", 1),
                          "0014751e76e8199196d454941c45d1b3a323f1433bd6")
-        self.assertEqual(functions.address_to_script("bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4", 1),
-                         "0014751e76e8199196d454941c45d1b3a323f1433bd6")
+
 
     def test_parse_script(self):
 
         k = tools.parse_script("76a9144b2832feeda5692c96c0594a6314136a998f515788ac")
         address = functions.hash_to_address(k["addressHash"], witness_version = None)
-        self.assertEqual(address, "17rPqUf4Hqu6Lvpgfsavt1CzRy2GL19GD3")
+        self.assertEqual(address, "59ERgZdwPeXrXGDYv4v7jFvrj1bhSTiDYk")
         self.assertEqual(k["type"],"P2PKH")
         self.assertEqual(k["nType"],0)
         self.assertEqual(k["reqSigs"],1)
@@ -186,7 +184,7 @@ class AddressFunctionsTests(unittest.TestCase):
 
         k = tools.parse_script("76a914a307d67484911deee457779b17505cedd20e1fe988ac")
         address = functions.hash_to_address(k["addressHash"], testnet= True, witness_version=None)
-        self.assertEqual(address,"mvNyptwisQTmwL3vN8VMaVUrA3swVCX83c")
+        self.assertEqual(address,"EwMY1XzYCWnJxxKFUpqpEqXGhD3Jj6QTUX")
         self.assertEqual(k["type"],"P2PKH")
         self.assertEqual(k["nType"],0)
         self.assertEqual(k["reqSigs"],1)
@@ -195,7 +193,7 @@ class AddressFunctionsTests(unittest.TestCase):
 
         k = tools.parse_script("a914b316ac9bdd0816ecdec6773d1192c0eaf52ae66487")
         address = functions.hash_to_address(k["addressHash"], script_hash=True, witness_version=None)
-        self.assertEqual(address, "3J1x3KHjgjoTjqHjrwKax2zeT8LSDkZJae")
+        self.assertEqual(address, "BLn1jVFVtM4z6W5UMKyxeYSP3DVJPdW6pw")
         self.assertEqual(k["type"],"P2SH")
         self.assertEqual(k["nType"],1)
         self.assertEqual(k["reqSigs"], None)
@@ -205,7 +203,7 @@ class AddressFunctionsTests(unittest.TestCase):
         k = tools.parse_script("0014751e76e8199196d454941c45d1b3a323f1433bd6")
         address = functions.hash_to_address(k["addressHash"], script_hash=False,
                                         witness_version=0, testnet=False)
-        self.assertEqual(address, "bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4")
+        self.assertEqual(address, "bgl1qw508d6qejxtdg4y5r3zarvary0c5xw7k0fy5a3")
         self.assertEqual(k["type"],"P2WPKH")
         self.assertEqual(k["nType"],5)
         self.assertEqual(k["reqSigs"],1)
@@ -221,7 +219,7 @@ class AddressFunctionsTests(unittest.TestCase):
         k = tools.parse_script(s)
         address = functions.hash_to_address(k["addressHash"], script_hash=True,
                                         witness_version=None, testnet=False)
-        self.assertEqual(address, "3F527pX8o2pgr6FuNdNvngA2Do2wVvDoZi")
+        self.assertEqual(address, "BHq5ozUtze6DCm3ds23JVBbkotBoktJjRb")
         self.assertEqual(k["type"],"P2SH")
         self.assertEqual(k["nType"],1)
         self.assertEqual(k["reqSigs"], None)
@@ -248,7 +246,7 @@ class AddressFunctionsTests(unittest.TestCase):
         sh = tools.script_to_hash(h, 0, 0)
         address = functions.hash_to_address(sh,script_hash=True,
                                         witness_version=None, testnet=False)
-        self.assertEqual(address, "3D2oetdNuZUqQHPJmcMDDHYoqkyNVsFk9r")
+        self.assertEqual(address, "BFnsM4b97AkMkxB3G11aunzYRr8EkgkE4o")
         self.assertEqual(k["type"],"MULTISIG")
         self.assertEqual(k["nType"],4)
         self.assertEqual(k["reqSigs"],3)

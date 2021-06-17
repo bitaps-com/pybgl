@@ -14,7 +14,7 @@ from pybgl.functions.encode import (encode_base58,
                                     base32charset_upcase)
 
 
-def public_key_to_address(pubkey, testnet=False, p2sh_p2wpkh=False, witness_version=0):
+def public_key_to_address(pubkey, testnet=False, p2sh_p2wpkh=False, witness_version=0, regtest=False):
     """
     Get address from public key/script hash. In case PUBKEY, P2PKH, P2PKH public key/script hash is SHA256+RIPEMD160,
     P2WSH script hash is SHA256.
@@ -39,10 +39,10 @@ def public_key_to_address(pubkey, testnet=False, p2sh_p2wpkh=False, witness_vers
         h = hash160(pubkey)
     return hash_to_address(h, testnet=testnet,
                            script_hash=p2sh_p2wpkh,
-                           witness_version=witness_version)
+                           witness_version=witness_version, regtest=regtest)
 
 
-def hash_to_address(address_hash, testnet=False, script_hash=False, witness_version=0):
+def hash_to_address(address_hash, testnet=False, script_hash=False, witness_version=0, regtest=False):
     """
     Get address from public key/script hash. In case PUBKEY, P2PKH, P2PKH public key/script hash is SHA256+RIPEMD160,
     P2WSH script hash is SHA256.
@@ -82,8 +82,12 @@ def hash_to_address(address_hash, testnet=False, script_hash=False, witness_vers
         return encode_base58(address_hash)
 
     if testnet:
-        prefix = TESTNET_SEGWIT_ADDRESS_BYTE_PREFIX
-        hrp = TESTNET_SEGWIT_ADDRESS_PREFIX
+        if regtest:
+            prefix = REGTEST_SEGWIT_ADDRESS_BYTE_PREFIX
+            hrp = REGTEST_SEGWIT_ADDRESS_PREFIX
+        else:
+            prefix = TESTNET_SEGWIT_ADDRESS_BYTE_PREFIX
+            hrp = TESTNET_SEGWIT_ADDRESS_PREFIX
     else:
         prefix = MAINNET_SEGWIT_ADDRESS_BYTE_PREFIX
         hrp = MAINNET_SEGWIT_ADDRESS_PREFIX
@@ -106,7 +110,7 @@ def address_to_hash(address, hex=True):
     if address[0] in ADDRESS_PREFIX_LIST:
         h = decode_base58(address)[1:-4]
     elif address.split("1")[0] in (MAINNET_SEGWIT_ADDRESS_PREFIX,
-                         TESTNET_SEGWIT_ADDRESS_PREFIX):
+                         TESTNET_SEGWIT_ADDRESS_PREFIX, REGTEST_SEGWIT_ADDRESS_PREFIX):
         address = address.split("1")[1]
         h = rebase_5_to_8(rebase_32_to_5(address)[1:-6], False)
     else:
@@ -129,11 +133,10 @@ def address_type(address, num=False):
                         TESTNET_ADDRESS_PREFIX,
                         TESTNET_ADDRESS_PREFIX_2):
         t = 'P2PKH'
-    elif address[:3] in (MAINNET_SEGWIT_ADDRESS_PREFIX,
-                         TESTNET_SEGWIT_ADDRESS_PREFIX):
-        if len(address) == 43:
+    elif (address[:3] in MAINNET_SEGWIT_ADDRESS_PREFIX) or (address[:4] in TESTNET_SEGWIT_ADDRESS_PREFIX) or (address[:4] in REGTEST_SEGWIT_ADDRESS_PREFIX):
+        if len(address) == 43 or  len(address) == 44:
             t = 'P2WPKH'
-        elif len(address) == 63:
+        elif len(address) == 63 or len(address) == 64:
             t = 'P2WSH'
         else:
             return SCRIPT_TYPES['NON_STANDARD'] if num else 'UNKNOWN'
@@ -158,7 +161,7 @@ def address_net_type(address):
                         TESTNET_ADDRESS_PREFIX,
                         TESTNET_ADDRESS_PREFIX_2):
         return "testnet"
-    elif address[:4] == TESTNET_SEGWIT_ADDRESS_PREFIX:
+    elif address[:4] == TESTNET_SEGWIT_ADDRESS_PREFIX or address[:4] == REGTEST_SEGWIT_ADDRESS_PREFIX:
         return "testnet"
     return None
 
@@ -190,7 +193,7 @@ def address_to_script(address, hex=False):
              OP_EQUALVERIFY,
              OP_CHECKSIG]
     elif (address[:3] == MAINNET_SEGWIT_ADDRESS_PREFIX) \
-         or (address[:4] == TESTNET_SEGWIT_ADDRESS_PREFIX):
+         or (address[:4] == TESTNET_SEGWIT_ADDRESS_PREFIX) or (address[:4] == REGTEST_SEGWIT_ADDRESS_PREFIX):
         h = address_to_hash(address, hex=False)
         s = [OP_0,
              bytes([len(h)]),
@@ -238,7 +241,7 @@ def public_key_to_p2sh_p2wpkh_script(pubkey, hex=False):
     return r.hex() if hex else r
 
 
-def is_address_valid(address, testnet=False):
+def is_address_valid(address, testnet=False, regtest=False):
     """
     Check is address valid.
 
@@ -246,6 +249,7 @@ def is_address_valid(address, testnet=False):
     :param testnet: (optional) flag for testnet network, by default is False.
     :return: boolean.
     """
+    print("addr",address)
     if not address or type(address) != str:
         return False
     if address[0] in (MAINNET_ADDRESS_PREFIX,
@@ -270,8 +274,8 @@ def is_address_valid(address, testnet=False):
             return False
         return True
     elif (address[:3] == MAINNET_SEGWIT_ADDRESS_PREFIX) \
-             or (address[:4] == TESTNET_SEGWIT_ADDRESS_PREFIX):
-        if len(address) not in (43, 63):
+             or (address[:4] == TESTNET_SEGWIT_ADDRESS_PREFIX) or (address[:4] == REGTEST_SEGWIT_ADDRESS_PREFIX):
+        if len(address) not in (43,44, 63, 64):
             return False
         try:
             prefix, payload = address.split('1')
@@ -285,23 +289,32 @@ def is_address_valid(address, testnet=False):
             else:
                 if i.isupper() or i not in base32charset:
                     return False
+
         payload = payload.lower()
         prefix = prefix.lower()
         if testnet:
-            if prefix != TESTNET_SEGWIT_ADDRESS_PREFIX:
+            if prefix != TESTNET_SEGWIT_ADDRESS_PREFIX and prefix != REGTEST_SEGWIT_ADDRESS_PREFIX:
                 return False
             stripped_prefix = TESTNET_SEGWIT_ADDRESS_BYTE_PREFIX
+            if regtest:
+                stripped_prefix = REGTEST_SEGWIT_ADDRESS_BYTE_PREFIX
         else:
             if prefix != MAINNET_SEGWIT_ADDRESS_PREFIX:
                 return False
             stripped_prefix = MAINNET_SEGWIT_ADDRESS_BYTE_PREFIX
         d = rebase_32_to_5(payload)
+
         address_hash = d[:-6]
         checksum = d[-6:]
+        print("checksum", checksum)
+        print("checksum_back", rebase_5_to_32(checksum))
         checksum2 = bech32_polymod(b"%s%s%s" % (stripped_prefix, address_hash, b"\x00" * 6))
         checksum2 = rebase_8_to_5(checksum2.to_bytes(5, "big"))[2:]
+        print("checksum2",checksum2)
+        print("checksum2_back", rebase_5_to_32(checksum2))
         if checksum != checksum2:
             return False
+        print("checksum2", checksum2)
         return True
     return False
 
