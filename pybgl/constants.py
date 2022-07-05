@@ -74,7 +74,7 @@ SCRIPT_N_TYPES = {0: "P2PKH",
 
 # CONSTANTS hierarchical deterministic wallets (HD Wallets)
 # m/44'/0' P2PKH
-MAINNET_XPRIVATE_KEY_PREFIX = b'\x04\x35\x87\xCF'
+MAINNET_XPRIVATE_KEY_PREFIX = b'\x04\x88\xAD\xE4'
 MAINNET_XPUBLIC_KEY_PREFIX = b'\x04\x88\xB2\x1E'
 
 # m/44'/1' P2PKH

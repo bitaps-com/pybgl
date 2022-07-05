@@ -1,19 +1,20 @@
 from struct import pack
 from pybgl.functions.key import private_to_public_key, private_key_to_wif
 from pybgl.functions.hash import hmac_sha512, double_sha256, hash160
+from pybgl.functions.address import public_key_to_address
 from pybgl.functions.encode import encode_base58, decode_base58
 from pybgl.constants import *
 from pybgl.crypto import __secp256k1_ec_pubkey_tweak_add__
 from pybgl.functions.tools import get_bytes
 
+
 def create_master_xprivate_key(seed, testnet=False, base58=None, hex=None):
     """
     Create extended private key from seed
 
-    :param seed: seed HEX or bytes string.
-    :param testnet: (optional) flag for testnet network, by default is False.
-    :param base58: (optional) return result as base58 encoded string, by default is True.
-    :param hex: (optional) return result as HEX encoded string, by default is False.
+    :param str,bytes key: seed HEX or bytes string.
+    :param boolean base58: (optional) return result as base58 encoded string, by default True.
+    :param boolean hex: (optional) return result as HEX encoded string, by default False.
                         In case True base58 flag value will be ignored.
     :return: extended private key  in base58, HEX or bytes string format.
     """
@@ -22,7 +23,7 @@ def create_master_xprivate_key(seed, testnet=False, base58=None, hex=None):
     m, c = i[:32], i[32:]
     m_int = int.from_bytes(m, byteorder="big")
 
-    if m_int <= 0 or m_int > ECDSA_SEC256K1_ORDER: # pragma: no cover
+    if m_int <= 0 or m_int > ECDSA_SEC256K1_ORDER:  # pragma: no cover
         return None
     prefix = TESTNET_XPRIVATE_KEY_PREFIX if testnet else MAINNET_XPRIVATE_KEY_PREFIX
     key = b''.join([prefix,
@@ -43,9 +44,9 @@ def xprivate_to_xpublic_key(xprivate_key, base58=True, hex=False):
     """
     Get extended public key from extended private key using ECDSA secp256k1
 
-    :param xprivate_key: extended private key in base58, HEX or bytes string.
-    :param base58: (optional) return result as base58 encoded string, by default is True.
-    :param hex: (optional) return result as HEX encoded string, by default is False.
+    :param str,bytes key: extended private key in base58, HEX or bytes string.
+    :param boolean base58: (optional) return result as base58 encoded string, by default True.
+    :param boolean hex: (optional) return result as HEX encoded string, by default False.
                         In case True base58 flag value will be ignored.
     :return: extended public key  in base58, HEX or bytes string format.
     """
@@ -63,6 +64,14 @@ def xprivate_to_xpublic_key(xprivate_key, base58=True, hex=False):
         prefix = TESTNET_XPUBLIC_KEY_PREFIX
     elif xprivate_key[:4] == MAINNET_XPRIVATE_KEY_PREFIX:
         prefix = MAINNET_XPUBLIC_KEY_PREFIX
+    elif xprivate_key[:4] == MAINNET_M49_XPRIVATE_KEY_PREFIX:
+        prefix = MAINNET_M49_XPUBLIC_KEY_PREFIX
+    elif xprivate_key[:4] == TESTNET_M49_XPRIVATE_KEY_PREFIX:
+        prefix = TESTNET_M49_XPUBLIC_KEY_PREFIX
+    elif xprivate_key[:4] == MAINNET_M84_XPRIVATE_KEY_PREFIX:
+        prefix = MAINNET_M84_XPUBLIC_KEY_PREFIX
+    elif xprivate_key[:4] == TESTNET_M84_XPRIVATE_KEY_PREFIX:
+        prefix = TESTNET_M84_XPUBLIC_KEY_PREFIX
     else:
         raise ValueError("invalid extended private key")
 
@@ -85,7 +94,7 @@ def decode_path(path, sub_path=False):
             raise ValueError("invalid path")
 
     r = []
-    for k in path if sub_path else path[1:]:
+    for k in path[1:]:
         if k[-1] == "'":
             k = int(k[:-1]) + HARDENED_KEY
         else:
@@ -94,26 +103,28 @@ def decode_path(path, sub_path=False):
     return r
 
 
-def derive_xkey(xkey, path, base58=None, hex=None):
+def derive_xkey(xkey, path, base58=None, hex=None, sub_path=False):
     """
     Child Key derivation for extended private/public keys
-    
-    :param xkey: extended private/public in base58, HEX or bytes string format.
-    :param path: list of derivation path levels. For hardened derivation use HARDENED_KEY flag.
-    :param base58: (optional) return result as base58 encoded string, by default is True.
-    :param hex: (optional) return result as HEX encoded string, by default is False.
+
+    :param bytes xkey: extended private/public in base58, HEX or bytes string format.
+    :param list path_level: list of derivation path levels. For hardened derivation use HARDENED_KEY flag.
+    :param boolean base58: (optional) return result as base58 encoded string, by default True.
+    :param boolean hex: (optional) return result as HEX encoded string, by default False.
                         In case True base58 flag value will be ignored.
     :return: extended child private/public key  in base58, HEX or bytes string format.
     """
     if isinstance(path, str):
-        path = decode_path(path)
+        path = decode_path(path, sub_path=sub_path)
     if isinstance(xkey, str):
         xkey = decode_base58(xkey, checksum=True)
-    if xkey[:4] in [MAINNET_XPRIVATE_KEY_PREFIX, TESTNET_XPRIVATE_KEY_PREFIX]:
+    key_type = xkey_type(xkey)
+
+    if key_type == 'private':
         for i in path:
             xkey = derive_child_xprivate_key(xkey, i)
 
-    elif xkey[:4] in [MAINNET_XPUBLIC_KEY_PREFIX, TESTNET_XPUBLIC_KEY_PREFIX]:
+    elif key_type == 'public':
         for i in path:
             xkey = derive_child_xpublic_key(xkey, i)
     else:
@@ -141,13 +152,13 @@ def derive_child_xprivate_key(xprivate_key, i):
     pub = private_to_public_key(k[1:], hex=False)
     fingerprint = hash160(pub)[:4]
     s = hmac_sha512(c, b"%s%s" % (k if i >= HARDENED_KEY else pub, pack(">L", i)))
-    p_int = int.from_bytes(s[:32],byteorder='big')
-    if p_int >= ECDSA_SEC256K1_ORDER: # pragma: no cover
+    p_int = int.from_bytes(s[:32], byteorder='big')
+    if p_int >= ECDSA_SEC256K1_ORDER:  # pragma: no cover
         return None
     k_int = (int.from_bytes(k[1:], byteorder='big') + p_int) % ECDSA_SEC256K1_ORDER
-    if not k_int: # pragma: no cover
+    if not k_int:  # pragma: no cover
         return None
-    key = int.to_bytes(k_int, byteorder = "big", length=32)
+    key = int.to_bytes(k_int, byteorder="big", length=32)
     return b"".join([xprivate_key[:4],
                      bytes([depth]),
                      fingerprint,
@@ -163,16 +174,16 @@ def derive_child_xpublic_key(xpublic_key, i):
     fingerprint = hash160(k)[:4]
     depth = xpublic_key[4] + 1
     if depth > 255:
-        raise ValueError("path depth should be <= 255")   # pragma: no cover
+        raise ValueError("path depth should be <= 255")  # pragma: no cover
     if i >= HARDENED_KEY:
         raise ValueError("derivation from extended public key impossible")
     s = hmac_sha512(c, k + pack(">L", i))
-    if int.from_bytes(s[:32], byteorder='big') >= ECDSA_SEC256K1_ORDER: # pragma: no cover
+    if int.from_bytes(s[:32], byteorder='big') >= ECDSA_SEC256K1_ORDER:  # pragma: no cover
         return None
 
     pk = __secp256k1_ec_pubkey_tweak_add__(k, s[:32])
-    if isinstance(pk, int): # pragma: no cover
-        raise RuntimeError("pubkey_tweak_add error %s" %pk)
+    if isinstance(pk, int):  # pragma: no cover
+        raise RuntimeError("pubkey_tweak_add error %s" % pk)
     return b"".join([xpublic_key[:4],
                      bytes([depth]),
                      fingerprint,
@@ -185,9 +196,9 @@ def public_from_xpublic_key(xpublic_key, hex=True):
     """
     Get public key from extended public key
 
-    :param xpublic_key: extended public in base58, HEX or bytes string format.
-    :param base58: (optional) return result as base58 encoded string, by default is True.
-    :param hex: (optional) return result as HEX encoded string, by default is False.
+    :param bytes xpublic_key: extended public in base58, HEX or bytes string format.
+    :param boolean base58: (optional) return result as base58 encoded string, by default True.
+    :param boolean hex: (optional) return result as HEX encoded string, by default False.
                         In case True base58 flag value will be ignored.
     :return: public key  in HEX or bytes string format.
     """
@@ -209,9 +220,9 @@ def private_from_xprivate_key(xprivate_key, wif=True, hex=False):
     """
     Get private key from extended private key
 
-    :param xprivate_key: extended private in base58, HEX or bytes string format.
-    :param wif: (optional) return result as WIF format, by default is True.
-    :param hex: (optional) return result as HEX encoded string, by default is False.
+    :param bytes xprivate_key: extended public in base58, HEX or bytes string format.
+    :param boolean wif: (optional) return result as WIF format, by default True.
+    :param boolean hex: (optional) return result as HEX encoded string, by default False.
                         In case True WIF flag value will be ignored.
     :return: private key  in HEX or bytes string format.
     """
@@ -260,7 +271,7 @@ def is_xprivate_key_valid(key):
                 key = bytes.fromhex(key)
             except:
                 pass
-    if not isinstance(key, bytes) or len(key)!=78:
+    if not isinstance(key, bytes) or len(key) != 78:
         return False
     if key[:4] not in [MAINNET_XPRIVATE_KEY_PREFIX,
                        TESTNET_XPRIVATE_KEY_PREFIX,
@@ -281,13 +292,13 @@ def is_xpublic_key_valid(key):
     """
     if isinstance(key, str):
         try:
-            key = decode_base58(key, verify_checksum = True)
+            key = decode_base58(key, verify_checksum=True)
         except:
             try:
                 key = bytes.fromhex(key)
             except:
                 pass
-    if not isinstance(key, bytes) or len(key)!=78:
+    if not isinstance(key, bytes) or len(key) != 78:
         return False
 
     if key[:4] not in [MAINNET_XPUBLIC_KEY_PREFIX,
@@ -300,17 +311,69 @@ def is_xpublic_key_valid(key):
     return True
 
 
+def xkey_derivation_type(key):
+    if isinstance(key, str):
+        key = decode_base58(key, checksum=True)
+    if len(key) != 78:
+        return False
+    prefix = key[:4]
+    if prefix in (MAINNET_XPRIVATE_KEY_PREFIX, TESTNET_XPRIVATE_KEY_PREFIX,
+                  MAINNET_XPUBLIC_KEY_PREFIX, TESTNET_XPUBLIC_KEY_PREFIX):
+        return "BIP44"
+    if prefix in (MAINNET_M49_XPRIVATE_KEY_PREFIX, TESTNET_M49_XPRIVATE_KEY_PREFIX,
+                  MAINNET_M49_XPUBLIC_KEY_PREFIX, TESTNET_M49_XPUBLIC_KEY_PREFIX):
+        return "BIP49"
+    if prefix in (MAINNET_M84_XPRIVATE_KEY_PREFIX, TESTNET_M84_XPRIVATE_KEY_PREFIX,
+                  MAINNET_M84_XPUBLIC_KEY_PREFIX, TESTNET_M84_XPUBLIC_KEY_PREFIX):
+        return "BIP84"
+    return "custom"
+
+
+def xkey_network_type(key):
+    if isinstance(key, str):
+        key = decode_base58(key, checksum=True)
+    if len(key) != 78:
+        raise Exception("invalid extended key")
+    prefix = key[:4]
+    if prefix in (MAINNET_XPRIVATE_KEY_PREFIX, MAINNET_M49_XPRIVATE_KEY_PREFIX,
+                  MAINNET_M84_XPRIVATE_KEY_PREFIX, MAINNET_XPUBLIC_KEY_PREFIX,
+                  MAINNET_M49_XPUBLIC_KEY_PREFIX, MAINNET_M84_XPUBLIC_KEY_PREFIX):
+        return "mainnet"
+    if prefix in (TESTNET_XPRIVATE_KEY_PREFIX, TESTNET_M49_XPRIVATE_KEY_PREFIX,
+                  TESTNET_M84_XPRIVATE_KEY_PREFIX, TESTNET_XPUBLIC_KEY_PREFIX,
+                  TESTNET_M49_XPUBLIC_KEY_PREFIX, TESTNET_M84_XPUBLIC_KEY_PREFIX):
+        return "testnet"
+    raise Exception("invalid extended key")
+
+
+def xkey_type(key):
+    if isinstance(key, str):
+        key = decode_base58(key, checksum=True)
+    if len(key) != 78:
+        raise Exception("invalid extended key")
+    prefix = key[:4]
+    if prefix in (MAINNET_XPRIVATE_KEY_PREFIX, MAINNET_M49_XPRIVATE_KEY_PREFIX,
+                  MAINNET_M84_XPRIVATE_KEY_PREFIX, TESTNET_XPRIVATE_KEY_PREFIX,
+                  TESTNET_M49_XPRIVATE_KEY_PREFIX, TESTNET_M84_XPRIVATE_KEY_PREFIX):
+        return "private"
+    if prefix in (MAINNET_XPUBLIC_KEY_PREFIX, MAINNET_M49_XPUBLIC_KEY_PREFIX,
+                  MAINNET_M84_XPUBLIC_KEY_PREFIX, TESTNET_XPUBLIC_KEY_PREFIX,
+                  TESTNET_M49_XPUBLIC_KEY_PREFIX, TESTNET_M84_XPUBLIC_KEY_PREFIX):
+        return "public"
+    raise ValueError("invalid extended key")
+
 
 def path_xkey_to_bip32_xkey(key, base58=True, hex=False):
     if isinstance(key, str):
         try:
-            key = decode_base58(key, verify_checksum = True)
+            key = decode_base58(key, verify_checksum=True)
         except:
             try:
                 key = bytes.fromhex(key)
             except:
                 pass
-    if not isinstance(key, bytes) or len(key)!=78:
+
+    if not isinstance(key, bytes) or len(key) != 78:
         raise ValueError("invalid extended key")
 
     if key[:4] in (MAINNET_XPUBLIC_KEY_PREFIX,
@@ -336,13 +399,14 @@ def path_xkey_to_bip32_xkey(key, base58=True, hex=False):
     else:
         return key
 
+
 def bip32_xkey_to_path_xkey(key, path_type, base58=True, hex=False):
     if path_type not in ("BIP44", "BIP49", "BIP84"):
         raise ValueError("unsupported path type %s" % path_type)
 
     if isinstance(key, str):
         try:
-            key = decode_base58(key, verify_checksum = True)
+            key = decode_base58(key, verify_checksum=True)
         except:
             try:
                 key = bytes.fromhex(key)
@@ -383,13 +447,28 @@ def bip32_xkey_to_path_xkey(key, path_type, base58=True, hex=False):
         else:
             key = MAINNET_M84_XPUBLIC_KEY_PREFIX + key[4:]
     else:
-        raise ValueError("invalid key")
+        raise ValueError("invalid extended key")
 
     if hex:
 
         return key.hex()
     elif base58:
-        return encode_base58(key, checksum = True)
+        return encode_base58(key, checksum=True)
     else:
         return key
+
+
+def address_from_xkey_path(key, path, address_type="P2WPKH", testnet=None):
+    if testnet is None:
+        testnet = xkey_network_type(key) == "testnet"
+    k = derive_xkey(key, path)
+    if xkey_type(key) == "private":
+        k = xprivate_to_xpublic_key(k)
+    k = public_from_xpublic_key(k)
+    if address_type == "P2SH_P2WPKH":
+        return public_key_to_address(k, testnet=testnet, p2sh_p2wpkh=True)
+    elif address_type == "P2WPKH":
+        return public_key_to_address(k, testnet=testnet)
+    elif address_type == "P2PKH" or address_type == "PUBKEY":
+        return public_key_to_address(k, testnet=testnet, witness_version=None)
 

@@ -10,234 +10,253 @@ class Wallet():
     The class for creating wallet object.
 
     :param init_vector: (optional) initialization vector should be mnemonic phrase, extended public key,
-                        extended private key, by default is None (generate new wallet).
-    :param passphrase: (optional) passphrase to get ability use 2FA approach for
-                          creating seed, by default is empty string.
-    :param path_type: (optional) "BIP44", "BIP49", "BIP84", by default is "BIP84"
-    :param init_account: (optional) integer
-    :param address_type: (optional) "P2PKH", "P2SH_P2WPKH", "P2WPKH"
-    :param testnet: (optional) flag for testnet network, by default is False.
-    :param hardened: (optional) boolean, by default is False.
+                        extended private key, by default None (generate new wallet).
+    :param compressed: (optional) if set to True private key corresponding compressed public key,
+                       by default set to True. Recommended use only compressed public key.
+    :param testnet: (optional) if set to True mean that this private key for testnet Bitcoin network.
 
     """
-    def __init__(self, init_vector=None, passphrase="", path_type=None,
-                 init_account=None, address_type=None, testnet=False, hardened=False):
-        self.seed = None
-        #: mnemonic (string)
-        self.mnemonic = None
-        self._init_vector = None
-        #: account public xkey (string)
-        self.account_public_xkey = None
-        #: account private xkey (string)
-        self.account_private_xkey = None
-        self.external_chain_public_xkey = None
-        self.external_chain_private_xkey = None
-        self.internal_chain_public_xkey = None
-        self.internal_chain_private_xkey = None
-        self.hardened = hardened
-
-        if path_type in (None, "BIP44", "BIP49", "BIP84"):
-            self.path_type = path_type
-        else:
-            raise ValueError("unknown path type %s" % path_type)
+    def __init__(self, init_vector=None,
+                       passphrase="",
+                       path=None,
+                       strength=256,
+                       threshold=1,
+                       shares=1,
+                       word_list=None,
+                       address_type=None,
+                       hardened_addresses=False,
+                       account=0,
+                       chain=0,
+                       testnet=False):
+        self.account = account
+        self.chain = chain
+        self.hardened_addresses = hardened_addresses
+        self.passphrase = passphrase
 
         if address_type in (None, "P2PKH", "P2SH_P2WPKH", "P2WPKH"):
             self.address_type = address_type
         else:
             raise ValueError("unsupported address type %s" % address_type)
+        self.path_type = None
+        self.seed = None
+        self.mnemonic = None
+        self._init_vector = None
+        self.master_private_xkey = None
+        self.account_public_xkey = None
+        self.account_private_xkey = None
+        self.external_chain_private_xkey = None
+        self.external_chain_private_xkey = None
+        self.internal_chain_public_xkey = None
+        self.internal_chain_public_xkey = None
+        self.chain_private_xkey = None
+        self.chain_public_xkey = None
 
-        self.account = 0
-        if init_account is not None:
-            self.account = int(init_account)
 
-        if init_vector is None:
-            e = generate_entropy()
-            m = entropy_to_mnemonic(e)
-            self.mnemonic = m
-            self.seed = mnemonic_to_seed(m, passphrase=passphrase)
-            self._init_vector = create_master_xprivate_key(self.seed, base58=False, testnet=testnet)
-            self._init_vector_type = "xprivate_key"
-            if path_type is None:
+        if path == "BIP84":
+            self.path_type = "BIP84"
+            self.path = "m/84'/0'/%s'/%s" % (self.account, self.chain)
+            self._account_path =  "m/84'/0'/%s'" % self.account
+        elif path == "BIP49":
+            self.path_type = "BIP49"
+            self.path = "m/49'/0'/%s'/%s" % (self.account, self.chain)
+            self._account_path =  "m/49'/0'/%s'" % self.account
+        elif path == "BIP44":
+            self.path_type = "BIP44"
+            self.path = "m/44'/0'/%s'/%s" % (self.account, self.chain)
+            self._account_path =  "m/44'/0'/%s'" % self.account
+        elif isinstance(path, str):
+            self.path_type = "custom"
+            self.path = path
+
+        if isinstance(init_vector, list):
+            for l in init_vector:
+                if not is_mnemonic_valid(l):
+                    break
+            else:
+                init_vector = combine_mnemonic(init_vector)
+
+        if init_vector == None:
+            self.mnemonic = entropy_to_mnemonic(generate_entropy(strength=strength), word_list=word_list)
+            self.seed = mnemonic_to_seed(self.mnemonic, passphrase=passphrase)
+            init_vector = create_master_xprivate_key(self.seed, testnet=testnet)
+            if self.path_type is None:
                 self.path_type = "BIP84"
-
-        else:
-            if isinstance(init_vector, str):
-                if is_xprivate_key_valid(init_vector):
-                    if len(init_vector) == 156:
-                        self._init_vector = bytes.fromhex(init_vector)
+                self.path = "m/84'/0'/%s'/%s" % (self.account, self.chain)
+                self._account_path = "m/84'/0'/%s'" % self.account
+            if self.path_type != "custom":
+                init_vector = bip32_xkey_to_path_xkey(init_vector, self.path_type)
+            init_vector_type = "xPriv"
+        elif isinstance(init_vector, str):
+            if is_xprivate_key_valid(init_vector):
+                if self.path_type is None:
+                    self.path_type = xkey_derivation_type(init_vector)
+                    if self.path_type == "BIP84":
+                        self.path = "m/84'/0'/%s'/%s" % (self.account, self.chain)
+                        self._account_path = "m/84'/0'/%s'" % self.account
+                    elif self.path_type == "BIP49":
+                        self.path = "m/49'/0'/%s'/%s" % (self.account, self.chain)
+                        self._account_path = "m/49'/0'/%s'" % self.account
+                    elif self.path_type == "BIP44":
+                        self.path = "m/44'/0'/%s'/%s" % (self.account, self.chain)
+                        self._account_path = "m/44'/0'/%s'" % self.account
                     else:
-                        self._init_vector = decode_base58(init_vector, checksum = True)
-                    self._init_vector_type = "xprivate_key"
+                        self.path = "m"
+                elif self.path_type != "custom":
+                    init_vector = bip32_xkey_to_path_xkey(init_vector, self.path_type)
+                init_vector_type = "xPriv"
 
-                    if path_type is None:
-                        if self._init_vector[:4] in (MAINNET_M49_XPRIVATE_KEY_PREFIX,
-                                                          TESTNET_M49_XPRIVATE_KEY_PREFIX):
-                            self.path_type = "BIP49"
-                        elif self._init_vector[:4] in (MAINNET_M84_XPRIVATE_KEY_PREFIX,
-                                                            TESTNET_M84_XPRIVATE_KEY_PREFIX):
-                            self.path_type = "BIP84"
-                        elif self._init_vector[:4] in (MAINNET_M44_XPRIVATE_KEY_PREFIX,
-                                                            TESTNET_M44_XPRIVATE_KEY_PREFIX):
-                            self.path_type = "BIP44"
-
-                elif is_xpublic_key_valid(init_vector):
-                    if len(init_vector) == 156:
-                        self._init_vector = bytes.fromhex(init_vector)
+            elif is_xpublic_key_valid(init_vector):
+                if self.path_type is None:
+                    self.path_type = xkey_derivation_type(init_vector)
+                    if self.path_type == "BIP84":
+                        self.path = "m/84'/0'/%s'/%s" % (self.account, self.chain)
+                        self._account_path = "m/84'/0'/%s'" % self.account
+                    elif self.path_type == "BIP49":
+                        self.path = "m/49'/0'/%s'/%s" % (self.account, self.chain)
+                        self._account_path = "m/49'/0'/%s'" % self.account
+                    elif self.path_type == "BIP44":
+                        self.path = "m/44'/0'/%s'/%s" % (self.account, self.chain)
+                        self._account_path = "m/44'/0'/%s'" % self.account
                     else:
-                        self._init_vector = decode_base58(init_vector, checksum = True)
-                    self._init_vector_type = "xpublic_key"
-                    if path_type is None:
-                        if self._init_vector[:4] in (MAINNET_M49_XPUBLIC_KEY_PREFIX,
-                                                          TESTNET_M49_XPUBLIC_KEY_PREFIX):
-                            self.path_type = "BIP49"
-                        elif self._init_vector[:4] in (MAINNET_M84_XPUBLIC_KEY_PREFIX,
-                                                            TESTNET_M84_XPUBLIC_KEY_PREFIX):
-                            self.path_type = "BIP84"
-                        elif self._init_vector[:4] in (MAINNET_M44_XPUBLIC_KEY_PREFIX,
-                                                            TESTNET_M44_XPUBLIC_KEY_PREFIX):
-                            self.path_type = "BIP44"
-                else:
-                    try:
-                        self.mnemonic = init_vector
-                        self.passphrase = passphrase
-                        self.seed = mnemonic_to_seed(self.mnemonic, passphrase=passphrase)
-                        self._init_vector = create_master_xprivate_key(self.seed, base58=False, testnet=testnet)
-                        self._init_vector_type = "xprivate_key"
-                    except Exception as err:
-                        raise ValueError("invalid initial vector %s" % err)
-        if not isinstance(self._init_vector, bytes):
-            raise ValueError("invalid initial vector")
+                        self.path = "m"
+                elif self.path_type != "custom":
+                    init_vector = bip32_xkey_to_path_xkey(init_vector, self.path_type)
+                init_vector_type = "xPub"
 
-
-        if self._init_vector[:4] in (MAINNET_XPRIVATE_KEY_PREFIX, MAINNET_XPUBLIC_KEY_PREFIX,
-                                     MAINNET_M49_XPUBLIC_KEY_PREFIX, MAINNET_M49_XPRIVATE_KEY_PREFIX,
-                                     MAINNET_M84_XPUBLIC_KEY_PREFIX, MAINNET_M84_XPRIVATE_KEY_PREFIX):
-            self.testnet = False
-        else:
-            self.testnet = True
-
-        if self.path_type in ("BIP44", "BIP49", "BIP84"):
-            if self.address_type is None:
-                if self.path_type == "BIP44":
-                    self.address_type = "P2PKH"
-                    self.path = [44 | HARDENED_KEY, HARDENED_KEY, self.account | HARDENED_KEY]
-                elif self.path_type == "BIP49":
-                    self.address_type = "P2SH_P2WPKH"
-                    self.path = [49 | HARDENED_KEY, HARDENED_KEY, self.account | HARDENED_KEY]
-                elif self.path_type == "BIP84":
-                    self.address_type = "P2WPKH"
-                    self.path = [84 | HARDENED_KEY, HARDENED_KEY, self.account | HARDENED_KEY]
-
-            self.version = self._init_vector[:4].hex()
-            self.depth = unpack('B', self._init_vector[4:5])[0]
-            if self.depth != 0:
-                self.path = []
-            self.fingerprint = self._init_vector[5:9].hex()
-            self.child = unpack('I', self._init_vector[9:13])[0]
-            self.chain_code = self._init_vector[13:45].hex()
-
-            if self._init_vector_type == "xprivate_key":
-                if self.mnemonic:
-                    info = ["Mnemonic seed"]
-                else:
-                    info = ["Derived private key"] if self.depth != 0 else ["Master private key"]
-                if self.testnet:
-                    info.append("[Testnet]")
-                else:
-                    info.append("[Mainnet]")
-                self.info = " ".join(info)
-
-                self._init_vector = path_xkey_to_bip32_xkey(self._init_vector, base58=False)
-
-                key = derive_xkey(self._init_vector, self.path)
-                self.account_private_xkey = bip32_xkey_to_path_xkey(key, self.path_type)
-                self.account_public_xkey = bip32_xkey_to_path_xkey(xprivate_to_xpublic_key(key), self.path_type)
-
-                key = derive_xkey(self._init_vector, self.path + [0])
-                self.external_chain_private_xkey = bip32_xkey_to_path_xkey(key, self.path_type)
-                self.external_chain_public_xkey = bip32_xkey_to_path_xkey(xprivate_to_xpublic_key(key), self.path_type)
-
-
-                key = derive_xkey(self._init_vector, self.path + [1])
-
-                self.internal_chain_private_xkey = bip32_xkey_to_path_xkey(key, self.path_type)
-                self.internal_chain_public_xkey = bip32_xkey_to_path_xkey(xprivate_to_xpublic_key(key), self.path_type)
             else:
-                if self.mnemonic:
-                    info = ["Mnemonic seed"]
-                else:
-                    info = ["Derived public key"] if self.depth != 0 else ["Master public key"]
-                if self.testnet:
-                    info.append("[Testnet]")
-                else:
-                    info.append("[Mainnet]")
-                self.info = " ".join(info)
+                if not is_mnemonic_valid(init_vector):
+                    raise Exception("Invalid mnemonic")
+                self.mnemonic = init_vector
+                self.seed = mnemonic_to_seed(self.mnemonic, passphrase=passphrase)
+                init_vector = create_master_xprivate_key(self.seed, testnet=testnet)
+                if self.path_type is None:
+                    self.path_type = "BIP84"
+                    self.path = "m/84'/0'/%s'/%s" % (self.account, self.chain)
+                    self._account_path = "m/84'/0'/%s'" % self.account
 
-                self._init_vector = path_xkey_to_bip32_xkey(self._init_vector, base58=False)
-
-                self.account_private_xkey = None
-                self.account_public_xkey = bip32_xkey_to_path_xkey(self._init_vector, self.path_type)
-
-                key = derive_xkey(self._init_vector, [0])
-                self.external_chain_private_xkey = None
-                self.external_chain_public_xkey = bip32_xkey_to_path_xkey(key, self.path_type)
-
-                key = derive_xkey(self._init_vector, [1])
-                self.internal_chain_private_xkey = None
-                self.internal_chain_public_xkey = bip32_xkey_to_path_xkey(key, self.path_type)
-        elif self.path_type == "Custom":
-            pass
-        elif self.path_type is None:
-            pass
+                if self.path_type != "custom":
+                    init_vector = bip32_xkey_to_path_xkey(init_vector, self.path_type)
+                init_vector_type = "xPriv"
         else:
-            raise ValueError("unknown path type %s" % path_type)
+            raise Exception("invalid initial data")
+
+        raw_init_vector = decode_base58(init_vector, checksum=True)
+        self.testnet = xkey_network_type(raw_init_vector) == 'testnet'
+        self.version = raw_init_vector[:4].hex()
+        self.depth = unpack('B', raw_init_vector[4:5])[0]
+        if self.path_type != 'custom':
+            if self.depth == 0 or self.depth == 3:
+                l = self.path.split('/')
+                self._path = '/'.join(l[self.depth:4])
+            else:
+                self.path_type = 'custom'
+                self.path = 'm'
+
+        self.fingerprint = raw_init_vector[5:9].hex()
+        self.child = unpack('I', raw_init_vector[9:13])[0]
+        self.chain_code = raw_init_vector[13:45].hex()
+        if init_vector_type == "xPriv":
+            if self.depth == 0:
+                self.master_private_xkey = init_vector
+
+            if self.path_type != 'custom':
+                self.account_private_xkey = derive_xkey(init_vector, self._path, sub_path=True)
+                self.account_public_xkey = xprivate_to_xpublic_key(self.account_private_xkey)
+                self.external_chain_private_xkey =  derive_xkey(init_vector, "%s/%s" % (self._path, self.chain),
+                                                                sub_path=True)
+                self.external_chain_public_xkey = xprivate_to_xpublic_key(self.external_chain_private_xkey)
+
+                self.internal_chain_private_xkey =  derive_xkey(init_vector, "%s/%s" % (self._path, self.chain + 1),
+                                                                sub_path=True)
+                self.internal_chain_public_xkey = xprivate_to_xpublic_key(self.internal_chain_private_xkey)
+            else:
+                self.chain_private_xkey = derive_xkey(init_vector, self.path)
+                self.chain_public_xkey = xprivate_to_xpublic_key(self.chain_private_xkey)
+        else:
+            if self.path_type != 'custom':
+                self.account_public_xkey = init_vector
+                self.external_chain_public_xkey = derive_xkey(init_vector, "%s/%s" % (self._path, self.chain),
+                                                                sub_path=True)
+                self.internal_chain_public_xkey = derive_xkey(init_vector, "%s/%s" % (self._path, self.chain + 1),
+                                                                sub_path=True)
+            else:
+                self.chain_public_xkey = derive_xkey(init_vector, self.path)
+
+        if self.mnemonic is not None:
+            self.shares_threshold = threshold
+            self.shares_total = shares
+            if self.shares_threshold > self.shares_total:
+                raise Exception("Shares threshold  invalid")
+            if self.shares_total > 1:
+                m = self.mnemonic.split()
+                bit_size = len(m) * 11
+                check_sum_bit_len = bit_size % 32
+                if self.shares_total > (2 ** check_sum_bit_len - 1):
+                    raise Exception("Maximum %s shares "
+                                    "allowed for %s mnemonic words" % (2 ** check_sum_bit_len - 1, len(m)))
+                self.mnemonic_shares = split_mnemonic(self.mnemonic, self.shares_threshold, self.shares_total,
+                                                      embedded_index=True, word_list=word_list)
 
 
-    def get_address(self, i, chain="external"):
-        """
-        the class method for creating a wallet address.
+        if address_type is None:
+            if self.path_type == "BIP84":
+                self.address_type = "P2WPKH"
+            elif self.path_type == "BIP49":
+                self.address_type = "P2SH_P2WPKH"
+            else:
+                self.address_type = "P2PKH"
 
-        :param i: index
-        :param chain: (optional) "external", "internal", by default is "external"
-        :return: dictionary:
 
-                - address
-                - public_key
-                - private_key (in case wallet is restored from private xkey or mnemonic)
-        """
-        if chain not in ("external", "internal"):
-            raise ValueError("invalid chain, should be [external, internal]")
-        if self.hardened:
+    def get_address(self, i, external=True, address_type=None, regtest=False):
+        iq = str(i)
+        if self.hardened_addresses:
             i = i|HARDENED_KEY
-
-        if chain == "external":
-            if self.external_chain_private_xkey:
-                key = derive_xkey(path_xkey_to_bip32_xkey(self.external_chain_private_xkey), [i])
-                private_key = private_from_xprivate_key(key)
-                pub_key = private_to_public_key(private_key)
+            iq = "%s'" % i
+        if self.path_type != "custom":
+            if external:
+                path = self.path
+                if self.external_chain_private_xkey:
+                    key = derive_xkey(path_xkey_to_bip32_xkey(self.external_chain_private_xkey), [i])
+                    private_key = private_from_xprivate_key(key)
+                    pub_key = private_to_public_key(private_key)
+                else:
+                    key = derive_xkey(path_xkey_to_bip32_xkey(self.external_chain_public_xkey), [i])
+                    pub_key = public_from_xpublic_key(key)
+                    private_key = None
             else:
-                key = derive_xkey(path_xkey_to_bip32_xkey(self.external_chain_public_xkey), [i])
-                pub_key = public_from_xpublic_key(key)
-                private_key = None
+                if self.internal_chain_private_xkey:
+                    key = derive_xkey(path_xkey_to_bip32_xkey(self.internal_chain_private_xkey), [i])
+                    private_key = private_from_xprivate_key(key)
+                    pub_key = private_to_public_key(private_key)
+                else:
+                    key = derive_xkey(path_xkey_to_bip32_xkey(self.internal_chain_public_xkey), [i])
+                    pub_key = public_from_xpublic_key(key)
+                    private_key = None
+            path = "%s/%s/%s" % (self._path, self.chain, iq)
         else:
-            if self.internal_chain_private_xkey:
-                key = derive_xkey(path_xkey_to_bip32_xkey(self.internal_chain_private_xkey), [i])
+            if self.chain_private_xkey:
+                key = derive_xkey(path_xkey_to_bip32_xkey(self.chain_private_xkey), [i])
                 private_key = private_from_xprivate_key(key)
                 pub_key = private_to_public_key(private_key)
             else:
-                key = derive_xkey(path_xkey_to_bip32_xkey(self.internal_chain_public_xkey), [i])
+                key = derive_xkey(path_xkey_to_bip32_xkey(self.chain_public_xkey), [i])
                 pub_key = public_from_xpublic_key(key)
                 private_key = None
+            path = "%s/%s" % (self.path, iq)
+        if address_type is None:
+            address_type = self.address_type
 
-        if self.address_type == "P2WPKH":
-            address = public_key_to_address(pub_key, testnet=self.testnet)
-        elif self.address_type == "P2SH_P2WPKH":
-            address = public_key_to_address(pub_key, p2sh_p2wpkh=True, testnet=self.testnet)
-        elif self.address_type == "P2PKH":
-            address = public_key_to_address(pub_key, witness_version=None, testnet=self.testnet)
+        if address_type == "P2WPKH":
+            address = public_key_to_address(pub_key, testnet=self.testnet, regtest=regtest)
+        elif address_type == "P2SH_P2WPKH":
+            address = public_key_to_address(pub_key, p2sh_p2wpkh=True, testnet=self.testnet,regtest=regtest)
+        else:
+            address = public_key_to_address(pub_key, witness_version=None, testnet=self.testnet,regtest=regtest)
+
+
 
         if private_key:
-            r = {"address": address, "public_key": pub_key, "private_key": private_key}
+            r = {"address": address, "public_key": pub_key, "private_key": private_key, "path": path}
         else:
-            r = {"address": address, "public_key": pub_key}
+            r = {"address": address, "public_key": pub_key, "path": path}
         return r

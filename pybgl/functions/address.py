@@ -78,7 +78,7 @@ def hash_to_address(address_hash, testnet=False, script_hash=False, witness_vers
         else:
             prefix = MAINNET_SCRIPT_ADDRESS_BYTE_PREFIX
         address_hash = b"%s%s" % (prefix, address_hash)
-        address_hash += sha3_256(address_hash)[:4]
+        address_hash += double_sha256(address_hash)[:4]
         return encode_base58(address_hash)
 
     if testnet:
