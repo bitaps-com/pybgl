@@ -6,6 +6,7 @@ from pybgl.functions.hash import double_sha256, hash160, sha3_256
 from pybgl.functions.encode import (encode_base58,
                                     rebase_8_to_5,
                                     bech32_polymod,
+                                    bech32m_polymod,
                                     rebase_5_to_32,
                                     decode_base58,
                                     rebase_5_to_8,
@@ -66,7 +67,7 @@ def hash_to_address(address_hash, testnet=False, script_hash=False, witness_vers
             else:
                 prefix = MAINNET_ADDRESS_BYTE_PREFIX
             address_hash = b"%s%s" % (prefix, address_hash)
-            address_hash += sha3_256(address_hash)[:4]
+            address_hash += double_sha256(address_hash)[:4]
             return encode_base58(address_hash)
         else:
             if len(address_hash) not in (20, 32):
@@ -94,7 +95,10 @@ def hash_to_address(address_hash, testnet=False, script_hash=False, witness_vers
 
     address_hash = b"%s%s" % (witness_version.to_bytes(1, "big"),
                               rebase_8_to_5(address_hash))
-    checksum = bech32_polymod(b"%s%s%s" % (prefix, address_hash, b"\x00" * 6))
+    if witness_version > 0:
+        checksum = bech32m_polymod(b"%s%s%s" % (prefix, address_hash, b"\x00" * 6)) ^ BECH32M_CONST
+    else:
+        checksum = bech32_polymod(b"%s%s%s" % (prefix, address_hash, b"\x00" * 6))
     checksum = rebase_8_to_5(checksum.to_bytes(5, "big"))[2:]
     return "%s1%s" % (hrp, rebase_5_to_32(address_hash + checksum).decode())
 
@@ -249,7 +253,6 @@ def is_address_valid(address, testnet=False, regtest=False):
     :param testnet: (optional) flag for testnet network, by default is False.
     :return: boolean.
     """
-    print("addr",address)
     if not address or type(address) != str:
         return False
     if address[0] in (MAINNET_ADDRESS_PREFIX,
@@ -270,7 +273,8 @@ def is_address_valid(address, testnet=False, regtest=False):
         if len(h) != 25:
             return False
         checksum = h[-4:]
-        if sha3_256(h[:-4])[:4] != checksum:
+        if double_sha256(h[:-4])[:4] != checksum:
+            print("should be address", encode_base58(h[:-4] + double_sha256(h[:-4])[:4]))
             return False
         return True
     elif (address[:3] == MAINNET_SEGWIT_ADDRESS_PREFIX) \
@@ -306,15 +310,14 @@ def is_address_valid(address, testnet=False, regtest=False):
 
         address_hash = d[:-6]
         checksum = d[-6:]
-        print("checksum", checksum)
-        print("checksum_back", rebase_5_to_32(checksum))
-        checksum2 = bech32_polymod(b"%s%s%s" % (stripped_prefix, address_hash, b"\x00" * 6))
+        if d[0] == 0:
+            checksum2 = bech32_polymod(b"%s%s%s" % (stripped_prefix, address_hash, b"\x00" * 6))
+        else:
+            checksum2 = bech32m_polymod(b"%s%s%s" % (stripped_prefix, address_hash, b"\x00" * 6)) ^ BECH32M_CONST
         checksum2 = rebase_8_to_5(checksum2.to_bytes(5, "big"))[2:]
-        print("checksum2",checksum2)
-        print("checksum2_back", rebase_5_to_32(checksum2))
         if checksum != checksum2:
+            print("checksum should be", rebase_5_to_32(checksum2).decode())
             return False
-        print("checksum2", checksum2)
         return True
     return False
 

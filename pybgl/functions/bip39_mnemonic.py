@@ -116,6 +116,15 @@ def mnemonic_to_entropy(mnemonic, language='english', word_list_dir=None,
     return entropy if not hex else entropy.hex()
 
 
+def get_mnemonic_checksum_data(mnemonic):
+    word_list = load_word_list()
+    mnemonic = mnemonic.split()
+    word_count = len(mnemonic)
+    chk_sum_bit_len = word_count * 11 % 32
+    last_word = mnemonic[-1]
+    codes = {w: c for c, w in enumerate(word_list)}
+    return codes[last_word] & (2 ** chk_sum_bit_len - 1)
+
 def is_mnemonic_checksum_valid(mnemonic, language='english', word_list_dir=None, word_list=None):
     if word_list is None:
         word_list = load_word_list(language, word_list_dir)
@@ -201,14 +210,33 @@ def split_mnemonic(mnemonic, threshold, total, language='english',
                                             word_list_dir=word_list_dir, word_list=word_list)
     return result
 
-def combine_mnemonic(shares, language='english', word_list_dir=None, word_list=None):
+def combine_mnemonic(shares, share_id = None, language='english', word_list_dir=None, word_list=None):
+    # share_id used to reconstruct upper level share
+    embedded_index = isinstance(shares, list)
     s = dict()
-    for share in shares:
-        s[share] = mnemonic_to_entropy(shares[share], language=language, hex=False, word_list_dir=word_list_dir,
-                                       word_list=word_list)
+    if embedded_index:
+        for share in shares:
+            e = mnemonic_to_entropy(share, language=language, hex=False, word_list_dir=word_list_dir,
+                                           word_list=word_list)
+            i = get_mnemonic_checksum_data(share)
+            if i in s:
+                raise ValueError("Non unique or invalid shares")
+            s[i] = e
+
+    else:
+        for share in shares:
+            s[share] = mnemonic_to_entropy(shares[share], language=language, hex=False, word_list_dir=word_list_dir,
+                                           word_list=word_list)
     entropy = restore_secret(s)
-    return entropy_to_mnemonic(entropy, language=language, word_list_dir=word_list_dir,
-                               word_list=word_list)
+
+    if share_id is None:
+        return entropy_to_mnemonic(entropy, language=language, word_list_dir=word_list_dir, word_list=word_list)
+    else:
+        m = entropy_to_mnemonic(entropy, language=language, word_list_dir=word_list_dir, word_list=word_list)
+        m = m.split()[:-1]
+        m.append(share_id)
+        return " ".join(m)
+
 
 def is_mnemonic_valid(mnemonic, word_list=None):
     if word_list is None:
