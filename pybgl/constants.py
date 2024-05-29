@@ -118,7 +118,9 @@ MINER_COINBASE_TAG = {
     b"Mining-Dutch": {"name": "Mining-Dutch", "link": "https://www.mining-dutch.nl/"},
 }
 
-MINER_PAYOUT_TAG = {}
+MINER_PAYOUT_TAG = {
+    "bgl1qjgaw8hmtgmrxncm47cufxwdde6wmphmwv46y43": {"name" : "Mining-Dutch", "link" : "https://www.mining-dutch.nl/"},
+}
 
 
 
